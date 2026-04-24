@@ -6,3 +6,11 @@ desktop.ini
 # Editor
 .vscode/
 *.swp
+
+# Local worktrees
+.worktrees/
+
+# Node / build output
+node_modules/
+.parcel-cache/
+dist/

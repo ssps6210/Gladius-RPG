@@ -1,0 +1,31 @@
+:root {
+  color-scheme: dark;
+  --legacy-bg: #100c07;
+  --legacy-bg-elevated: #1a1209;
+  --legacy-panel: rgba(35, 24, 12, 0.9);
+  --legacy-panel-border: rgba(200, 150, 30, 0.35);
+  --legacy-text: #d4b483;
+  --legacy-text-strong: #f3e7cf;
+  --legacy-text-muted: #c9b48a;
+  --legacy-gold: #c8961e;
+  --legacy-gold-bright: #e8c050;
+  --legacy-gold-dark: #8b5a14;
+  --legacy-gold-muted: #5a4020;
+  --color-bg: var(--legacy-bg);
+  --color-bg-elevated: var(--legacy-bg-elevated);
+  --color-panel: var(--legacy-panel);
+  --color-panel-border: var(--legacy-panel-border);
+  --color-text: var(--legacy-text-strong);
+  --color-text-muted: var(--legacy-text-muted);
+  --color-accent: var(--legacy-gold);
+  --color-accent-strong: var(--legacy-gold-bright);
+  --shadow-panel: 0 20px 40px rgba(0, 0, 0, 0.35);
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --radius-panel: 20px;
+  --font-display: "Cinzel Decorative", "Cinzel", serif;
+  --font-heading: "Cinzel", serif;
+  --font-body: "Crimson Text", Georgia, serif;
+}
