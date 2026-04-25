@@ -2,6 +2,10 @@
 
 A browser-based text RPG with turn-based combat, randomized loot, quests, arena battles, and inventory progression. The current runtime runs through Parcel + React + TypeScript from the modular `src/` app.
 
+## 🎮 Play Now
+
+**[▶ Click here to play in your browser](https://ssps6210.github.io/Gladius-RPG)** — no installation required!
+
 ## 🎮 Run Locally
 
 ```bash
