@@ -2986,6 +2986,7 @@ function InnPanel({ player, dungeonInjuredUntil, arenaInjuredUntil, cMhp, onRest
 
 // ── QuestTab component ────────────────────────────────────────────────────
 function QuestTab({ player, inventory, questState, onCollect, t, lang }) {
+  const L = (zh, en) => lang==="zh" ? zh : en;
   const [catTab, setCatTab] = useState("daily");
   const statsWithInv = {...player, _inv: inventory};
 
@@ -3119,6 +3120,7 @@ function QuestTab({ player, inventory, questState, onCollect, t, lang }) {
 
 // ── ArenaTab component ────────────────────────────────────────────────────
 function ArenaTab({ player, arenaOpponents, arenaInjuredUntil, arenaRefreshes, onRefresh, onFight, onInit, t, lang }) {
+  const L = (zh, en) => lang==="zh" ? zh : en;
   const [now, setNow] = useState(Date.now());
   // Tick every second for injury countdown
   useEffect(()=>{
