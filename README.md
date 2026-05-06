@@ -1,12 +1,14 @@
 # ⚔ Gladius RPG
 
-A browser-based text RPG with turn-based combat, randomized loot, quests, arena battles, and inventory progression. The current runtime runs through Parcel + React + TypeScript from the modular `src/` app.
+A browser-based text RPG with turn-based combat, randomised loot, quests, arena battles, and inventory progression. Built with React + TypeScript, bundled with Parcel.
 
 ## 🎮 Play Now
 
 **[▶ Click here to play in your browser](https://ssps6210.github.io/Gladius-RPG)** — no installation required!
 
-## 🎮 Run Locally
+---
+
+## 🚀 Run Locally
 
 ```bash
 npm install
@@ -19,14 +21,19 @@ npm run dev
 npm run build
 ```
 
-Runtime note: `index.html` is the Parcel HTML entry for the modular app and loads `src/main.tsx`.
+> `index.html` is the Parcel HTML entry and loads `src/main.tsx`.
+
+---
 
 ## ✨ Features
 
-- Dynamic turn-based combat with weapon traits and battle logs
-- Randomized loot, enhancement, training, and inventory management
-- Expedition, dungeon, quest, arena, shop, auction, and mercenary flows
-- Traditional Chinese UI
+- Turn-based combat with weapon traits and detailed battle logs
+- Randomised loot drops, gear enhancement, and stat training
+- Expedition, dungeon, quest, arena, shop, auction, and mercenary systems
+- Persistent save via `localStorage` — progress survives page reloads
+- Bilingual UI (Traditional Chinese / English)
+
+---
 
 ## 🛠️ Tech Stack
 
@@ -35,35 +42,45 @@ Runtime note: `index.html` is the Parcel HTML entry for the modular app and load
 - Parcel
 - Vitest
 
-## ✅ Migration Verification
+---
 
-- Dev-mode runtime was exercised with `npm run dev`; Parcel served the migrated app successfully on a local port during Task 5 smoke testing.
-- Fresh-state startup was verified because no existing save was present in the test browser context at the start of the run.
-- Expedition flow was exercised with `狼群獵場`; battle log, rewards, gold/EXP updates, and item drop UI all rendered.
-- Dungeon flow was exercised with `野狼森林【普通】`; multi-wave combat, level-up, and boss-loss result handling all rendered.
-- Inventory interaction was exercised by equipping `皮靴`; visible defense and speed values updated in the character panel.
-- Shop flow was exercised by buying one `銅戒指` and then selling it back through the sell view.
-- Auction coverage was limited to the inspection path; listings, current bids, and disabled bid controls were confirmed, but no bid was placed because the smoke-test character did not have enough gold for the minimum bid.
-- Training flow was exercised with one HP training action; the forge screen rendered numeric values for `攻擊力`, `防禦力`, `生命值`, and `速度`, and the HP training update changed gold and max HP and persisted after reload.
-- Quest rendering was exercised by opening the quest tab and confirming progress values were shown.
-- Arena flow was exercised by challenging one opponent; combat report, defeat handling, and cooldown messaging all rendered.
-- Persistence was exercised by saving, reloading the page, and confirming player state plus equipped inventory restored from `localStorage`.
+## ✅ Smoke-Test Coverage
 
-## 📁 Runtime Notes
+- Dev runtime verified with `npm run dev`; Parcel served the app successfully on a local port.
+- Fresh-state startup confirmed with no prior save in the test browser context.
+- **Expedition** tested with *Wolf Pack Hunting Ground*; battle log, rewards, gold/EXP updates, and item drop UI all rendered.
+- **Dungeon** tested with *Wolf Forest [Normal]*; multi-wave combat, level-up, and boss-loss result handling all rendered.
+- **Inventory** tested by equipping *Leather Boots*; DEF and SPD values updated in the character panel.
+- **Shop** tested by buying a *Bronze Ring* and selling it back through the sell view.
+- **Auction** inspected listings and confirmed current bids and disabled bid controls rendered (no bid placed — test character lacked the minimum gold).
+- **Training** tested one HP training action; ATK, DEF, HP, and SPD values rendered correctly; gold and max HP updated and persisted after reload.
+- **Quests** verified progress values rendered on the quest tab.
+- **Arena** tested by challenging one opponent; combat report, defeat handling, and cooldown messaging all rendered.
+- **Persistence** verified by saving, reloading, and confirming player state and equipped inventory restored from `localStorage`.
 
-- `index.html` is the Parcel entry used by the migrated app.
-- The active runtime lives under `src/`.
-- Historical migration references may still appear inside docs, but they are not part of the current runnable architecture.
+---
 
-## 📁 Runtime Files
+## 📁 Key Files
 
 | File | Description |
 |------|-------------|
-| `index.html` | Parcel entry for the current migrated runtime |
-| `src/main.tsx` | App bootstrap entry loaded by Parcel |
+| `index.html` | Parcel entry point |
+| `src/main.tsx` | App bootstrap |
 | `src/App.tsx` | Root app shell |
 | `src/game/GameApp.tsx` | Main game composition |
 
+---
+
+## ☕ Support
+
+If you enjoy the game, consider buying the developer a coffee!
+
+<a href="https://www.buymeacoffee.com/ssps6210noa" target="_blank">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height:60px;width:217px;" />
+</a>
+
+---
+
 ## Disclaimer
 
-This is an educational, non-profit, fan-made project. All original game concepts belong to their respective copyright holders.
+This is a non-profit, independently developed fan project. Not affiliated with any publisher or exam board.
