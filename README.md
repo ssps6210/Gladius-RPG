@@ -1,69 +1,41 @@
 # ⚔ Gladius RPG
 
-A browser-based text RPG with turn-based combat, randomized loot, quests, arena battles, and inventory progression. The current runtime runs through Parcel + React + TypeScript from the modular `src/` app.
+A browser-based arena RPG with turn-based combat, randomized loot, dungeon runs, quests, arena battles, and inventory progression. Built with React + AI (Vibe Coding) — no installation needed.
 
 ## 🎮 Play Now
 
 **[▶ Click here to play in your browser](https://ssps6210.github.io/Gladius-RPG)** — no installation required!
 
-## 🎮 Run Locally
-
-```bash
-npm install
-npm run dev
-```
-
-## 🏗️ Build
-
-```bash
-npm run build
-```
-
-Runtime note: `index.html` is the Parcel HTML entry for the modular app and loads `src/main.tsx`.
-
 ## ✨ Features
 
-- Dynamic turn-based combat with weapon traits and battle logs
-- Randomized loot, enhancement, training, and inventory management
-- Expedition, dungeon, quest, arena, shop, auction, and mercenary flows
-- Traditional Chinese UI
+- ⚔️ Dynamic turn-based combat with 10 weapon types and unique traits
+- 🎲 Randomized loot with 5 rarity tiers (Common → Mythic)
+- 🏰 20 expedition zones + multiple dungeons (Normal / Hero / Legend difficulty)
+- 🏟 Arena PvP — challenge opponents and plunder their gold
+- 📋 Daily / weekly / achievement quest system
+- 🍺 Tavern quest board with full story lore
+- 🧤 8-slot equipment system with enhancement (+1 to +10)
+- ⚒ Forge — permanently train Attack, Defense, HP, and Speed
+- 🪖 Mercenary dungeon system with contract scrolls
+- 💾 Auto-save via localStorage
+- 🌐 Traditional Chinese UI with English bilingual support
 
 ## 🛠️ Tech Stack
 
-- React 19
-- TypeScript
-- Parcel
-- Vitest
+- React 18 (via CDN)
+- Babel Standalone (JSX in browser)
+- Pure HTML / CSS / JS — zero build step
 
-## ✅ Migration Verification
+## 📖 Beginner's Guide
 
-- Dev-mode runtime was exercised with `npm run dev`; Parcel served the migrated app successfully on a local port during Task 5 smoke testing.
-- Fresh-state startup was verified because no existing save was present in the test browser context at the start of the run.
-- Expedition flow was exercised with `狼群獵場`; battle log, rewards, gold/EXP updates, and item drop UI all rendered.
-- Dungeon flow was exercised with `野狼森林【普通】`; multi-wave combat, level-up, and boss-loss result handling all rendered.
-- Inventory interaction was exercised by equipping `皮靴`; visible defense and speed values updated in the character panel.
-- Shop flow was exercised by buying one `銅戒指` and then selling it back through the sell view.
-- Auction coverage was limited to the inspection path; listings, current bids, and disabled bid controls were confirmed, but no bid was placed because the smoke-test character did not have enough gold for the minimum bid.
-- Training flow was exercised with one HP training action; the forge screen rendered numeric values for `攻擊力`, `防禦力`, `生命值`, and `速度`, and the HP training update changed gold and max HP and persisted after reload.
-- Quest rendering was exercised by opening the quest tab and confirming progress values were shown.
-- Arena flow was exercised by challenging one opponent; combat report, defeat handling, and cooldown messaging all rendered.
-- Persistence was exercised by saving, reloading the page, and confirming player state plus equipped inventory restored from `localStorage`.
-
-## 📁 Runtime Notes
-
-- `index.html` is the Parcel entry used by the migrated app.
-- The active runtime lives under `src/`.
-- Historical migration references may still appear inside docs, but they are not part of the current runnable architecture.
-
-## 📁 Runtime Files
-
-| File | Description |
-|------|-------------|
-| `index.html` | Parcel entry for the current migrated runtime |
-| `src/main.tsx` | App bootstrap entry loaded by Parcel |
-| `src/App.tsx` | Root app shell |
-| `src/game/GameApp.tsx` | Main game composition |
+New to Gladius? Read the **[新手指南 (Beginner's Guide)](gladius-guide.txt)** to get started.
 
 ## Disclaimer
 
 This is an educational, non-profit, fan-made project. All original game concepts belong to their respective copyright holders.
+
+## ☕ Support
+
+Enjoying the arena?
+
+<a href="https://www.buymeacoffee.com/ssps6210noa" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
