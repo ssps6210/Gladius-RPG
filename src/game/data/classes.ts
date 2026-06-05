@@ -14,19 +14,19 @@ export interface JobClass {
   spdBonus: number;
 }
 
-export const GLADIATOR_PORTRAIT = "/portraits/Gladiator.jpg";
+export const GLADIATOR_PORTRAIT = "./portraits/Gladiator.jpg";
 
 export const JOB_CLASSES: Record<JobClassId, JobClass> = {
   warrior: {
     id: "warrior", name: "戰士", nameEn: "Warrior", icon: "⚔️",
-    portrait: "/portraits/Warrior.png",
+    portrait: "./portraits/Warrior.png",
     atkBonus: 20, defBonus: 15, hpPct: 10, spdBonus: 0,
     desc: "+20攻擊 +15防禦 +10%HP，受擊時15%機率格擋，傷害減半。",
     descEn: "+20 ATK +15 DEF +10% HP. 15% chance to block, halving incoming damage.",
   },
   bard: {
     id: "bard", name: "吟遊詩人", nameEn: "Bard", icon: "🎵",
-    portrait: "/portraits/Bard.png",
+    portrait: "./portraits/Bard.png",
     atkBonus: 5, defBonus: 0, hpPct: 0, spdBonus: 20,
     desc: "+5攻擊 +20速度，每回合20%機率旋律激勵，跳過敵方攻擊。",
     descEn: "+5 ATK +20 SPD. Each round, 20% chance to Inspire and skip enemy attack.",
