@@ -12,9 +12,12 @@ import { QuestTab } from "../features/quests/QuestTab";
 import { ShopTab } from "../features/shop/ShopTab";
 import { TavernPage } from "../features/tavern/TavernPage";
 import { TrainTab } from "../features/train/TrainTab";
+import { calculateSetBonuses } from "./data/sets";
+import { useLanguage } from "./i18n/LanguageContext";
 import { useGameState } from "./useGameState";
 
 export default function GameApp() {
+  const { t, tr, L, toggleLang } = useLanguage();
   const state = useGameState();
   const {
     acceptTavernQuestAction,
@@ -87,6 +90,13 @@ export default function GameApp() {
     takeLoot,
     wCat,
     enhanceItems,
+    synthesisCards,
+    synthesisGoldCost,
+    synthesisLog,
+    synthesisResult,
+    synthesisUids,
+    doSynthesize,
+    toggleSynthesisUid,
   } = state;
 
   return (
@@ -94,12 +104,15 @@ export default function GameApp() {
       <div className="gw">
         <header className="gh">
           <div className="gt">⚔ GLADIUS</div>
-          <div className="gd">🪙 {player.gold}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button className="btn btm" style={{ fontSize: 11, padding: "4px 10px" }} onClick={toggleLang}>🌐 {t("langBtn")}</button>
+            <div className="gd">🪙 {player.gold}</div>
+          </div>
         </header>
         <div className="ml">
           <aside className="sb">
             <div className="pn">
-              <div className="ph">角色</div>
+              <div className="ph">{t("charTitle")}</div>
               <div className="pb">
                 <div className="pname">{player.name}</div>
                 <HpBar cur={player.hp} max={tMhp} />
@@ -109,23 +122,23 @@ export default function GameApp() {
                 </div>
                 <div style={{ marginTop: 8 }}>
                   {[
-                    ["攻擊", tAtk, player.trainedAtk || 0],
-                    ["防禦", tDef, player.trainedDef || 0],
-                    ["速度", tSpd, player.trainedSpd || 0],
+                    [t("statAtk"), tAtk, player.trainedAtk || 0],
+                    [t("statDef"), tDef, player.trainedDef || 0],
+                    [t("statSpd"), tSpd, player.trainedSpd || 0],
                   ].map(([k, v, trained]) => (
                     <div className="sr" key={k}>
                       <span className="sl">{k}</span>
                       <span className="sv">
                         {v}
-                        {trained > 0 && <span style={{ fontSize: 10, color: "#4caf50", marginLeft: 3 }}>+{trained}訓</span>}
+                        {trained > 0 && <span style={{ fontSize: 10, color: "#4caf50", marginLeft: 3 }}>+{trained}{t("trained")}</span>}
                       </span>
                     </div>
                   ))}
                   <div className="sr">
-                    <span className="sl">最大HP</span>
+                    <span className="sl">{t("statMaxHp")}</span>
                     <span className="sv">
                       {tMhp}
-                      {(player.trainedHp || 0) > 0 && <span style={{ fontSize: 10, color: "#c84040", marginLeft: 3 }}>+{(player.trainedHp || 0) * 3}訓</span>}
+                      {(player.trainedHp || 0) > 0 && <span style={{ fontSize: 10, color: "#c84040", marginLeft: 3 }}>+{(player.trainedHp || 0) * 3}{t("trained")}</span>}
                     </span>
                   </div>
                 </div>
@@ -134,7 +147,7 @@ export default function GameApp() {
             </div>
 
             <div className="pn">
-              <div className="ph">裝備（點擊卸下）</div>
+              <div className="ph">{t("equipTitle")}{t("clickUnequip")}</div>
               <div className="pb" style={{ padding: "8px 10px" }}>
                 {equipmentSidebarItems.map(({ category, equippedItem, onUnequip, rarityColor, slot, style, textShadow, title }) => {
                   return (
@@ -144,31 +157,31 @@ export default function GameApp() {
                       style={style}>
                       <span style={{ fontSize: 13, flexShrink: 0, marginTop: 1 }}>{slot.icon}</span>
                       <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontSize: 9, color: "#4a3020", fontFamily: "'Cinzel',serif", letterSpacing: 0.5, lineHeight: 1 }}>{slot.label}</div>
+                        <div style={{ fontSize: 9, color: "#4a3020", fontFamily: "'Cinzel',serif", letterSpacing: 0.5, lineHeight: 1 }}>{tr(slot, "label")}</div>
                         {equippedItem ? <>
                           <div style={{
                             fontSize: 11, color: rarityColor, lineHeight: 1.3, marginTop: 1,
                             textShadow,
                             fontFamily: "'Cinzel',serif", letterSpacing: 0.3,
-                          }}>{equippedItem.name}</div>
+                          }}>{tr(equippedItem, "name")}</div>
                           <div style={{ fontSize: 10, color: "#6a5030", marginTop: 2, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                            {equippedItem.attack > 0 && <span style={{ color: "#c8781e" }}>攻+{equippedItem.attack}</span>}
-                            {equippedItem.defense > 0 && <span style={{ color: "#4a9fd4" }}>防+{equippedItem.defense}</span>}
+                            {equippedItem.attack > 0 && <span style={{ color: "#c8781e" }}>{L("攻", "ATK")}+{equippedItem.attack}</span>}
+                            {equippedItem.defense > 0 && <span style={{ color: "#4a9fd4" }}>{L("防", "DEF")}+{equippedItem.defense}</span>}
                             {equippedItem.hp > 0 && <span style={{ color: "#c84040" }}>HP+{equippedItem.hp}</span>}
-                            {equippedItem.speed > 0 && <span style={{ color: "#4caf50" }}>速+{equippedItem.speed}</span>}
-                            {category && <span style={{ color: "#d08030" }}>{category.icon}{category.label}</span>}
+                            {equippedItem.speed > 0 && <span style={{ color: "#4caf50" }}>{L("速", "SPD")}+{equippedItem.speed}</span>}
+                            {category && <span style={{ color: "#d08030" }}>{category.icon}{tr(category, "label")}</span>}
                             {equippedItem.itemLevel && <span style={{ color: "#5a4020" }}>Lv{equippedItem.itemLevel}</span>}
                           </div>
                           {equippedItem.affixes && equippedItem.affixes.length > 0 && (
                             <div style={{ marginTop: 2, display: "flex", gap: 3, flexWrap: "wrap" }}>
                               {equippedItem.affixes.map((a: any, i: any) => (
                                 <span key={i} style={{ fontSize: 9, color: a.special ? "#c870d0" : "#6aaa6a", background: "rgba(0,0,0,0.3)", padding: "0 3px", borderRadius: 2 }}>
-                                  {a.tag}
+                                  {tr(a, "tag")}
                                 </span>
                               ))}
                             </div>
                           )}
-                        </> : <div style={{ fontSize: 10, color: "#2a1808", fontStyle: "italic" }}>空槽</div>}
+                        </> : <div style={{ fontSize: 10, color: "#2a1808", fontStyle: "italic" }}>{t("emptySlot2")}</div>}
                       </div>
                     </div>
                   );
@@ -176,12 +189,53 @@ export default function GameApp() {
               </div>
             </div>
 
+            {(() => {
+              const setBonuses = calculateSetBonuses(player.equipment || {});
+              if (setBonuses.length === 0) return null;
+              return (
+                <div className="pn">
+                  <div className="ph">{t("setEffectTitle")}</div>
+                  <div className="pb" style={{ padding: "8px 10px" }}>
+                    {setBonuses.map(({ set, activePieces, allBonuses }) => {
+                      const totalPieces = set.itemNames.length;
+                      const equippedNames = set.itemNames.filter(name =>
+                        Object.values(player.equipment || {}).some((e: any) => e?.name === name)
+                      );
+                      return (
+                        <div key={set.id} style={{ marginBottom: 8, borderBottom: "1px solid #2a1a08", paddingBottom: 6 }}>
+                          <div style={{ fontSize: 12, color: "#e0c060", fontWeight: "bold", marginBottom: 3 }}>
+                            {set.icon} {tr(set, "name")}
+                            <span style={{ fontSize: 10, color: "#8a7050", fontWeight: "normal", marginLeft: 4 }}>
+                              ({activePieces}/{totalPieces})
+                            </span>
+                          </div>
+                          <div style={{ fontSize: 10, color: "#6a5030", marginBottom: 4, fontStyle: "italic" }}>
+                            {tr(set, "description")}
+                          </div>
+                          {allBonuses.map((bonus, i) => (
+                            <div key={i} style={{ fontSize: 10, color: "#4caf50", marginBottom: 2 }}>
+                              ✦ {bonus.pieces}{L("件", "pc")}: {tr(bonus, "description")}
+                            </div>
+                          ))}
+                          {activePieces < totalPieces && (
+                            <div style={{ fontSize: 9, color: "#4a3020", marginTop: 3 }}>
+                              {L("未裝備", "Missing")}: {set.itemNames.filter(name => !equippedNames.includes(name)).join(L("、", ", "))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
             <div className="pn">
-              <div className="ph">存檔</div>
+              <div className="ph">{t("saveLabel")}</div>
               <div className="pb">
                 <div className="svr">
-                  <button className="btn btp" onClick={save}>💾 存檔</button>
-                  <button className="btn btm" onClick={reset}>🔄 重置</button>
+                  <button className="btn btp" onClick={save}>{t("saveBtn")}</button>
+                  <button className="btn btm" onClick={reset}>{t("resetBtn")}</button>
                 </div>
                 {saveMsg && <div className="svi">{saveMsg}</div>}
               </div>
@@ -205,7 +259,7 @@ export default function GameApp() {
                   </button>
                 );
               })}
-              {replay && <button className={`nb${tab === "battle" ? " active" : ""}`} onClick={openBattleReport}>{replay.won ? "🏆" : "⚔"} 報告</button>}
+              {replay && <button className={`nb${tab === "battle" ? " active" : ""}`} onClick={openBattleReport}>{replay.won ? "🏆" : "⚔"} {L("報告", "Report")}</button>}
             </div>
 
             <div className="ca">
@@ -227,6 +281,13 @@ export default function GameApp() {
                   enhanceLog={enhanceLog}
                   enhanceItems={enhanceItems}
                   enhanceAnim={enhanceAnim}
+                  synthesisCards={synthesisCards}
+                  synthesisGoldCost={synthesisGoldCost}
+                  synthesisLog={synthesisLog}
+                  synthesisResult={synthesisResult}
+                  synthesisUids={synthesisUids}
+                  doSynthesize={doSynthesize}
+                  toggleSynthesisUid={toggleSynthesisUid}
                 />
               )}
 

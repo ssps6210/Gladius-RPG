@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { QUEST_DEFS } from "../../game/data/quests";
 import { getQuestProgress, isQuestDone } from "../../game/systems";
+import { useLanguage } from "../../game/i18n/LanguageContext";
 import type { GameItem, GamePlayer, GameQuestState } from "../../game/appTypes";
 
 export function QuestTab({ player, inventory, questState, onCollect }: {
@@ -10,13 +11,14 @@ export function QuestTab({ player, inventory, questState, onCollect }: {
   questState: GameQuestState;
   onCollect: (questId: string) => void;
 }) {
+  const { t, tr, L } = useLanguage();
   const [catTab, setCatTab] = useState("daily");
   const statsWithInv = { ...player, _inv: inventory };
 
   const cats = [
-    { id: "daily", label: "📅 每日", color: "#4caf50" },
-    { id: "weekly", label: "📆 每週", color: "#4a9fd4" },
-    { id: "achieve", label: "🏆 成就", color: "#e07020" },
+    { id: "daily", label: t("questDaily"), color: "#4caf50" },
+    { id: "weekly", label: t("questWeekly"), color: "#4a9fd4" },
+    { id: "achieve", label: t("questAchieve"), color: "#e07020" },
   ];
 
   const questsInCat = Object.entries(QUEST_DEFS).filter(([, d]) => d.cat === catTab);
@@ -28,7 +30,7 @@ export function QuestTab({ player, inventory, questState, onCollect }: {
   return (
     <div>
       <div className="stl">
-        📋 任務
+        {t("questTitle")}
         {completable > 0 && (
           <span style={{ marginLeft: 8, background: "#c84040", color: "#fff", borderRadius: "10px",
             padding: "1px 7px", fontSize: 11, fontFamily: "sans-serif" }}>
@@ -61,17 +63,17 @@ export function QuestTab({ player, inventory, questState, onCollect }: {
 
       {catTab === "daily" && (
         <div style={{ fontSize: 11, color: "#4a3820", marginBottom: 10, fontStyle: "italic" }}>
-          每日任務在午夜重置（{questState.dailyDate}）
+          {t("questDailyReset")}（{questState.dailyDate}）
         </div>
       )}
       {catTab === "weekly" && (
         <div style={{ fontSize: 11, color: "#4a3820", marginBottom: 10, fontStyle: "italic" }}>
-          每週任務在週一重置（{questState.weeklyDate}）
+          {t("questWeeklyReset")}（{questState.weeklyDate}）
         </div>
       )}
       {catTab === "achieve" && (
         <div style={{ fontSize: 11, color: "#4a3820", marginBottom: 10, fontStyle: "italic" }}>
-          成就任務永不重置，完成後即鎖定
+          {t("questAchieveDesc")}
         </div>
       )}
 
@@ -87,24 +89,24 @@ export function QuestTab({ player, inventory, questState, onCollect }: {
             <div key={id} className={`quest-card${collected ? " done" : done ? " collect" : ""}`}>
               <div className="quest-icon">{def.icon}</div>
               <div className="quest-body">
-                <div className="quest-title">{def.title}</div>
-                <div className="quest-desc">{def.desc}</div>
+                <div className="quest-title">{tr(def, "title")}</div>
+                <div className="quest-desc">{tr(def, "desc")}</div>
                 {!collected && (
                   <>
                     <div className="quest-progress">
                       <div className="quest-pbar" style={{ width: `${pct}%`, background: barColor }} />
                     </div>
                     <div className="quest-ptext">
-                      {done ? "✅ 已完成，可領取！" : `${Math.min(progress, def.target)} / ${def.target}`}
+                      {done ? t("questReady") : `${Math.min(progress, def.target)} / ${def.target}`}
                     </div>
                   </>
                 )}
                 {collected && (
-                  <div className="quest-ptext" style={{ color: "#4caf50" }}>✓ 已領取</div>
+                  <div className="quest-ptext" style={{ color: "#4caf50" }}>{t("questDone")}</div>
                 )}
                 <div className="quest-rewards">
                   {def.rewards.map((r: any, i: any) => (
-                    <span key={i} className="quest-reward-badge">{r.label}</span>
+                    <span key={i} className="quest-reward-badge">{tr(r, "label")}</span>
                   ))}
                 </div>
               </div>
@@ -112,7 +114,7 @@ export function QuestTab({ player, inventory, questState, onCollect }: {
                 {!collected && done && (
                   <button className="btn btp" style={{ fontSize: 10, padding: "6px 12px", whiteSpace: "nowrap" }}
                     onClick={() => onCollect(id)}>
-                    領取！
+                    {t("questCollect")}
                   </button>
                 )}
                 {collected && <div style={{ fontSize: 18 }}>✅</div>}

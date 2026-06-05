@@ -19,6 +19,7 @@ import { applyEnhanceBonus, calcSellPrice, enhanceCost } from "./lib/items";
 import { trainCost } from "./lib/training";
 import { clearGameState, loadGameState, saveGameState } from "./persistence";
 import { getBulkSellResult } from "./systems/economy";
+import { RARITIES } from "./data/rarities";
 import {
   applyProgressionRewards,
   cAtk,
@@ -33,14 +34,17 @@ import {
   genShopItem,
   gSpec,
   getRarity,
+  getSetEffects,
   getWeaponCat,
   initQuestState,
   isQuestDone,
+  setCombatLang,
   simulateArenaBattle,
   simulateExpedition,
   simulateMercRun,
   simulateRun,
 } from "./systems";
+import { useLanguage } from "./i18n/LanguageContext";
 import {
   abandonTavernQuest,
   acceptTavernQuest,
@@ -62,6 +66,11 @@ import type {
 type SellThreshold = "normal" | "magic" | "rare" | "legendary" | "mythic";
 
 export function useGameState() {
+  const { lang, t, L, tr } = useLanguage();
+  useEffect(() => {
+    setCombatLang(lang);
+  }, [lang]);
+
   const initialSave = loadGameState();
   const [player, setPlayer] = useState<GamePlayer>(() => initialSave.player as GamePlayer);
 
@@ -76,6 +85,9 @@ export function useGameState() {
   const [shopFilter, setShopFilter] = useState("all");
   const [invFilter, setInvFilter] = useState("all");
   const [sellThreshold, setSellThreshold] = useState<SellThreshold>("normal");
+  const [synthesisUids, setSynthesisUids] = useState<any[]>([]);
+  const [synthesisResult, setSynthesisResult] = useState<any>(null);
+  const [synthesisLog, setSynthesisLog] = useState<string[]>([]);
   const [shopItems, setShopItems] = useState<any[]>(() =>
     Array.from({ length: 8 }, (_, i) =>
       genShopItem(1, ["weapon", "offhand", "armor", "helmet", "gloves", "boots", "ring", "amulet"][i]),
@@ -101,12 +113,12 @@ export function useGameState() {
 
   const save = useCallback(() => {
     saveGameState({ player, inventory });
-    setSaveMsg("存檔成功！");
+    setSaveMsg(t("savedMsg"));
     setTimeout(() => setSaveMsg(""), 2000);
   }, [inventory, player]);
 
   const reset = () => {
-    if (!confirm("確定重置？")) return;
+    if (!confirm(t("confirmReset"))) return;
     clearGameState();
     setPlayer({ ...INITIAL_PLAYER, equipment: { ...INITIAL_EQUIPMENT } });
     setInventory([]);
@@ -152,17 +164,17 @@ export function useGameState() {
         transition: "all .2s",
       },
       textShadow: glow ? `0 0 6px ${rarityColor}88` : "none",
-      title: equippedItem ? "點擊卸下" : `${slot.label}（空）`,
+      title: equippedItem ? L("點擊卸下", "Click to unequip") : `${tr(slot, "label")}${L("（空）", " (empty)")}`,
     };
   });
   const navTabs = [
-    { id: "dungeon", label: "地下城", badgeCount: 0 },
-    { id: "arena", label: "🏟 競技場", badgeCount: 0 },
-    { id: "tavern", label: "🍺 酒館", badgeCount: 0 },
-    { id: "quest", label: "📋 任務", badgeCount: questBadgeCount },
-    { id: "shop", label: "商店", badgeCount: 0 },
-    { id: "inventory", label: "背包", badgeCount: 0 },
-    { id: "train", label: "⚒ 鍛造", badgeCount: 0 },
+    { id: "dungeon", label: t("tabDungeon"), badgeCount: 0 },
+    { id: "arena", label: t("tabArena"), badgeCount: 0 },
+    { id: "tavern", label: t("tabTavern"), badgeCount: 0 },
+    { id: "quest", label: t("tabQuest"), badgeCount: questBadgeCount },
+    { id: "shop", label: t("tabShop"), badgeCount: 0 },
+    { id: "inventory", label: t("tabInventory"), badgeCount: 0 },
+    { id: "train", label: t("tabForge"), badgeCount: 0 },
   ].map((tabItem) => ({
     ...tabItem,
     onSelect: () => handleTabSelect(tabItem.id),
@@ -175,20 +187,20 @@ export function useGameState() {
       expedition,
       icon: (monster && monster.icon) || expedition.icon,
       isLocked: locked,
-      monsterName: monster && monster.name,
+      monsterName: monster && tr(monster, "name"),
       onStart: locked ? undefined : () => startExpedition(expedition),
       style: { borderColor: locked ? "#2a1808" : "#3a2a10" },
-      traitDesc: monster && monster.traitDesc,
+      traitDesc: monster && tr(monster, "traitDesc"),
     };
   });
   const dungeonSections = DUNGEONS.map((dungeon) => ({
     bossIcon: MONSTERS[dungeon.boss] ? MONSTERS[dungeon.boss].icon : "👑",
-    bossName: MONSTERS[dungeon.boss] ? MONSTERS[dungeon.boss].name : "Boss",
+    bossName: MONSTERS[dungeon.boss] ? tr(MONSTERS[dungeon.boss], "name") : "Boss",
     icon: dungeon.icon,
     id: dungeon.id,
-    lore: dungeon.lore,
+    lore: tr(dungeon, "lore"),
     minLv: dungeon.minLv,
-    name: dungeon.name,
+    name: tr(dungeon, "name"),
     tierCards: DUNGEON_TIERS.map((tier) => {
       const req = dungeon.minLv + tier.minLvOffset;
       const locked = player.level < req;
@@ -201,19 +213,22 @@ export function useGameState() {
         tier,
       };
     }),
-    waveBadges: dungeon.waves.map((wave: any) => ({
+    waveBadges: dungeon.waves.map((wave: any, wi: number) => ({
       enemies: wave.monsters.map((key: any) => (MONSTERS[key] ? MONSTERS[key].icon : "?")).join(""),
       key: wave.label,
-      label: wave.label.replace("第", "").replace("波", "") + "波",
+      label: L(wave.label.replace("第", "").replace("波", "") + "波", `W${wi + 1}`),
     })),
   }));
 
   function lvUp(np: any, expG: any, goldG: any, log: any) {
+    // Apply set bonus: bonus experience
+    const expBonus = getSetEffects(np).expBonus;
+    const boostedExp = expBonus > 0 ? Math.floor(expG * (1 + expBonus / 100)) : expG;
     const withGold = { ...np, gold: (np.gold || 0) + goldG };
     const prevLevel = withGold.level;
-    const { player: next } = applyProgressionRewards(withGold, { exp: expG, gold: 0 });
+    const { player: next } = applyProgressionRewards(withGold, { exp: boostedExp, gold: 0 });
     for (let lv = prevLevel + 1; lv <= next.level; lv++) {
-      log.push({ txt: `🌟 等級提升！Lv.${lv}！`, type: "win" });
+      log.push({ txt: L(`🌟 等級提升！Lv.${lv}！`, `🌟 Level Up! Lv.${lv}!`), type: "win" });
     }
     return next;
   }
@@ -243,7 +258,7 @@ export function useGameState() {
     const now = Date.now();
     if (now < dungeonInjuredUntil) {
       const mins = Math.ceil((dungeonInjuredUntil - now) / 60_000);
-      alert(`你仍在養傷中，還需 ${mins} 分鐘才能出戰！`);
+      alert(L(`你仍在養傷中，還需 ${mins} 分鐘才能出戰！`, `Still recovering — ${mins} more minutes before you can fight!`));
       setTab("tavern");
       return;
     }
@@ -282,7 +297,7 @@ export function useGameState() {
     const now = Date.now();
     if (now < dungeonInjuredUntil) {
       const mins = Math.ceil((dungeonInjuredUntil - now) / 60_000);
-      alert(`你仍在養傷中，還需 ${mins} 分鐘才能出戰！`);
+      alert(L(`你仍在養傷中，還需 ${mins} 分鐘才能出戰！`, `Still recovering — ${mins} more minutes before you can fight!`));
       setTab("tavern");
       return;
     }
@@ -391,7 +406,7 @@ export function useGameState() {
         cursor: "pointer",
         transition: "all .2s",
       },
-      statusText: selected ? "✓ 已選" : scroll.desc,
+      statusText: selected ? L("✓ 已選", "✓ Selected") : tr(scroll, "desc"),
       statusTextColor: selected ? rarity.color : "#4a3020",
     };
   });
@@ -420,18 +435,18 @@ export function useGameState() {
     const now = Date.now();
     if (now < dungeonInjuredUntil) {
       const mins = Math.ceil((dungeonInjuredUntil - now) / 60_000);
-      alert(`你仍在養傷中，還需 ${mins} 分鐘才能出戰！`);
+      alert(L(`你仍在養傷中，還需 ${mins} 分鐘才能出戰！`, `Still recovering — ${mins} more minutes before you can fight!`));
       setTab("tavern");
       return;
     }
 
     const dungeon = MERC_DUNGEONS.find((d) => d.id === dungeonId) || MERC_DUNGEONS[0];
     if (player.level < dungeon.minLv) {
-      alert(`需要 Lv.${dungeon.minLv}！`);
+      alert(L(`需要 Lv.${dungeon.minLv}！`, `Requires Lv.${dungeon.minLv}!`));
       return;
     }
     if (!selectedScrolls.length) {
-      alert("請先從背包選擇傭兵契約捲軸！");
+      alert(L("請先從背包選擇傭兵契約捲軸！", "Select merc scrolls from your inventory first!"));
       return;
     }
     const usedUids = new Set(selectedScrolls);
@@ -527,20 +542,20 @@ export function useGameState() {
   const sellJunk = (threshold: SellThreshold = sellThreshold) => {
     const result = getBulkSellResult(inventory, player.equipment as Record<string, any>, threshold);
     if (!result.items.length) {
-      alert(`沒有${getRarity(threshold).label}以下的裝備可賣`);
+      alert(L(`沒有${getRarity(threshold).label}以下的裝備可賣`, `No gear at or below ${tr(getRarity(threshold), "label")} to sell`));
       return;
     }
 
     const soldUids = new Set(result.items.map((item) => item.uid));
     setPlayer((p) => ({ ...p, gold: p.gold + result.gold }));
     setInventory((inv) => inv.filter((item) => !soldUids.has(item.uid)));
-    alert(`賣出 ${result.items.length} 件裝備，獲得 ${result.gold} 金幣`);
+    alert(L(`賣出 ${result.items.length} 件裝備，獲得 ${result.gold} 金幣`, `Sold ${result.items.length} items for ${result.gold} gold`));
   };
 
   const refreshShop = () => {
     const cost = Math.floor(player.level * 5 + 20);
     if (player.gold < cost) {
-      alert(`刷新需要 ${cost} 金幣`);
+      alert(L(`刷新需要 ${cost} 金幣`, `Refresh costs ${cost} gold`));
       return;
     }
     setPlayer((p) => ({ ...p, gold: p.gold - cost }));
@@ -555,11 +570,11 @@ export function useGameState() {
     const needsRest = now < dungeonInjuredUntil || now < arenaInjuredUntil || !atFullHp;
 
     if (!needsRest) {
-      alert("你目前狀態良好，暫時不需要住宿。");
+      alert(L("你目前狀態良好，暫時不需要住宿。", "You're in good shape — no need to rest."));
       return;
     }
     if (player.gold < tavernRestCost) {
-      alert(`住宿需要 ${tavernRestCost} 金幣。`);
+      alert(L(`住宿需要 ${tavernRestCost} 金幣。`, `Resting costs ${tavernRestCost} gold.`));
       return;
     }
 
@@ -571,7 +586,7 @@ export function useGameState() {
   const refreshTavern = () => {
     const cost = Math.max(20, Math.floor(player.level * 8));
     if (player.gold < cost) {
-      alert(`刷新酒館告示板需要 ${cost} 金幣`);
+      alert(L(`刷新酒館告示板需要 ${cost} 金幣`, `Refreshing the tavern board costs ${cost} gold`));
       return;
     }
 
@@ -600,7 +615,7 @@ export function useGameState() {
       return lvUp({ ...p }, quest.reward.exp, quest.reward.gold, log);
     });
     setTavernQuestState((state) => claimTavernQuestReward({ ...state, activeQuestId: questId }));
-    setQuestNotify(`✅ 酒館委託完成：${quest.title}`);
+    setQuestNotify(L(`✅ 酒館委託完成：${quest.title}`, `✅ Tavern bounty complete: ${tr(quest, "title")}`));
     setTimeout(() => setQuestNotify(null), 3000);
   };
 
@@ -617,13 +632,13 @@ export function useGameState() {
     if (!item) return;
     const curLv = item.enhLv || 0;
     if (curLv >= 10) {
-      setEnhanceLog((l) => [`⚠️ 已達最高強化等級 +10`, ...l]);
+      setEnhanceLog((l) => [L(`⚠️ 已達最高強化等級 +10`, `⚠️ Max enhancement +10 reached`), ...l]);
       return;
     }
     const lvData = ENHANCE_LEVELS[curLv];
     const cost = enhanceCost(item);
     if (player.gold < cost) {
-      setEnhanceLog((l) => [`💰 金幣不足（需要 ${cost}）`, ...l]);
+      setEnhanceLog((l) => [L(`💰 金幣不足（需要 ${cost}）`, `💰 Not enough gold (need ${cost})`), ...l]);
       return;
     }
 
@@ -655,7 +670,7 @@ export function useGameState() {
         });
       }
       setEnhanceAnim("success");
-      setEnhanceLog((l) => [`✨ 強化成功！${item.name} → +${newLv}！費用 ${cost} 金幣`, ...l]);
+      setEnhanceLog((l) => [L(`✨ 強化成功！${item.name} → +${newLv}！費用 ${cost} 金幣`, `✨ Enhance success! ${tr(item, "name")} → +${newLv}! Cost ${cost} gold`), ...l]);
       setPlayer((p) => {
         const np2 = { ...p, totalEnhances: (p.totalEnhances || 0) + 1 };
         updateQuestProgress(np2, inventory);
@@ -687,8 +702,8 @@ export function useGameState() {
       setEnhanceAnim("fail");
       setEnhanceLog((l) => [
         newLv < curLv
-          ? `💔 強化失敗！+${curLv} → +${newLv}（降級）費用 ${cost} 金幣`
-          : `💔 強化失敗！+${curLv} 維持不變。費用 ${cost} 金幣`,
+          ? L(`💔 強化失敗！+${curLv} → +${newLv}（降級）費用 ${cost} 金幣`, `💔 Enhance failed! +${curLv} → +${newLv} (downgrade) Cost ${cost} gold`)
+          : L(`💔 強化失敗！+${curLv} 維持不變。費用 ${cost} 金幣`, `💔 Enhance failed! +${curLv} unchanged. Cost ${cost} gold`),
         ...l,
       ]);
     }
@@ -700,7 +715,7 @@ export function useGameState() {
     const cost = trainCost(player.level, current);
     if (player.gold < cost) return;
     if (player.gold - cost < 50) {
-      alert(`訓練費用 ${cost}，會讓金幣低於 50，請先賺更多金幣！`);
+      alert(L(`訓練費用 ${cost}，會讓金幣低於 50，請先賺更多金幣！`, `Training costs ${cost} and would drop gold below 50 — earn more first!`));
       return;
     }
     const trainStat = TRAIN_STATS.find((s) => s.id === statId);
@@ -712,6 +727,98 @@ export function useGameState() {
       return np;
     });
   };
+
+  const RARITY_ORDER: Record<string, number> = { normal: 0, magic: 1, rare: 2, legendary: 3, mythic: 4 };
+  const RARITY_SYNTHESIS_BONUS: Record<string, number> = { normal: 0, magic: 0.15, rare: 0.3, legendary: 0.5, mythic: 0.8 };
+  const RARITY_NAMES: Record<string, string> = { normal: "普通", magic: "魔法", rare: "稀有", legendary: "傳說", mythic: "神話" };
+
+  const synthesisItems = inventory.filter((i: any) => i.type !== "potion" && i.type !== "merc_scroll" && i.slot);
+
+  const toggleSynthesisUid = (uid: any) => {
+    setSynthesisUids((prev) => {
+      if (prev.includes(uid)) return prev.filter((u) => u !== uid);
+      if (prev.length >= 3) return prev;
+      return [...prev, uid];
+    });
+    setSynthesisResult(null);
+  };
+
+  const doSynthesize = () => {
+    if (synthesisUids.length < 2) {
+      alert(L("至少需要 2 件裝備才能合成！", "You need at least 2 items to synthesize!"));
+      return;
+    }
+    const items = synthesisUids.map((uid: any) => inventory.find((i: any) => i.uid === uid)).filter(Boolean);
+    if (items.length < synthesisUids.length) {
+      alert(L("部分裝備已不存在！", "Some selected items no longer exist!"));
+      return;
+    }
+    const goldCost = synthesisUids.length * 30 * player.level;
+    if (player.gold < goldCost) {
+      alert(L(`合成需要 ${goldCost} 金幣！`, `Synthesis costs ${goldCost} gold!`));
+      return;
+    }
+
+    // Determine output slot from most common slot
+    const slotCounts: Record<string, number> = {};
+    items.forEach((item: any) => { slotCounts[item.slot] = (slotCounts[item.slot] || 0) + 1; });
+    const outputSlot = Object.entries(slotCounts).sort((a: any, b: any) => b[1] - a[1])[0][0];
+
+    // Determine output rarity: highest rarity of inputs + 1 tier (with bonus chance based on count)
+    const maxRarityIdx = Math.max(...items.map((item: any) => RARITY_ORDER[item.rarity || "normal"] || 0));
+    const rarityBonus = items.reduce((sum: number, item: any) => sum + (RARITY_SYNTHESIS_BONUS[item.rarity || "normal"] || 0), 0);
+    const bonusChance = synthesisUids.length === 3 ? 0.5 + rarityBonus : 0.2 + rarityBonus;
+    let outputRarityIdx = maxRarityIdx;
+    if (maxRarityIdx < 4 && Math.random() < bonusChance) {
+      outputRarityIdx = maxRarityIdx + 1;
+    }
+    const outputRarity = RARITIES[outputRarityIdx] || RARITIES[0];
+
+    // Generate a new item at the forced output rarity so affixes match the rarity.
+    const upgraded = outputRarityIdx > maxRarityIdx;
+    const result = genLoot(player.level, rarityBonus, outputSlot, outputRarity.id);
+    const rarity = getRarity(outputRarity.id);
+
+    // Scale stats higher for synthesis
+    const synthScale = 1 + (synthesisUids.length - 1) * 0.15;
+    const finalResult = {
+      ...result,
+      attack: Math.floor(result.attack * synthScale),
+      defense: Math.floor(result.defense * synthScale),
+      hp: Math.floor(result.hp * synthScale),
+      speed: Math.floor(result.speed * synthScale),
+      uid: Date.now() + Math.random(),
+      // genLoot already named it per its rarity; just mark a rarity upgrade.
+      name: upgraded ? "★" + result.name : result.name,
+      nameEn: upgraded ? "★" + (result.nameEn || result.name) : (result.nameEn || result.name),
+    };
+
+    // Remove consumed items and gold
+    const consumedUids = new Set(synthesisUids);
+    setInventory((inv: any[]) => [...inv.filter((i: any) => !consumedUids.has(i.uid)), finalResult]);
+    setPlayer((p: any) => ({ ...p, gold: p.gold - goldCost }));
+
+    const msg = outputRarityIdx > maxRarityIdx
+      ? L(`🎉 合成成功！稀有度提升至【${rarity.label}】！`, `🎉 Synthesis success! Rarity raised to [${tr(rarity, "label")}]!`)
+      : L(`✅ 合成成功！獲得 ${rarity.label} ${finalResult.name}`, `✅ Synthesis success! Got ${tr(rarity, "label")} ${tr(finalResult, "name")}`);
+    setSynthesisLog((l: string[]) => [msg, ...l.slice(0, 9)]);
+    setSynthesisResult(finalResult);
+    setSynthesisUids([]);
+  };
+
+  const synthesisCards = synthesisItems.map((item: any) => {
+    const rar = getRarity(item.rarity);
+    const selected = synthesisUids.includes(item.uid);
+
+    return {
+      item,
+      rar,
+      selected,
+      onToggle: () => toggleSynthesisUid(item.uid),
+    };
+  });
+
+  const synthesisGoldCost = synthesisUids.length * 30 * player.level;
 
   const initArena = () => {
     const today = new Date().toISOString().slice(0, 10);
@@ -755,8 +862,8 @@ export function useGameState() {
       progress: { ...qs.progress, [questId]: { ...(qs.progress[questId] || {}), collected: true } },
     }));
 
-    const rewardText = def.rewards.map((r: any) => r.label).join("、");
-    setQuestNotify(`✅ 任務完成：${def.title}\n獎勵：${rewardText}`);
+    const rewardText = def.rewards.map((r: any) => tr(r, "label")).join(L("、", ", "));
+    setQuestNotify(L(`✅ 任務完成：${def.title}\n獎勵：${rewardText}`, `✅ Quest complete: ${tr(def, "title")}\nReward: ${rewardText}`));
     setTimeout(() => setQuestNotify(null), 3000);
   };
 
@@ -767,7 +874,7 @@ export function useGameState() {
     } else {
       const cost = 50 + player.level * 10;
       if (player.gold < cost) {
-        alert(`刷新需要 ${cost} 金幣！`);
+        alert(L(`刷新需要 ${cost} 金幣！`, `Refresh costs ${cost} gold!`));
         return;
       }
       setPlayer((p) => ({ ...p, gold: p.gold - cost }));
@@ -808,11 +915,11 @@ export function useGameState() {
         if (it.auctionId !== auctionId) return it;
         const minBid = it.currentBid + Math.max(5, Math.floor(it.currentBid * 0.1));
         if (amount < minBid) {
-          alert(`最低加價為 ${minBid} 金幣`);
+          alert(L(`最低加價為 ${minBid} 金幣`, `Minimum bid is ${minBid} gold`));
           return it;
         }
         if (player.gold < amount) {
-          alert("金幣不足！");
+          alert(L("金幣不足！", "Not enough gold!"));
           return it;
         }
         setPlayer((p) => ({ ...p, gold: p.gold - amount + (it.myBid || 0) }));
@@ -888,18 +995,18 @@ export function useGameState() {
 
   const replaySummary = replay
     ? {
-        actionLabel: replay.isArena ? "🏟 返回競技場" : "⚔ 再次出征",
+        actionLabel: replay.isArena ? t("btnArenaBack") : t("btnRunAgain"),
         progressBackground: replay.won ? "linear-gradient(90deg,#1a5a1a,#40a040)" : "linear-gradient(90deg,#5a1a1a,#a04040)",
         progressWidth: `${Math.round((replay.cursor / replay.lines.length) * 100)}%`,
         showBattleSummary: replay.cursor >= replay.lines.length,
-        statusText: replay.cursor < replay.lines.length ? "戰鬥回放中..." : "— 戰鬥結束 —",
+        statusText: replay.cursor < replay.lines.length ? t("battleWait") : t("battleEnd"),
         title: replay.isArena
-          ? `🏟 競技場 · ${(replay.opponent && replay.opponent.name) || "對手"}`
+          ? `🏟 ${L("競技場", "Arena")} · ${(replay.opponent && tr(replay.opponent, "name")) || L("對手", "Opponent")}`
           : replay.isExpedition
-            ? `🗺 ${replay.expedition && replay.expedition.name}`
+            ? `🗺 ${replay.expedition && tr(replay.expedition, "name")}`
             : replay.isMerc
-              ? `🏴 ${MERC_DUNGEONS.find((d) => d.id === replay.mercDungeonId)?.label || "傭兵副本"}`
-              : `${replay.dungeon ? `${replay.dungeon.icon} ${replay.dungeon.name}` : "⚔"}${!replay.isExpedition && !replay.isMerc && !replay.isArena ? ` · ${replay.tier && replay.tier.label}` : ""}`,
+              ? `🏴 ${(() => { const d = MERC_DUNGEONS.find((d) => d.id === replay.mercDungeonId); return d ? tr(d, "label") : L("傭兵副本", "Merc Dungeon"); })()}`
+              : `${replay.dungeon ? `${replay.dungeon.icon} ${tr(replay.dungeon, "name")}` : "⚔"}${!replay.isExpedition && !replay.isMerc && !replay.isArena ? ` · ${replay.tier && tr(replay.tier, "label")}` : ""}`,
       }
     : null;
 
@@ -908,20 +1015,22 @@ export function useGameState() {
     const displayKey = TRAIN_STAT_DISPLAY_KEYS[stat.id];
     const cost = trainCost(player.level, current);
     const canAfford = player.gold - cost >= 50;
-    const effect = stat.hpStat ? `每次+3最大HP（已訓${current}次，+${current * 3}HP）` : `每次+1${stat.label}（已訓${current}次）`;
+    const effect = stat.hpStat
+      ? L(`每次+3最大HP（已訓${current}次，+${current * 3}HP）`, `+3 Max HP each (trained ${current}×, +${current * 3} HP)`)
+      : L(`每次+1${stat.label}（已訓${current}次）`, `+1 ${tr(stat, "label")} each (trained ${current}×)`);
 
     return {
       canAfford,
       cost,
       current,
-      desc: stat.desc,
+      desc: tr(stat, "desc"),
       displayValue: stat.hpStat ? `${player.maxHp + current * 3}` : `${(player[displayKey] || 0) + (current || 0)}`,
       effect,
       icon: stat.icon,
       id: stat.id,
-      label: stat.label,
+      label: tr(stat, "label"),
       progressWidth: `${Math.min(100, current * 2)}%`,
-      trainLabel: canAfford ? `訓練 (-🪙${cost})` : `金幣不足（需 ${cost}，保留50）`,
+      trainLabel: canAfford ? L(`訓練 (-🪙${cost})`, `Train (-🪙${cost})`) : L(`金幣不足（需 ${cost}，保留50）`, `Not enough (need ${cost}, keep 50)`),
       color: stat.color,
       onTrain: () => doTrain(stat.id),
     };
@@ -961,8 +1070,8 @@ export function useGameState() {
   });
 
   const potionShopItems = [
-    { name: "小型回復藥", icon: "🧪", heal: 30, cost: 25 },
-    { name: "大型回復藥", icon: "⚗️", heal: 80, cost: 60 },
+    { name: "小型回復藥", nameEn: "Minor Heal Potion", icon: "🧪", heal: 30, cost: 25 },
+    { name: "大型回復藥", nameEn: "Major Heal Potion", icon: "⚗️", heal: 80, cost: 60 },
   ].map((item) => ({
     ...item,
     canAfford: player.gold >= item.cost,
@@ -994,11 +1103,11 @@ export function useGameState() {
     return {
       id: filterId,
       isActive: shopFilter === filterId,
-      label: filterId === "all" ? "全部" : slotDef ? slotDef.label : filterId,
+      label: filterId === "all" ? t("filterAll") : slotDef ? tr(slotDef, "label") : filterId,
       onSelect: () => setShopFilter(filterId),
     };
   });
-  const shopTabOptions = [["buy", "🏪 購買"], ["auction", "🔨 競標"], ["sell", "💰 賣出"]].map(([id, label]) => ({
+  const shopTabOptions = [["buy", t("shopBuy")], ["auction", t("shopAuction")], ["sell", t("shopSell")]].map(([id, label]) => ({
     id,
     isActive: shopTab === id,
     label,
@@ -1016,7 +1125,7 @@ export function useGameState() {
       onSell: () => sellItem(item.uid),
       price,
       rarity,
-      selectLabel: selectedScrolls.includes(item.uid) ? "✓ 已選（去副本）" : "選入傭兵隊",
+      selectLabel: selectedScrolls.includes(item.uid) ? t("scrollSelected") : t("addToParty"),
       onSelect: item.type === "merc_scroll" ? () => selectMercScrollFromInventory(item.uid) : undefined,
     };
   });
@@ -1042,22 +1151,22 @@ export function useGameState() {
       onUse: item.type === "potion" ? () => useInventoryPotion(item.uid) : undefined,
       price,
       rarity,
-      selectLabel: selectedScrolls.includes(item.uid) ? "✓ 已選（去副本）" : "選入傭兵隊",
+      selectLabel: selectedScrolls.includes(item.uid) ? t("scrollSelected") : t("addToParty"),
     };
   });
 
   const SLOT_FILTERS = [
-    { id: "all", label: "全部" },
-    { id: "weapon", label: "武器" },
-    { id: "offhand", label: "副手" },
-    { id: "armor", label: "胸甲" },
-    { id: "helmet", label: "頭盔" },
-    { id: "gloves", label: "手套" },
-    { id: "boots", label: "靴子" },
-    { id: "ring", label: "戒指" },
-    { id: "amulet", label: "護符" },
-    { id: "potion", label: "藥水" },
-    { id: "merc_scroll", label: "📜傭兵" },
+    { id: "all", label: t("filterAll") },
+    { id: "weapon", label: t("slotWeapon") },
+    { id: "offhand", label: t("slotOffhand") },
+    { id: "armor", label: t("slotArmor") },
+    { id: "helmet", label: t("slotHelmet") },
+    { id: "gloves", label: t("slotGloves") },
+    { id: "boots", label: t("slotBoots") },
+    { id: "ring", label: t("slotRing") },
+    { id: "amulet", label: t("slotAmulet") },
+    { id: "potion", label: t("potionLabel") },
+    { id: "merc_scroll", label: t("mercLabel") },
   ];
   const inventoryFilterOptions = SLOT_FILTERS.map((filter) => ({
     ...filter,
@@ -1183,5 +1292,12 @@ export function useGameState() {
     toggleSelectedScroll,
     wCat,
     enhanceItems,
+    synthesisCards,
+    synthesisGoldCost,
+    synthesisLog,
+    synthesisResult,
+    synthesisUids,
+    doSynthesize,
+    toggleSynthesisUid,
   };
 }

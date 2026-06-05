@@ -42,11 +42,13 @@ describe("content data tables", () => {
       boss: expect.objectContaining({ name: "盜賊首領" }),
     });
     expect(Object.keys(QUEST_DEFS)).toContain("d1");
-    expect(TAVERN_QUEST_DEFS.find((quest) => quest.id === "wolf_hunt")).toMatchObject({
+    expect(TAVERN_QUEST_DEFS.find((quest) => quest.id === "tq_wolf_01")).toMatchObject({
       reqLv: 1,
       targetMonster: "wolf",
-      reqCount: 5,
+      reqCount: 15,
       hint: expect.stringContaining("地下城"),
+      lore: expect.stringContaining("伐木工"),
+      conclusion: expect.stringContaining("狼群"),
     });
     expect(ARENA_FIRST_NAMES).toContain("鐵拳");
     expect(ARENA_LAST_NAMES).toContain("戰士");

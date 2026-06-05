@@ -68,6 +68,6 @@ it("dispatches tavern quest actions from board cards", () => {
   fireEvent.click(screen.getByRole("button", { name: "放棄" }));
   expect(onAbandonQuest).toHaveBeenCalledWith("wolf_hunt");
 
-  fireEvent.click(screen.getByRole("button", { name: "接取任務" }));
+  fireEvent.click(screen.getByRole("button", { name: "接受委託" }));
   expect(onAcceptQuest).toHaveBeenCalledWith("wolf_hunt");
 });

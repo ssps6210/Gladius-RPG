@@ -103,6 +103,7 @@ describe("loot system", () => {
     mockRandomSequence(randomValues);
     expect(genAuctionItem(12)).toEqual({
       name: "【神話】強化刺刀之狂怒",
+      nameEn: "[Mythic] Fortified Stiletto of Furious",
       slot: "weapon",
       cat: "dagger",
       attack: 88,
@@ -113,15 +114,16 @@ describe("loot system", () => {
       lvReq: 4,
       rarity: "mythic",
       rarityLabel: "神話",
+      rarityLabelEn: "Mythic",
       rarityColor: "#e07020",
       rarityGlow: "0 0 14px #e0702055",
       affixes: [
-        { id: "fortified", tag: "強化", type: "prefix", stat: "defense", min: 5, max: 14, slots: ["armor", "offhand", "helmet", "gloves", "boots", "weapon"], rolledVal: 19 },
-        { id: "fury", tag: "狂怒", type: "suffix", special: "fury", val: [4, 12], slots: ["weapon"], rolledVal: 9 },
-        { id: "vital", tag: "活力", type: "prefix", stat: "hp", min: 15, max: 45, slots: ["weapon", "offhand", "armor", "helmet", "gloves", "boots", "ring", "amulet"], rolledVal: 40 },
-        { id: "pierce", tag: "穿透", type: "suffix", special: "pierce", val: [10, 30], slots: ["weapon"], rolledVal: 19 },
-        { id: "brutal", tag: "殘酷", type: "prefix", stat: "attack", min: 12, max: 28, slots: ["weapon"], rolledVal: 42 },
-        { id: "heavy", tag: "沉重", type: "prefix", stat: "attack", min: 5, max: 14, slots: ["weapon"], rolledVal: 20 },
+        { id: "fortified", tag: "強化", tagEn: "Fortified", type: "prefix", stat: "defense", min: 5, max: 14, slots: ["armor", "offhand", "helmet", "gloves", "boots", "weapon"], rolledVal: 19 },
+        { id: "fury", tag: "狂怒", tagEn: "Furious", type: "suffix", special: "fury", val: [4, 12], slots: ["weapon"], rolledVal: 9 },
+        { id: "vital", tag: "活力", tagEn: "Vital", type: "prefix", stat: "hp", min: 15, max: 45, slots: ["weapon", "offhand", "armor", "helmet", "gloves", "boots", "ring", "amulet"], rolledVal: 40 },
+        { id: "pierce", tag: "穿透", tagEn: "Piercing", type: "suffix", special: "pierce", val: [10, 30], slots: ["weapon"], rolledVal: 19 },
+        { id: "brutal", tag: "殘酷", tagEn: "Brutal", type: "prefix", stat: "attack", min: 12, max: 28, slots: ["weapon"], rolledVal: 42 },
+        { id: "heavy", tag: "沉重", tagEn: "Heavy", type: "prefix", stat: "attack", min: 5, max: 14, slots: ["weapon"], rolledVal: 20 },
       ],
       specials: [
         { type: "fury", val: 9 },
