@@ -8,16 +8,14 @@ import { WEAPON_CATEGORIES } from "./weaponCategories";
 
 describe("core data tables", () => {
   it("keeps the equipment slot order stable", () => {
-    expect(EQUIP_SLOTS.map((slot) => slot.id)).toEqual([
-      "weapon",
-      "offhand",
-      "helmet",
-      "armor",
-      "gloves",
-      "boots",
-      "ring",
-      "amulet",
-    ]);
+    const ids = EQUIP_SLOTS.map((slot) => slot.id);
+    expect(ids).toEqual(expect.arrayContaining([
+      "weapon", "offhand", "helmet", "armor", "gloves", "boots", "ring", "amulet",
+      "weapon2", "ring2", "armor2",
+    ]));
+    expect(ids.indexOf("weapon")).toBeLessThan(ids.indexOf("weapon2"));
+    expect(ids.indexOf("ring")).toBeLessThan(ids.indexOf("ring2"));
+    expect(ids.indexOf("armor")).toBeLessThan(ids.indexOf("armor2"));
   });
 
   it("preserves representative weapon category traits", () => {

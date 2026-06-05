@@ -87,7 +87,7 @@ export function InventoryTab({
       </div>
       {isEmpty && <div style={{ color: "#4a3a20", fontStyle: "italic" }}>{t("slotEmpty")}</div>}
       <div className="ig">
-        {inventoryItems.map(({ item, currentEquipped, onEquip, onSelectMerc, onSell, onUse, price, rarity, selectLabel }) => {
+        {inventoryItems.map(({ item, currentEquipped, currentEquipped2, secondarySlotId, onEquip, onEquip2, onSelectMerc, onSell, onUse, price, rarity, selectLabel }) => {
           if (item.type === "potion") {
             return (
               <div key={item.uid} className="ii">
@@ -177,6 +177,21 @@ export function InventoryTab({
                 <button className="btn btp" style={{ flex: 1, fontSize: 9, padding: "5px" }} onClick={onEquip}>{L("裝備", "Equip")}</button>
                 <button className="btn btd" style={{ flex: 1, fontSize: 9, padding: "5px" }} onClick={onSell}>{L("出售", "Sell")}</button>
               </div>
+              {onEquip2 && secondarySlotId && (
+                <div style={{ marginTop: 4 }}>
+                  <button
+                    className="btn btm"
+                    style={{ width: "100%", fontSize: 9, padding: "4px 5px", color: "#a08040" }}
+                    onClick={onEquip2}
+                    title={currentEquipped2 ? (currentEquipped2 as any).name || "" : ""}
+                  >
+                    {L("副槽裝備", "Equip Slot 2")}
+                    {currentEquipped2
+                      ? <span style={{ color: "#6a5028", marginLeft: 3 }}>({L("替換", "swap")})</span>
+                      : <span style={{ color: "#4a3820", marginLeft: 3 }}>({L("空", "empty")})</span>}
+                  </button>
+                </div>
+              )}
             </div>
           );
         })}

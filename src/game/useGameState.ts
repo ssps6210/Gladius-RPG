@@ -8,6 +8,8 @@ import { ENHANCE_LEVELS } from "./data/enhanceLevels";
 import { DUNGEON_TIERS } from "./data/dungeonTiers";
 import { DUNGEONS } from "./data/dungeons";
 import { EQUIP_SLOTS } from "./data/equipmentSlots";
+import { SLOT_CLASS_UNLOCK, SLOT_BASE_TYPE } from "./types/shared";
+import { playLootDrop, playLevelUp, playVictory, playDefeat, playEnhance, playGold } from "./audio";
 import { EXPEDITIONS } from "./data/expeditions";
 import { MERC_DUNGEONS } from "./data/mercenaries";
 import { MONSTERS } from "./data/monsters";
@@ -138,16 +140,21 @@ export function useGameState() {
   const wCat = getWeaponCat(player);
   const renderedQuestState = checkQuestReset(questState, player);
   const questBadgeCount = Object.keys(QUEST_DEFS).filter((qid) => isQuestDone(qid, { ...player, _inv: inventory }, renderedQuestState)).length;
-  const equipmentSidebarItems = EQUIP_SLOTS.map((slot) => {
+  const equipmentSidebarItems = EQUIP_SLOTS.filter((slot) => {
+    const unlock = SLOT_CLASS_UNLOCK[slot.id as keyof typeof SLOT_CLASS_UNLOCK];
+    return !unlock || player.jobClass === unlock;
+  }).map((slot) => {
     const equippedItem = player.equipment[slot.id];
     const rarity = equippedItem ? getRarity(equippedItem.rarity) : null;
     const rarityColor = rarity ? rarity.color : "#2a1808";
     const glow = (rarity && rarity.glow) || "";
     const category = equippedItem && equippedItem.cat ? WEAPON_CATEGORIES[equippedItem.cat] : null;
+    const effectiveness = slot.effectiveness;
 
     return {
       category,
       equippedItem,
+      effectiveness,
       onUnequip: () => unequip(slot.id),
       rarityColor,
       slot,
@@ -231,6 +238,7 @@ export function useGameState() {
     for (let lv = prevLevel + 1; lv <= next.level; lv++) {
       log.push({ txt: L(`🌟 等級提升！Lv.${lv}！`, `🌟 Level Up! Lv.${lv}!`), type: "win" });
     }
+    if (next.level > prevLevel) playLevelUp();
     return next;
   }
 
@@ -368,6 +376,9 @@ export function useGameState() {
     if (!replay || replay.cursor < replay.lines.length) return;
     if (replay.drops && replay.drops.length > 0 && !lootDrop) {
       setLootDrop({ ...replay.drops[0], _remaining: replay.drops.slice(1) } as LootDrop);
+      playLootDrop();
+    } else if (!lootDrop) {
+      if (replay.won) playVictory(); else playDefeat();
     }
   }, [replay && replay.cursor]);
 
@@ -375,7 +386,12 @@ export function useGameState() {
     const remaining = (lootDrop && lootDrop._remaining) || [];
     if (!lootDrop) return;
     setInventory((inv) => [...inv, { ...lootDrop, _remaining: undefined }]);
-    setLootDrop(remaining.length > 0 ? ({ ...remaining[0], _remaining: remaining.slice(1) } as LootDrop) : null);
+    if (remaining.length > 0) {
+      setLootDrop({ ...remaining[0], _remaining: remaining.slice(1) } as LootDrop);
+      playLootDrop();
+    } else {
+      setLootDrop(null);
+    }
   };
 
   const discardLoot = () => {
@@ -533,6 +549,7 @@ export function useGameState() {
     const price = calcSellPrice(item);
     setPlayer((p) => ({ ...p, gold: p.gold + price }));
     setInventory((inv) => inv.filter((i) => i.uid !== uid));
+    playGold();
   };
 
   const sortInventory = () => {
@@ -678,6 +695,7 @@ export function useGameState() {
         });
       }
       setEnhanceAnim("success");
+      playEnhance(true);
       setEnhanceLog((l) => [L(`✨ 強化成功！${item.name} → +${newLv}！費用 ${cost} 金幣`, `✨ Enhance success! ${tr(item, "name")} → +${newLv}! Cost ${cost} gold`), ...l]);
       setPlayer((p) => {
         const np2 = { ...p, totalEnhances: (p.totalEnhances || 0) + 1 };
@@ -708,6 +726,7 @@ export function useGameState() {
         }
       }
       setEnhanceAnim("fail");
+      playEnhance(false);
       setEnhanceLog((l) => [
         newLv < curLv
           ? L(`💔 強化失敗！+${curLv} → +${newLv}（降級）費用 ${cost} 金幣`, `💔 Enhance failed! +${curLv} → +${newLv} (downgrade) Cost ${cost} gold`)
@@ -964,6 +983,16 @@ export function useGameState() {
     });
   };
 
+  const equipToSlot = (item: any, targetSlot: string) => {
+    const old = player.equipment[targetSlot];
+    setPlayer((p) => ({ ...p, equipment: { ...p.equipment, [targetSlot]: item } }));
+    setInventory((inv) => {
+      const n = inv.filter((i) => i.uid !== item.uid);
+      if (old) n.push({ ...old, uid: Date.now() });
+      return n;
+    });
+  };
+
   const unequip = (slot: any) => {
     const item = player.equipment[slot];
     if (!item) return;
@@ -1161,10 +1190,21 @@ export function useGameState() {
       ? (player.equipment[item.slot] as GameItem | null) ?? null
       : null;
 
+    const secondarySlotId = Object.keys(SLOT_BASE_TYPE).find(
+      (sid) => SLOT_BASE_TYPE[sid as keyof typeof SLOT_BASE_TYPE] === item.slot
+        && SLOT_CLASS_UNLOCK[sid as keyof typeof SLOT_CLASS_UNLOCK] === player.jobClass
+    ) as string | undefined;
+    const currentEquipped2 = secondarySlotId
+      ? (player.equipment[secondarySlotId] as GameItem | null) ?? null
+      : null;
+
     return {
       item,
       currentEquipped,
+      currentEquipped2,
+      secondarySlotId,
       onEquip: item.type === "weapon" || item.slot ? () => equipItem(item) : undefined,
+      onEquip2: secondarySlotId ? () => equipToSlot(item, secondarySlotId) : undefined,
       onSelectMerc: item.type === "merc_scroll" ? () => selectMercScrollFromInventory(item.uid) : undefined,
       onSell: () => sellItem(item.uid),
       onUse: item.type === "potion" ? () => useInventoryPotion(item.uid) : undefined,
@@ -1221,6 +1261,7 @@ export function useGameState() {
     enhanceTarget,
     expeditionCards,
     equipItem,
+    equipToSlot,
     equipLootNow,
     expPct,
     filteredInv,

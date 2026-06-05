@@ -205,7 +205,7 @@ export default function GameApp() {
             <div className="pn">
               <div className="ph">{t("equipTitle")}{t("clickUnequip")}</div>
               <div className="pb" style={{ padding: "8px 10px" }}>
-                {equipmentSidebarItems.map(({ category, equippedItem, onUnequip, rarityColor, slot, style, textShadow, title }) => {
+                {equipmentSidebarItems.map(({ category, equippedItem, effectiveness, onUnequip, rarityColor, slot, style, textShadow, title }) => {
                   return (
                     <div key={slot.id}
                       onClick={onUnequip}
@@ -213,7 +213,12 @@ export default function GameApp() {
                       style={style}>
                       <span style={{ fontSize: 13, flexShrink: 0, marginTop: 1 }}>{slot.icon}</span>
                       <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontSize: 9, color: "#4a3020", fontFamily: "'Cinzel',serif", letterSpacing: 0.5, lineHeight: 1 }}>{tr(slot, "label")}</div>
+                        <div style={{ fontSize: 9, color: "#4a3020", fontFamily: "'Cinzel',serif", letterSpacing: 0.5, lineHeight: 1 }}>
+                          {tr(slot, "label")}
+                          {effectiveness && effectiveness < 1 && (
+                            <span style={{ color: "#7a5020", marginLeft: 3 }}>({Math.round(effectiveness * 100)}%)</span>
+                          )}
+                        </div>
                         {equippedItem ? <>
                           <div style={{
                             fontSize: 11, color: rarityColor, lineHeight: 1.3, marginTop: 1,

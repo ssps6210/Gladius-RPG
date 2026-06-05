@@ -4,6 +4,7 @@ import { WEAPON_CATEGORIES } from "../data/weaponCategories";
 import { aggregateSetEffects, calculateSetBonuses } from "../data/sets";
 import { JOB_CLASSES } from "../data/classes";
 import { applyEnhanceBonus } from "../lib/items";
+import { SLOT_EFFECTIVENESS } from "../types/shared";
 import type { KillRecord } from "../types/combat";
 
 type AnyRecord = Record<string, any>;
@@ -44,14 +45,12 @@ function recordKill(kills: KillRecord[], enemyId: string, enemyName: string, ene
 }
 
 export const sumEq = (player: any, stat: any) =>
-  Object.values(player.equipment).reduce((sum, entry) => {
+  Object.entries(player.equipment).reduce((sum, [slotId, entry]) => {
     const item = entry as any;
-    if (!item) {
-      return sum;
-    }
-
+    if (!item) return sum;
     const value = item.enhLv > 0 ? applyEnhanceBonus(item)[stat] || 0 : item[stat] || 0;
-    return sum + value;
+    const mult = SLOT_EFFECTIVENESS[slotId as keyof typeof SLOT_EFFECTIVENESS] ?? 1.0;
+    return sum + Math.floor(value * mult);
   }, 0);
 
 export const cAtk = (player: any) => {
