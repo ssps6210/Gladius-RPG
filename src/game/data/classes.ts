@@ -33,14 +33,14 @@ export const JOB_CLASSES: Record<JobClassId, JobClass> = {
   },
   cleric: {
     id: "cleric", name: "聖職者", nameEn: "Cleric", icon: "✝️",
-    portrait: "",
+    portrait: "./portraits/Cleric.jpg",
     atkBonus: 0, defBonus: 10, hpPct: 30, spdBonus: 0,
     desc: "+30%最大HP +10防禦，每回合神聖回復8HP。",
     descEn: "+30% Max HP +10 DEF. Regenerates 8 HP per round.",
   },
   rogue: {
     id: "rogue", name: "強盜", nameEn: "Rogue", icon: "🗡️",
-    portrait: "",
+    portrait: "./portraits/Rogue.jpg",
     atkBonus: 15, defBonus: 0, hpPct: 0, spdBonus: 5,
     desc: "+15攻擊 +5速度，首回合必定爆擊，爆擊率+15%。",
     descEn: "+15 ATK +5 SPD. First round always crits. +15% bonus crit chance.",
