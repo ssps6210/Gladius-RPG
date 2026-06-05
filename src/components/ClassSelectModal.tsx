@@ -43,18 +43,42 @@ export function ClassSelectModal({
                 style={{
                   background: isActive ? "linear-gradient(160deg,#3a2a08,#1e1608)" : "linear-gradient(160deg,#1a1208,#0e0a06)",
                   border: `1px solid ${isActive ? "#c8901e" : "#3a2810"}`,
-                  borderRadius: 6, padding: "12px 10px", cursor: "pointer",
-                  textAlign: "left", transition: "all .2s",
+                  borderRadius: 6, padding: 0, cursor: "pointer",
+                  textAlign: "left", transition: "all .2s", overflow: "hidden",
                   boxShadow: isActive ? "0 0 12px rgba(200,140,30,0.4)" : "none",
                 }}
               >
-                <div style={{ fontSize: 22, marginBottom: 4 }}>{cls.icon}</div>
-                <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: isActive ? "#e0a830" : "#c8a060", marginBottom: 3 }}>
-                  {L(cls.name, cls.nameEn)}
-                </div>
-                <div style={{ fontSize: 10, color: "#7a6040", lineHeight: 1.5 }}>
-                  {L(cls.desc, cls.descEn)}
-                </div>
+                {cls.portrait ? (
+                  <div style={{ position: "relative" }}>
+                    <img
+                      src={cls.portrait}
+                      alt={cls.nameEn}
+                      style={{ width: "100%", aspectRatio: "1", objectFit: "cover", display: "block", opacity: isActive ? 1 : 0.75 }}
+                    />
+                    <div style={{
+                      position: "absolute", bottom: 0, left: 0, right: 0,
+                      background: "linear-gradient(transparent, rgba(0,0,0,0.85))",
+                      padding: "16px 8px 8px",
+                    }}>
+                      <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: isActive ? "#e0a830" : "#c8a060" }}>
+                        {cls.icon} {L(cls.name, cls.nameEn)}
+                      </div>
+                      <div style={{ fontSize: 9, color: "#9a8060", lineHeight: 1.4, marginTop: 2 }}>
+                        {L(cls.desc, cls.descEn)}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ padding: "12px 10px" }}>
+                    <div style={{ fontSize: 22, marginBottom: 4 }}>{cls.icon}</div>
+                    <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: isActive ? "#e0a830" : "#c8a060", marginBottom: 3 }}>
+                      {L(cls.name, cls.nameEn)}
+                    </div>
+                    <div style={{ fontSize: 10, color: "#7a6040", lineHeight: 1.5 }}>
+                      {L(cls.desc, cls.descEn)}
+                    </div>
+                  </div>
+                )}
               </button>
             );
           })}

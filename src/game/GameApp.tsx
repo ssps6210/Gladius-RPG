@@ -14,7 +14,7 @@ import { ShopTab } from "../features/shop/ShopTab";
 import { TavernPage } from "../features/tavern/TavernPage";
 import { TrainTab } from "../features/train/TrainTab";
 import { calculateSetBonuses } from "./data/sets";
-import { JOB_CLASSES } from "./data/classes";
+import { JOB_CLASSES, GLADIATOR_PORTRAIT } from "./data/classes";
 import { useLanguage } from "./i18n/LanguageContext";
 import { useGameState } from "./useGameState";
 
@@ -119,7 +119,27 @@ export default function GameApp() {
             <div className="pn">
               <div className="ph">{t("charTitle")}</div>
               <div className="pb">
-                <div className="pname">{player.name}</div>
+                {(() => {
+                  const cls = JOB_CLASSES[player.jobClass as keyof typeof JOB_CLASSES];
+                  const portrait = cls?.portrait || GLADIATOR_PORTRAIT;
+                  return (
+                    <div style={{ position: "relative", marginBottom: 8, borderRadius: 4, overflow: "hidden" }}>
+                      <img
+                        src={portrait}
+                        alt="character"
+                        style={{ width: "100%", aspectRatio: "1", objectFit: "cover", objectPosition: "top", display: "block", opacity: 0.9 }}
+                      />
+                      <div style={{
+                        position: "absolute", bottom: 0, left: 0, right: 0,
+                        background: "linear-gradient(transparent, rgba(0,0,0,0.9))",
+                        padding: "20px 8px 6px",
+                      }}>
+                        <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: "#e0c060" }}>{player.name}</div>
+                        {cls && <div style={{ fontSize: 10, color: "#a08040" }}>{cls.icon} {L(cls.name, cls.nameEn)}</div>}
+                      </div>
+                    </div>
+                  );
+                })()}
                 <HpBar cur={player.hp} max={tMhp} />
                 <div className="bw">
                   <div className="bl"><span>Lv.{player.level}</span><span>{player.exp}/{player.expNeeded}</span></div>
