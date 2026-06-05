@@ -1,7 +1,7 @@
 export const MERC_BASES: Array<Record<string, any>> = [
   { id: "soldier", name: "退役士兵", nameEn: "Veteran Soldier", icon: "🗡️", attack: 8, defense: 3, hp: 60, heal: 0, desc: "穩定輸出型步兵", descEn: "Steady damage infantry", grade: "normal" },
   { id: "archer", name: "流浪弓手", nameEn: "Wandering Archer", icon: "🏹", attack: 14, defense: 1, hp: 40, heal: 0, desc: "高攻擊低防禦", descEn: "High ATK, low DEF", grade: "magic" },
-  { id: "smith", name: "矮人鐵匠", nameEn: "Dwarf Smith", icon: "⚒️", attack: 6, defense: 12, hp: 100, heal: 0, desc: "高防替你擋傷", descEn: "Tanks damage for you", grade: "rare" },
+  { id: "smith", name: "矮人鐵匠", nameEn: "Dwarf Smith", icon: "⚒️", attack: 6, defense: 12, hp: 100, heal: 0, desc: "高防替你擋傷", descEn: "High DEF, tanks damage for you", grade: "rare" },
   { id: "mage", name: "侏儒法師", nameEn: "Gnome Mage", icon: "🧙", attack: 20, defense: 2, hp: 35, heal: 0, desc: "最高傷害輸出", descEn: "Highest damage output", grade: "legendary" },
   { id: "healer", name: "精靈治癒師", nameEn: "Elf Healer", icon: "🧝", attack: 5, defense: 4, hp: 50, heal: 8, desc: "每回合回復 8HP", descEn: "Heals 8 HP per round", grade: "mythic" },
   { id: "berserker", name: "狂戰士", nameEn: "Berserker", icon: "🪖", attack: 25, defense: 5, hp: 80, heal: 0, desc: "狂暴：攻擊+30%", descEn: "Rage: ATK +30%", grade: "legendary" },

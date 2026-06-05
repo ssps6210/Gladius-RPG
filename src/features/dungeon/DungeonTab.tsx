@@ -110,7 +110,7 @@ export function DungeonTab({
                     <div style={{ fontSize: 11, color: rarity.color, fontFamily: "'Cinzel',serif", letterSpacing: 0.3, textShadow: rarity.glow ? `0 0 8px ${rarity.color}` : "none" }}>{tr(scroll, "name")}</div>
                     <div style={{ fontSize: 10, color: "#5a4020", marginTop: 3, lineHeight: 1.5 }}>
                       {L("攻", "ATK")}{scroll.attack} {L("防", "DEF")}{scroll.defense} HP{scroll.hp}
-                      {scroll.heal > 0 && <span style={{ color: "#50c890" }}> {L("回", "Heal")}{scroll.heal}</span>}
+                      {scroll.heal > 0 && <span style={{ color: "#50c890" }}> {L("回復", "Heal")}{scroll.heal}</span>}
                     </div>
                     {scroll.affixes && scroll.affixes.length > 0 && <div style={{ display: "flex", gap: 2, justifyContent: "center", flexWrap: "wrap", marginTop: 3 }}>
                       {scroll.affixes.map((a, i) => <span key={i} style={{ fontSize: 9, color: a.special ? "#c870d0" : "#6aaa6a", background: "rgba(0,0,0,0.4)", padding: "0 3px", borderRadius: 2 }}>{tr(a, "tag")}</span>)}
