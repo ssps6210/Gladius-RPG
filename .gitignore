@@ -14,3 +14,10 @@ desktop.ini
 node_modules/
 .parcel-cache/
 dist/
+
+# Secrets — never commit API keys
+env.txt
+.env
+.env.*
+*.key
+*.secret
