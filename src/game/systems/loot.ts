@@ -95,6 +95,29 @@ export function buildName(base: any, rarity: any, affixes: any) {
   return name;
 }
 
+export function buildNameEn(base: any, rarity: any, affixes: any) {
+  const baseName = base.nameEn || base.name;
+  if (rarity.id === "normal") {
+    return baseName;
+  }
+
+  const prefix = affixes.find((affix: any) => affix.type === "prefix");
+  const suffix = affixes.find((affix: any) => affix.type === "suffix");
+  let name = baseName;
+
+  if (prefix) {
+    name = `${prefix.tagEn || prefix.tag} ${name}`;
+  }
+  if (suffix) {
+    name = `${name} of ${suffix.tagEn || suffix.tag}`;
+  }
+  if (rarity.id === "mythic") {
+    name = `[Mythic] ${name}`;
+  }
+
+  return name;
+}
+
 function buildEquipmentItem(base: any, rarity: any, affixes: any[], playerLevel: any) {
   const bonuses: AnyRecord = { attack: 0, defense: 0, hp: 0, speed: 0 };
   const specials: any[] = [];
@@ -113,12 +136,14 @@ function buildEquipmentItem(base: any, rarity: any, affixes: any[], playerLevel:
   return {
     ...base,
     name: buildName(base, rarity, affixes),
+    nameEn: buildNameEn(base, rarity, affixes),
     attack: Math.floor(((base.attack || 0) + bonuses.attack) * scale),
     defense: Math.floor(((base.defense || 0) + bonuses.defense) * scale),
     hp: Math.floor(((base.hp || 0) + bonuses.hp) * scale),
     speed: Math.floor(((base.speed || 0) + bonuses.speed) * scale),
     rarity: rarity.id,
     rarityLabel: rarity.label,
+    rarityLabelEn: rarity.labelEn || rarity.label,
     rarityColor: rarity.color,
     rarityGlow: rarity.glow || "",
     affixes,
@@ -129,7 +154,7 @@ function buildEquipmentItem(base: any, rarity: any, affixes: any[], playerLevel:
   };
 }
 
-export function genLoot(playerLevel: any, bonus: any = 0, forcedSlot: any = null) {
+export function genLoot(playerLevel: any, bonus: any = 0, forcedSlot: any = null, forcedRarity: any = null) {
   const slotGroups = {
     weapon: ["weapon"],
     offhand: ["offhand"],
@@ -152,7 +177,7 @@ export function genLoot(playerLevel: any, bonus: any = 0, forcedSlot: any = null
     base = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : ALL_BASE_ITEMS.filter((item) => item.lvReq <= playerLevel + 2)[0];
   }
 
-  const rarity = rollRarity(bonus);
+  const rarity = forcedRarity ? getRarity(forcedRarity) : rollRarity(bonus);
   const affixes: any[] = rollAffixes(base.slot, rarity, playerLevel);
 
   return buildEquipmentItem(base, rarity, affixes, playerLevel);

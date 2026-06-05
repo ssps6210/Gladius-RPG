@@ -1,13 +1,25 @@
 import { INITIAL_EQUIPMENT } from "../constants";
-import { ARENA_FIRST_NAMES, ARENA_LAST_NAMES, ARENA_TITLES } from "../data/arena";
+import {
+  ARENA_FIRST_NAMES,
+  ARENA_FIRST_NAMES_EN,
+  ARENA_LAST_NAMES,
+  ARENA_LAST_NAMES_EN,
+  ARENA_TITLES,
+  ARENA_TITLES_EN,
+} from "../data/arena";
 import { WEAPON_CATEGORIES } from "../data/weaponCategories";
 import { genLoot } from "./loot";
 
 export function genArenaOpponent(playerLevel: any) {
-  const firstName = ARENA_FIRST_NAMES[Math.floor(Math.random() * ARENA_FIRST_NAMES.length)];
-  const lastName = ARENA_LAST_NAMES[Math.floor(Math.random() * ARENA_LAST_NAMES.length)];
-  const title = ARENA_TITLES[Math.floor(Math.random() * ARENA_TITLES.length)];
+  const fi = Math.floor(Math.random() * ARENA_FIRST_NAMES.length);
+  const li = Math.floor(Math.random() * ARENA_LAST_NAMES.length);
+  const ti = Math.floor(Math.random() * ARENA_TITLES.length);
+  const firstName = ARENA_FIRST_NAMES[fi];
+  const lastName = ARENA_LAST_NAMES[li];
+  const title = ARENA_TITLES[ti];
   const name = `${title}${firstName}${lastName}`;
+  const nameEn = `${ARENA_FIRST_NAMES_EN[fi]} ${ARENA_LAST_NAMES_EN[li]}, ${ARENA_TITLES_EN[ti]}`;
+  const titleEn = ARENA_TITLES_EN[ti];
 
   const lvOffset = Math.floor(Math.random() * 7) - 3;
   const oppLv = Math.max(1, playerLevel + lvOffset);
@@ -45,7 +57,9 @@ export function genArenaOpponent(playerLevel: any) {
   return {
     id: Date.now() + Math.random(),
     name,
+    nameEn,
     title,
+    titleEn,
     level: oppLv,
     tier,
     attack: totalAtk,

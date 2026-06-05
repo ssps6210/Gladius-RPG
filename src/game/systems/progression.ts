@@ -10,7 +10,7 @@ interface PlayerLike {
 }
 
 export function getNextExpNeeded(currentExpNeeded: number): number {
-  return Math.floor(currentExpNeeded * 1.4);
+  return Math.floor(currentExpNeeded * 1.15);
 }
 
 export function getLevelMaxHp(currentMaxHp: number): number {

@@ -1,5 +1,6 @@
 import { BattleLog } from "../../components/BattleLog";
 import { ReplayLog } from "../../components/ReplayLog";
+import { useLanguage } from "../../game/i18n/LanguageContext";
 import type { GameReplay } from "../../game/appTypes";
 
 type ReplaySummary = {
@@ -24,6 +25,7 @@ export function BattleReport({
   onRestart: () => void;
   onSkip: () => void;
 }) {
+  const { t, L } = useLanguage();
   return (
     <div className="ba">
       {replay ? (
@@ -47,7 +49,7 @@ export function BattleReport({
           {replaySummary?.showBattleSummary && (
             <div style={{ marginTop: 12 }}>
               <div style={{ fontSize: 10, color: "#5a4020", fontFamily: "'Cinzel',serif", letterSpacing: 1, marginBottom: 4, textAlign: "center" }}>
-                戰鬥摘要
+                {L("戰鬥摘要", "Battle Summary")}
               </div>
               <BattleLog log={replay.lines} />
             </div>
@@ -56,7 +58,7 @@ export function BattleReport({
           <div className="bact" style={{ marginTop: 12 }}>
             {replay.cursor < replay.lines.length ? (
               <button className="btn btm" onClick={onSkip}>
-                ⏩ 跳過
+                {t("btnSkip")}
               </button>
             ) : (
               <>
@@ -64,7 +66,7 @@ export function BattleReport({
                   {replaySummary?.actionLabel}
                 </button>
                 <button className="btn btm" onClick={onClose}>
-                  ↩ 返回
+                  {t("btnReturn")}
                 </button>
               </>
             )}
@@ -72,7 +74,7 @@ export function BattleReport({
         </>
       ) : (
         <div style={{ textAlign: "center", color: "#5a4020", fontFamily: "'Cinzel',serif", fontSize: 13, marginTop: 40 }}>
-          選擇副本出發！
+          {t("btnChargeDun")}
         </div>
       )}
     </div>
