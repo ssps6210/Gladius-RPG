@@ -39,6 +39,7 @@ export function createInitialPlayer(): RuntimePlayer {
     totalMercRuns: 0,
     monsterKills: {},
     highestLevel: 1,
+    jobClass: "",
   };
 }
 

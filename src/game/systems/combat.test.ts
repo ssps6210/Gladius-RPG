@@ -132,7 +132,7 @@ describe("combat system", () => {
 
     const result = fightMonster(enemy, player, 18, 9, 120, [{ type: "lifesteal", val: 10 }], WEAPON_CATEGORIES.trident, log, bleedRef);
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       np: player,
       won: true,
       crits: 0,

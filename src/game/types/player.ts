@@ -30,5 +30,6 @@ export type RuntimePlayer = {
   totalMercRuns: number;
   monsterKills: Record<string, number>;
   highestLevel: number;
+  jobClass: string;
   [key: string]: unknown;
 };

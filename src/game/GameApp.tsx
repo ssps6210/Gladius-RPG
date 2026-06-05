@@ -1,6 +1,7 @@
 import "./game.css";
 
 import { HpBar } from "../components/HpBar";
+import { ClassSelectModal } from "../components/ClassSelectModal";
 import { ItemCard } from "../components/ItemCard";
 import { LootPopup } from "../components/LootPopup";
 import { StoryModal } from "../components/StoryModal/StoryModal";
@@ -13,6 +14,7 @@ import { ShopTab } from "../features/shop/ShopTab";
 import { TavernPage } from "../features/tavern/TavernPage";
 import { TrainTab } from "../features/train/TrainTab";
 import { calculateSetBonuses } from "./data/sets";
+import { JOB_CLASSES } from "./data/classes";
 import { useLanguage } from "./i18n/LanguageContext";
 import { useGameState } from "./useGameState";
 
@@ -78,6 +80,9 @@ export default function GameApp() {
     shopTabOptions,
     sortInventory,
     skipReplay,
+    chooseClass,
+    openClassModal,
+    classModalOpen,
     startArenaBattle,
     tAtk,
     tDef,
@@ -143,6 +148,37 @@ export default function GameApp() {
                   </div>
                 </div>
                 {wCat && <div className="weapon-trait">{wCat.icon} {wCat.label}：{wCat.traitDesc}</div>}
+                {player.level >= 30 && (
+                  <div style={{ marginTop: 8, borderTop: "1px solid #2a1808", paddingTop: 6 }}>
+                    {player.jobClass ? (
+                      <div
+                        onClick={openClassModal}
+                        style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                        title={L("點擊更換職業", "Click to change class")}
+                      >
+                        {(() => {
+                          const cls = JOB_CLASSES[player.jobClass as keyof typeof JOB_CLASSES];
+                          return cls ? (
+                            <>
+                              <span style={{ fontSize: 14 }}>{cls.icon}</span>
+                              <span style={{ fontSize: 11, color: "#c8a060", fontFamily: "'Cinzel',serif" }}>
+                                {L(cls.name, cls.nameEn)}
+                              </span>
+                            </>
+                          ) : null;
+                        })()}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={openClassModal}
+                        className="btn btp"
+                        style={{ width: "100%", fontSize: 10 }}
+                      >
+                        {L("⚔ 選擇職業（Lv30解鎖）", "⚔ Choose Class (Lv30)")}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -389,6 +425,12 @@ export default function GameApp() {
           onTake={takeLoot}
           onDiscard={discardLoot}
         />}
+
+        <ClassSelectModal
+          open={classModalOpen}
+          onChoose={chooseClass}
+          currentClass={player.jobClass}
+        />
       </div>
     </>
   );

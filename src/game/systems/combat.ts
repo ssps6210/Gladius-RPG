@@ -2,6 +2,7 @@ import { MERC_DUNGEONS } from "../data/mercenaries";
 import { MONSTERS } from "../data/monsters";
 import { WEAPON_CATEGORIES } from "../data/weaponCategories";
 import { aggregateSetEffects, calculateSetBonuses } from "../data/sets";
+import { JOB_CLASSES } from "../data/classes";
 import { applyEnhanceBonus } from "../lib/items";
 import type { KillRecord } from "../types/combat";
 
@@ -56,28 +57,46 @@ export const sumEq = (player: any, stat: any) =>
 export const cAtk = (player: any) => {
   const base = player.attack + (player.trainedAtk || 0) + sumEq(player, "attack");
   const setBonuses = calculateSetBonuses(player.equipment || {});
-  return base + aggregateSetEffects(setBonuses).attack;
+  const cls = JOB_CLASSES[player.jobClass as keyof typeof JOB_CLASSES];
+  return base + aggregateSetEffects(setBonuses).attack + (cls?.atkBonus || 0);
 };
 export const cDef = (player: any) => {
   const base = player.defense + (player.trainedDef || 0) + sumEq(player, "defense");
   const setBonuses = calculateSetBonuses(player.equipment || {});
-  return base + aggregateSetEffects(setBonuses).defense;
+  const cls = JOB_CLASSES[player.jobClass as keyof typeof JOB_CLASSES];
+  return base + aggregateSetEffects(setBonuses).defense + (cls?.defBonus || 0);
 };
 export const cMhp = (player: any) => {
   const base = player.maxHp + (player.trainedHp || 0) * 3 + sumEq(player, "hp");
   const setBonuses = calculateSetBonuses(player.equipment || {});
-  return base + aggregateSetEffects(setBonuses).hp;
+  const cls = JOB_CLASSES[player.jobClass as keyof typeof JOB_CLASSES];
+  const hpAdd = cls?.hpPct ? Math.floor(base * cls.hpPct / 100) : 0;
+  return base + aggregateSetEffects(setBonuses).hp + hpAdd;
 };
 export const cSpd = (player: any) => {
   const base = player.speed + (player.trainedSpd || 0) + sumEq(player, "speed");
   const setBonuses = calculateSetBonuses(player.equipment || {});
-  return base + aggregateSetEffects(setBonuses).speed;
+  const cls = JOB_CLASSES[player.jobClass as keyof typeof JOB_CLASSES];
+  return base + aggregateSetEffects(setBonuses).speed + (cls?.spdBonus || 0);
 };
 
 /** Get aggregate set effects for a player (used by combat for lifesteal, critChance, etc.) */
 export const getSetEffects = (player: any) => {
   const setBonuses = calculateSetBonuses(player.equipment || {});
   return aggregateSetEffects(setBonuses);
+};
+
+/** Get class-based combat effect modifiers for a player */
+export const getClassEffects = (player: any) => {
+  const cls = JOB_CLASSES[player.jobClass as keyof typeof JOB_CLASSES];
+  if (!cls) return { blockChance: 0, inspireChance: 0, regenPerRound: 0, firstRoundCrit: false, bonusCritChance: 0 };
+  switch (cls.id) {
+    case "warrior": return { blockChance: 0.15, inspireChance: 0, regenPerRound: 0, firstRoundCrit: false, bonusCritChance: 0 };
+    case "bard":    return { blockChance: 0, inspireChance: 0.20, regenPerRound: 0, firstRoundCrit: false, bonusCritChance: 0 };
+    case "cleric":  return { blockChance: 0, inspireChance: 0, regenPerRound: 8, firstRoundCrit: false, bonusCritChance: 0 };
+    case "rogue":   return { blockChance: 0, inspireChance: 0, regenPerRound: 0, firstRoundCrit: true, bonusCritChance: 15 };
+    default:        return { blockChance: 0, inspireChance: 0, regenPerRound: 0, firstRoundCrit: false, bonusCritChance: 0 };
+  }
 };
 
 export const gSpec = (player: any) => {
@@ -234,10 +253,15 @@ export function applyMonsterTrait(enemy: any, dmgToEnemy: any, log: any[]) {
   return finalDmg;
 }
 
-export function enemyAttackPlayer(enemy: any, pDef: any, specials: any, np: any, pMhp: any, log: any[], round: any, setEffects?: { damageReduction: number }) {
+export function enemyAttackPlayer(enemy: any, pDef: any, specials: any, np: any, pMhp: any, log: any[], round: any, setEffects?: { damageReduction: number }, blockChance?: number) {
   const attackResult = resolveEnemyAttack(enemy, pDef, specials, np, log, round);
   np = attackResult.np;
   let damageTaken = attackResult.damageTaken;
+  // Warrior: block chance halves incoming damage
+  if (blockChance && blockChance > 0 && Math.random() < blockChance) {
+    damageTaken = Math.max(1, Math.floor(damageTaken / 2));
+    log.push({ txt: L("🛡 【戰士】格擋成功！傷害減半！", "🛡 [Warrior] Block! Damage halved!"), type: "hit" });
+  }
   // Apply set bonus: damage reduction on incoming attacks
   if (setEffects && setEffects.damageReduction > 0) {
     damageTaken = Math.max(1, Math.floor(damageTaken * (1 - setEffects.damageReduction / 100)));
@@ -359,11 +383,13 @@ export function resolvePlayerCombatRound(
   firstRound: any,
   bleed: any,
   setEffects?: { critChance: number; lifesteal: number; damageReduction: number },
+  classEffects?: { blockChance: number; inspireChance: number; regenPerRound: number; firstRoundCrit: boolean; bonusCritChance: number },
 ) {
   let nextBleed = bleed;
   let totalDmgDealt = 0;
   let crits = 0;
   let stuns = 0;
+  let setTriggered = false;
 
   if (nextBleed > 0) {
     const bleedDamage = nextBleed * 3;
@@ -372,7 +398,7 @@ export function resolvePlayerCombatRound(
     log.push({ txt: resist ? L(`💀 ${enemy.name}抵抗流血！`, `💀 ${LF(enemy, "name")} resists bleed!`) : L(`🩸 流血${bleedDamage}傷害(${nextBleed}層)`, `🩸 Bleed ${bleedDamage} dmg (${nextBleed} stacks)`), type: resist ? "info" : "hit" });
   }
   if (enemy.hp <= 0) {
-    return { np, bleed: nextBleed, totalDmgDealt, crits, stuns, enemyDefeated: true, stunned: false };
+    return { np, bleed: nextBleed, totalDmgDealt, crits, stuns, setTriggered, enemyDefeated: true, stunned: false };
   }
 
   let rawDef = enemy.defense;
@@ -395,15 +421,31 @@ export function resolvePlayerCombatRound(
   let extra = specResult.extra;
   let isCrit = specResult.isCrit;
 
+  // Rogue: first round always crits
+  if (!isCrit && classEffects?.firstRoundCrit && firstRound) {
+    extra += dmg;
+    isCrit = true;
+    log.push({ txt: L("🗡️ 【強盜】首擊爆擊！", "🗡️ [Rogue] First-strike crit!"), type: "hit" });
+  }
+
   // Apply set bonus: extra crit chance
   if (!isCrit && setEffects && setEffects.critChance > 0 && Math.random() * 100 < setEffects.critChance) {
     extra += dmg;
     isCrit = true;
+    setTriggered = true;
+  }
+
+  // Rogue: bonus crit chance on top of set effects
+  if (!isCrit && classEffects && classEffects.bonusCritChance > 0 && Math.random() * 100 < classEffects.bonusCritChance) {
+    extra += dmg;
+    isCrit = true;
+    log.push({ txt: L("🗡️ 【強盜】爆擊！", "🗡️ [Rogue] Crit!"), type: "hit" });
   }
 
   // Apply set bonus: lifesteal
   if (setEffects && setEffects.lifesteal > 0) {
     healed += Math.floor((dmg * setEffects.lifesteal) / 100);
+    setTriggered = true;
   }
   const weaponResult = applyWeaponTrait(wc, dmg + extra, enemy, firstRound, nextBleed);
   weaponResult.log.forEach((entry) => log.push({ txt: entry, type: "hit" }));
@@ -427,6 +469,12 @@ export function resolvePlayerCombatRound(
     log.push({ txt: L(`🩸 吸血+${healed}HP`, `🩸 Lifesteal +${healed} HP`), type: "heal" });
   }
 
+  // Cleric: regen per round
+  if (classEffects && classEffects.regenPerRound > 0 && np.hp > 0) {
+    np.hp = Math.min(np.hp + classEffects.regenPerRound, pMhp);
+    log.push({ txt: L(`✝️ 神聖回復+${classEffects.regenPerRound}HP`, `✝️ Holy Regen +${classEffects.regenPerRound} HP`), type: "heal" });
+  }
+
   // Apply set bonus: damage reduction on incoming attacks (applied later in enemyAttackPlayer)
   const regen = specials.filter((special: any) => special.type === "regen" || special.type === "vampiric").reduce((sum: any, special: any) => sum + special.val, 0);
   if (regen > 0 && np.hp > 0) {
@@ -434,7 +482,7 @@ export function resolvePlayerCombatRound(
     log.push({ txt: L(`💚 回復+${regen}HP`, `💚 Regen +${regen} HP`), type: "heal" });
   }
 
-  return { np, bleed: nextBleed, totalDmgDealt, crits, stuns, enemyDefeated: enemy.hp <= 0, stunned: weaponResult.stunned };
+  return { np, bleed: nextBleed, totalDmgDealt, crits, stuns, setTriggered, enemyDefeated: enemy.hp <= 0, stunned: weaponResult.stunned };
 }
 
 function runCombatEncounter(
@@ -454,21 +502,24 @@ function runCombatEncounter(
   let bleed = bleedRef.val;
   // Equipment doesn't change mid-combat, so compute set bonuses once up front.
   const setEffects = getSetEffects(np);
+  const classEffects = getClassEffects(np);
   let totalDmgDealt = 0;
   let totalDmgTaken = 0;
   let crits = 0;
   let stuns = 0;
+  let setTriggers = 0;
   const roundCap = hooks.roundCap || 80;
 
   while (np.hp > 0 && enemy.hp > 0 && round < roundCap) {
     round += 1;
 
-    const roundResult = resolvePlayerCombatRound(enemy, np, pAtk, pMhp, specials, wc, log, round, firstRound, bleed, setEffects);
+    const roundResult = resolvePlayerCombatRound(enemy, np, pAtk, pMhp, specials, wc, log, round, firstRound, bleed, setEffects, classEffects);
     np = roundResult.np;
     bleed = roundResult.bleed;
     totalDmgDealt += roundResult.totalDmgDealt;
     crits += roundResult.crits;
     stuns += roundResult.stuns;
+    if (roundResult.setTriggered) setTriggers += 1;
     if (roundResult.enemyDefeated) {
       break;
     }
@@ -483,11 +534,17 @@ function runCombatEncounter(
     }
 
     if (!roundResult.stunned) {
-      const attackResult = hooks.enemyAttack
-        ? hooks.enemyAttack({ enemy, np, pDef, pMhp, specials, log, round })
-        : enemyAttackPlayer(enemy, pDef, specials, np, pMhp, log, round, setEffects);
-      np = attackResult.np || np;
-      totalDmgTaken += attackResult.damageTaken || 0;
+      // Bard: inspire — 20% chance to skip enemy attack
+      const inspired = classEffects.inspireChance > 0 && Math.random() < classEffects.inspireChance;
+      if (inspired) {
+        log.push({ txt: L("🎵 【吟遊詩人】旋律激勵！敵方本回合無法攻擊！", "🎵 [Bard] Inspiring melody! Enemy can't attack!"), type: "hit" });
+      } else {
+        const attackResult = hooks.enemyAttack
+          ? hooks.enemyAttack({ enemy, np, pDef, pMhp, specials, log, round })
+          : enemyAttackPlayer(enemy, pDef, specials, np, pMhp, log, round, setEffects, classEffects.blockChance);
+        np = attackResult.np || np;
+        totalDmgTaken += attackResult.damageTaken || 0;
+      }
     }
 
     if (hooks.afterEnemyRound) {
@@ -499,7 +556,7 @@ function runCombatEncounter(
   }
 
   bleedRef.val = bleed;
-  return { np, won: enemy.hp <= 0, crits, stuns, totalDmgDealt, totalDmgTaken };
+  return { np, won: enemy.hp <= 0, crits, stuns, totalDmgDealt, totalDmgTaken, setTriggers, rounds: round };
 }
 
 export function fightMonster(enemy: any, np: any, pAtk: any, pDef: any, pMhp: any, specials: any, wc: any, log: any[], bleedRef: any) {
@@ -555,7 +612,8 @@ export function simulateExpedition(expedition: any, initPlayer: any, deps: Comba
   }
 
   log.push({ txt: "─────────────────", type: "sep" });
-  log.push({ txt: `📊 ${result.won ? L("勝利", "Victory") : L("落敗", "Defeat")} · ${L("造成", "Dealt")}${result.totalDmgDealt} · ${L("承受", "Taken")}${result.totalDmgTaken}`, type: result.won ? "win" : "lose" });
+  const expAvgDps = (result.rounds || 0) > 0 ? Math.round(result.totalDmgDealt / result.rounds) : 0;
+  log.push({ txt: `📊 ${result.won ? L("勝利", "Victory") : L("落敗", "Defeat")} · ${L("造成", "Dealt")}${result.totalDmgDealt} · ${L("均傷", "Avg DPS")}${expAvgDps} · ${L("承受", "Taken")}${result.totalDmgTaken} · ${L("爆擊", "Crits")}${result.crits}${L("次", "")}${(result.setTriggers || 0) > 0 ? ` · ${L("套裝觸發", "Set procs")}${result.setTriggers}${L("次", "")}` : ""}`, type: result.won ? "win" : "lose" });
   return { log, finalPlayer: np, drops, kills, won: result.won };
 }
 
@@ -575,6 +633,8 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
   let totalDmgDealt = 0;
   let totalDmgTaken = 0;
   let totalCrits = 0;
+  let totalSetTriggers = 0;
+  let totalRounds = 0;
 
   log.push({ txt: L(`⚔️ 進入 ${dungeon.name}【${tier.label}】`, `⚔️ Entering ${LF(dungeon, "name")} [${LF(tier, "label")}]`), type: "title" });
   log.push({ txt: `"${dungeon.lore}"`, type: "info" });
@@ -598,6 +658,8 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
       totalDmgDealt += result.totalDmgDealt;
       totalDmgTaken += result.totalDmgTaken;
       totalCrits += result.crits;
+      totalSetTriggers += result.setTriggers || 0;
+      totalRounds += result.rounds || 0;
       if (result.won) {
         recordKill(kills, monsterKey, enemy.name);
         totalKills += 1;
@@ -631,6 +693,8 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
     totalDmgDealt += result.totalDmgDealt;
     totalDmgTaken += result.totalDmgTaken;
     totalCrits += result.crits;
+    totalSetTriggers += result.setTriggers || 0;
+    totalRounds += result.rounds || 0;
     if (result.won) {
       recordKill(kills, dungeon.boss || boss.key || boss.name, boss.name, "boss");
       totalKills += 1;
@@ -660,9 +724,10 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
   }
   const totalMonsters = dungeon.waves.flatMap((wave: any) => wave.monsters).length + 1;
   log.push({ txt: "─────────────────", type: "sep" });
+  const avgDps = totalRounds > 0 ? Math.round(totalDmgDealt / totalRounds) : 0;
   log.push({ txt: L("📊 戰鬥結算", "📊 Battle Summary"), type: "title" });
   log.push({ txt: `${won ? L("🏆 副本完成！", "🏆 Dungeon cleared!") : L("💀 副本失敗", "💀 Dungeon failed")} · ${L("擊殺", "Kills")}${totalKills}/${totalMonsters}`, type: won ? "win" : "lose" });
-  log.push({ txt: `⚔ ${L("造成", "Dealt")}${totalDmgDealt} · ${L("承受", "Taken")}${totalDmgTaken} · ${L("爆擊", "Crits")}${totalCrits}${L("次", "")} · ${L("掉落", "Drops")}${drops.length}${L("件", "")}`, type: "info" });
+  log.push({ txt: `⚔ ${L("造成", "Dealt")}${totalDmgDealt} · ${L("均傷", "Avg DPS")}${avgDps} · ${L("承受", "Taken")}${totalDmgTaken} · ${L("爆擊", "Crits")}${totalCrits}${L("次", "")}${totalSetTriggers > 0 ? ` · ${L("套裝觸發", "Set procs")}${totalSetTriggers}${L("次", "")}` : ""} · ${L("掉落", "Drops")}${drops.length}${L("件", "")}`, type: "info" });
   return { log, finalPlayer: np, drops, kills, won };
 }
 
@@ -682,6 +747,8 @@ export function simulateMercRun(dungeonId: any, initPlayer: any, mercs: any, dep
   const bleedRef = { val: 0 };
   let totalDmgDealt = 0;
   let totalDmgTaken = 0;
+  let totalMercCrits = 0;
+  let totalMercSetTriggers = 0;
 
   log.push({ txt: L(`🏴 傭兵副本：${dungeon.icon}${dungeon.label}`, `🏴 Merc Dungeon: ${dungeon.icon}${LF(dungeon, "label")}`), type: "title" });
   log.push({ txt: `"${LF(dungeon, "lore")}"`, type: "info" });
@@ -732,6 +799,8 @@ export function simulateMercRun(dungeonId: any, initPlayer: any, mercs: any, dep
       np = result.np;
       totalDmgDealt += result.totalDmgDealt;
       totalDmgTaken += result.totalDmgTaken;
+      totalMercCrits += result.crits || 0;
+      totalMercSetTriggers += result.setTriggers || 0;
 
       if (np.hp > 0 && enemy.hp <= 0) {
         recordKill(kills, monsterData ? monsterKey : enemy.name, enemy.name);
@@ -773,6 +842,8 @@ export function simulateMercRun(dungeonId: any, initPlayer: any, mercs: any, dep
     const result = fightMonster(bossEnemy, np, pAtk, pDef, pMhp, specials, getWeaponCat(np), log, bleedRef);
     np = result.np;
     totalDmgDealt += result.totalDmgDealt;
+    totalMercCrits += result.crits || 0;
+    totalMercSetTriggers += result.setTriggers || 0;
     if (result.won) {
       recordKill(kills, bossData.name, bossData.name, "boss");
       np = lvUp(np, bossEnemy.expReward, bossEnemy.goldReward, log);
@@ -799,7 +870,7 @@ export function simulateMercRun(dungeonId: any, initPlayer: any, mercs: any, dep
     np.hp = Math.floor(cMhp(np) * 0.3);
   }
   log.push({ txt: "─────────────────", type: "sep" });
-  log.push({ txt: `📊 ${won ? L("勝利", "Victory") : L("落敗", "Defeat")} · ${L("造成", "Dealt")}${totalDmgDealt} · ${L("承受", "Taken")}${totalDmgTaken} · ${L("掉落", "Drops")}${drops.length}${L("件", "")}`, type: won ? "win" : "lose" });
+  log.push({ txt: `📊 ${won ? L("勝利", "Victory") : L("落敗", "Defeat")} · ${L("造成", "Dealt")}${totalDmgDealt} · ${L("承受", "Taken")}${totalDmgTaken} · ${L("爆擊", "Crits")}${totalMercCrits}${L("次", "")}${totalMercSetTriggers > 0 ? ` · ${L("套裝觸發", "Set procs")}${totalMercSetTriggers}${L("次", "")}` : ""} · ${L("掉落", "Drops")}${drops.length}${L("件", "")}`, type: won ? "win" : "lose" });
   return { log, finalPlayer: np, drops, kills, won };
 }
 
@@ -882,7 +953,7 @@ export function simulateArenaBattle(player: any, opponent: any) {
     log.push({ txt: L(`🛌 你需要休息 30 分鐘才能再戰`, `🛌 Rest 30 min before fighting again`), type: "lose" });
   }
   log.push({ txt: `─────────────────`, type: "sep" });
-  log.push({ txt: `📊 ${L("造成", "Dealt")} ${result.totalDmgDealt} · ${L("承受", "Taken")} ${result.totalDmgTaken} · ${L("爆擊", "Crits")} ${result.crits}${L(" 次", "")}`, type: "info" });
+  log.push({ txt: `📊 ${L("造成", "Dealt")} ${result.totalDmgDealt} · ${L("承受", "Taken")} ${result.totalDmgTaken} · ${L("爆擊", "Crits")} ${result.crits}${L("次", "")}${(result.setTriggers || 0) > 0 ? ` · ${L("套裝觸發", "Set procs")}${result.setTriggers}${L("次", "")}` : ""}`, type: "info" });
 
   return { log, finalPlayer: result.np, won, goldPlundered };
 }

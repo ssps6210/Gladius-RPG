@@ -98,6 +98,7 @@ export function useGameState() {
   const [bidInput, setBidInput] = useState<AnyRecord>({});
   const [enhanceTarget, setEnhanceTarget] = useState<any>(null);
   const [enhanceLog, setEnhanceLog] = useState<string[]>([]);
+  const [classModalOpen, setClassModalOpen] = useState(false);
   const [enhanceAnim, setEnhanceAnim] = useState<string | null>(null);
   const [arenaOpponents, setArenaOpponents] = useState<GameArenaOpponent[]>([]);
   const [dungeonInjuredUntil, setDungeonInjuredUntil] = useState(0);
@@ -340,6 +341,13 @@ export function useGameState() {
       setDungeonInjuredUntil(0);
     }
   }, [dungeonInjuredUntil, player]);
+
+  // Auto-open class selection when player first reaches Lv30
+  useEffect(() => {
+    if (player.level >= 30 && !player.jobClass) {
+      setClassModalOpen(true);
+    }
+  }, [player.level, player.jobClass]);
 
   useEffect(() => {
     if (!replay || replay.cursor >= replay.lines.length) return;
@@ -963,6 +971,13 @@ export function useGameState() {
     setPlayer((p) => ({ ...p, equipment: { ...p.equipment, [slot]: null } }));
   };
 
+  const chooseClass = (classId: string) => {
+    setPlayer((p) => ({ ...p, jobClass: classId }));
+    setClassModalOpen(false);
+  };
+
+  const openClassModal = () => setClassModalOpen(true);
+
   const skipReplay = () => {
     setReplay((r) => (r ? { ...r, cursor: r.lines.length } : null));
   };
@@ -1142,9 +1157,13 @@ export function useGameState() {
   const inventoryItems = filteredInv.map((item) => {
     const rarity = getRarity(item.rarity);
     const price = calcSellPrice(item);
+    const currentEquipped = item.slot && item.type !== "potion" && item.type !== "merc_scroll"
+      ? (player.equipment[item.slot] as GameItem | null) ?? null
+      : null;
 
     return {
       item,
+      currentEquipped,
       onEquip: item.type === "weapon" || item.slot ? () => equipItem(item) : undefined,
       onSelectMerc: item.type === "merc_scroll" ? () => selectMercScrollFromInventory(item.uid) : undefined,
       onSell: () => sellItem(item.uid),
@@ -1272,6 +1291,9 @@ export function useGameState() {
     SLOT_FILTERS,
     sortInventory,
     skipReplay,
+    chooseClass,
+    openClassModal,
+    classModalOpen,
     startArenaBattle,
     startBattle,
     startExpedition,

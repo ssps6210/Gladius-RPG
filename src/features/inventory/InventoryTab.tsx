@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { WEAPON_CATEGORIES } from "../../game/data/weaponCategories";
 import { getRarity } from "../../game/systems";
 import { useLanguage } from "../../game/i18n/LanguageContext";
@@ -15,6 +17,49 @@ type InventoryTabProps = {
   onSellJunk: () => void;
 };
 
+function StatDiff({ label, newVal, oldVal }: { label: string; newVal: number; oldVal: number }) {
+  const diff = newVal - oldVal;
+  if (newVal === 0 && oldVal === 0) return null;
+  return (
+    <div style={{ fontSize: 9, display: "flex", gap: 3, alignItems: "center" }}>
+      <span style={{ color: "#6a5030" }}>{label}</span>
+      <span style={{ color: "#8a7040" }}>{newVal}</span>
+      {diff !== 0 && (
+        <span style={{ color: diff > 0 ? "#4caf50" : "#c84040", fontWeight: "bold" }}>
+          ({diff > 0 ? "+" : ""}{diff})
+        </span>
+      )}
+    </div>
+  );
+}
+
+function CompareTooltip({ newItem, equipped }: { newItem: any; equipped: any }) {
+  const { L } = useLanguage();
+  const eq = equipped || { attack: 0, defense: 0, hp: 0, speed: 0 };
+  return (
+    <div style={{
+      position: "absolute", left: "calc(100% + 6px)", top: 0,
+      background: "linear-gradient(160deg,#1a1208,#0e0a06)",
+      border: "1px solid #4a3010", borderRadius: 6, padding: "8px 10px",
+      width: 130, zIndex: 100, boxShadow: "0 4px 16px rgba(0,0,0,0.7)",
+      pointerEvents: "none",
+    }}>
+      <div style={{ fontSize: 9, color: "#8a6030", fontFamily: "'Cinzel',serif", marginBottom: 4, borderBottom: "1px solid #2a1808", paddingBottom: 3 }}>
+        {equipped ? L("▲ 與已裝備比較", "▲ vs Equipped") : L("（插槽為空）", "(slot empty)")}
+      </div>
+      {equipped && (
+        <div style={{ fontSize: 9, color: "#6a5028", marginBottom: 4, fontStyle: "italic" }}>
+          {equipped.name || equipped.nameEn}
+        </div>
+      )}
+      <StatDiff label={L("攻", "ATK")} newVal={newItem.attack || 0} oldVal={eq.attack || 0} />
+      <StatDiff label={L("防", "DEF")} newVal={newItem.defense || 0} oldVal={eq.defense || 0} />
+      <StatDiff label="HP" newVal={newItem.hp || 0} oldVal={eq.hp || 0} />
+      <StatDiff label={L("速", "SPD")} newVal={newItem.speed || 0} oldVal={eq.speed || 0} />
+    </div>
+  );
+}
+
 export function InventoryTab({
   inventoryCount,
   inventoryFilterOptions,
@@ -24,6 +69,8 @@ export function InventoryTab({
   onSellJunk,
 }: InventoryTabProps) {
   const { t, tr, L } = useLanguage();
+  const [hoveredUid, setHoveredUid] = useState<string | null>(null);
+
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
@@ -40,7 +87,7 @@ export function InventoryTab({
       </div>
       {isEmpty && <div style={{ color: "#4a3a20", fontStyle: "italic" }}>{t("slotEmpty")}</div>}
       <div className="ig">
-        {inventoryItems.map(({ item, onEquip, onSelectMerc, onSell, onUse, price, rarity, selectLabel }) => {
+        {inventoryItems.map(({ item, currentEquipped, onEquip, onSelectMerc, onSell, onUse, price, rarity, selectLabel }) => {
           if (item.type === "potion") {
             return (
               <div key={item.uid} className="ii">
@@ -97,9 +144,22 @@ export function InventoryTab({
           }
 
           const rarityInfo = getRarity(item.rarity);
+          const showCompare = hoveredUid === item.uid && !!item.slot;
 
           return (
-            <div key={item.uid} className="ii" style={{ borderColor: rarityInfo.color + (rarityInfo.id === "normal" ? "33" : "77"), background: rarityInfo.id === "normal" ? "linear-gradient(160deg,#1a1208,#120e06)" : `linear-gradient(160deg,${rarityInfo.color}0a,#120e06)`, boxShadow: rarityInfo.glow || "none" }}>
+            <div
+              key={item.uid}
+              className="ii"
+              style={{
+                borderColor: rarityInfo.color + (rarityInfo.id === "normal" ? "33" : "77"),
+                background: rarityInfo.id === "normal" ? "linear-gradient(160deg,#1a1208,#120e06)" : `linear-gradient(160deg,${rarityInfo.color}0a,#120e06)`,
+                boxShadow: rarityInfo.glow || "none",
+                position: "relative",
+              }}
+              onMouseEnter={() => setHoveredUid(item.uid)}
+              onMouseLeave={() => setHoveredUid(null)}
+            >
+              {showCompare && <CompareTooltip newItem={item} equipped={currentEquipped} />}
               <div className="iii" style={{ filter: `drop-shadow(0 2px 4px ${rarityInfo.color}66)` }}>{item.icon}</div>
               {rarityInfo.id !== "normal" && <div className="rb" style={{ color: rarityInfo.color, borderColor: rarityInfo.color + "55", background: `${rarityInfo.color}15` }}>{tr(rarityInfo, "label")}</div>}
               <div className="iin" style={{ color: rarityInfo.color }}>{tr(item, "name")}</div>
