@@ -37,7 +37,16 @@ export function TavernPage({
   const monName = (key: string) => (MONSTERS[key] ? tr(MONSTERS[key], "name") : key);
   return (
     <section>
-      <h2>{t("tabTavern")}</h2>
+      <div style={{
+        position: "relative", width: "100%", height: 140, marginBottom: 16,
+        borderRadius: 6, overflow: "hidden", border: "1px solid #3a2410",
+      }}>
+        <img src="./portraits/Tavern.png" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 40%", display: "block" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(10,7,3,0.92) 100%)" }} />
+        <div style={{ position: "absolute", bottom: 12, left: 16, fontFamily: "'Cinzel',serif", fontSize: 18, color: "#e8c050", letterSpacing: 3, textShadow: "0 0 20px rgba(200,150,30,0.6)" }}>
+          🍺 {t("tabTavern")}
+        </div>
+      </div>
       <InnPanel player={player} recovery={recovery} restCost={restCost} onRest={onRest} />
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
@@ -72,8 +81,8 @@ export function TavernPage({
               </div>
 
               <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
-                <button className="btn btp" onClick={() => onAcceptQuest(quest.id)}>{t("tavernAccept")}</button>
-                {isAccepted && <button className="btn btm" onClick={() => onAbandonQuest(quest.id)}>{t("tavernAbandon")}</button>}
+                {!isAccepted && <button className="btn btp" disabled={!!activeQuestId} onClick={() => onAcceptQuest(quest.id)}>{t("tavernAccept")}</button>}
+                {isAccepted && !done && <button className="btn btm" onClick={() => onAbandonQuest(quest.id)}>{t("tavernAbandon")}</button>}
                 {isAccepted && done && <button className="btn btd" onClick={() => onClaimQuest(quest.id)}>{L("領取賞金", "Claim Bounty")}</button>}
               </div>
             </article>

@@ -62,12 +62,9 @@ it("dispatches tavern quest actions from board cards", () => {
     />,
   );
 
+  // quest is accepted + done → only "領取賞金" shows, no accept/abandon
   fireEvent.click(screen.getByRole("button", { name: "領取賞金" }));
   expect(onClaimQuest).toHaveBeenCalledWith("wolf_hunt");
-
-  fireEvent.click(screen.getByRole("button", { name: "放棄" }));
-  expect(onAbandonQuest).toHaveBeenCalledWith("wolf_hunt");
-
-  fireEvent.click(screen.getByRole("button", { name: "接受委託" }));
-  expect(onAcceptQuest).toHaveBeenCalledWith("wolf_hunt");
+  expect(screen.queryByRole("button", { name: "放棄" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "接受委託" })).not.toBeInTheDocument();
 });

@@ -21,6 +21,16 @@ export function TrainTab({ trainingCards, enhanceLog, enhanceItems, enhanceAnim,
   const { t, tr, L } = useLanguage();
   return (
     <div>
+      <div style={{
+        position: "relative", width: "100%", height: 140, marginBottom: 16,
+        borderRadius: 6, overflow: "hidden", border: "1px solid #3a2410",
+      }}>
+        <img src="./portraits/Forge.png" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 30%", display: "block" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(10,7,3,0.92) 100%)" }} />
+        <div style={{ position: "absolute", bottom: 12, left: 16, fontFamily: "'Cinzel',serif", fontSize: 18, color: "#e8c050", letterSpacing: 3, textShadow: "0 0 20px rgba(200,150,30,0.6)" }}>
+          ⚒️ {t("trainHall")}
+        </div>
+      </div>
       <div className="stl">{t("trainHall")} <span style={{ color: "#6a5030", fontSize: 13 }}>{t("trainSub")}</span></div>
       <div style={{ padding: "8px 12px", background: "#120e06", border: "1px solid #2a1a08", borderRadius: 5, fontSize: 12, color: "#6a5030", marginBottom: 16, lineHeight: 1.7 }}>
         {t("trainDesc2")}<br />
