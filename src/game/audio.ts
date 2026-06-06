@@ -1,3 +1,32 @@
+// ── Audio settings (persisted to localStorage) ──────────────────────────
+const LS_KEY = "gladius_audio";
+
+interface AudioSettings {
+  seEnabled: boolean;
+  bgmEnabled: boolean;
+  masterVolume: number; // 0–1
+}
+
+const _defaults: AudioSettings = { seEnabled: true, bgmEnabled: true, masterVolume: 1 };
+let _settings: AudioSettings = { ..._defaults };
+
+if (typeof window !== "undefined") {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) _settings = { ..._defaults, ...JSON.parse(raw) };
+  } catch { /* ignore */ }
+}
+
+function _save() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(_settings)); } catch { /* ignore */ }
+}
+
+export function getAudioSettings(): Readonly<AudioSettings> { return _settings; }
+export function setSeEnabled(v: boolean)    { _settings = { ..._settings, seEnabled: v };                             _save(); }
+export function setBgmEnabled(v: boolean)   { _settings = { ..._settings, bgmEnabled: v };                            _save(); }
+export function setMasterVolume(v: number)  { _settings = { ..._settings, masterVolume: Math.max(0, Math.min(1, v)) }; _save(); }
+
+// ── AudioContext + buffer caches ─────────────────────────────────────────
 let ctx: AudioContext | null = null;
 const fetchCache = new Map<string, ArrayBuffer>();
 const bufCache = new Map<string, AudioBuffer | null>();
@@ -60,8 +89,9 @@ function playBuf(buf: AudioBuffer, vol: number) {
 }
 
 async function play(url: string, vol: number) {
+  if (!_settings.seEnabled) return;
   const buf = await loadBuf(url);
-  if (buf) playBuf(buf, vol);
+  if (buf) playBuf(buf, vol * _settings.masterVolume);
 }
 
 // Prefetch raw audio bytes eagerly so first-play has no network delay

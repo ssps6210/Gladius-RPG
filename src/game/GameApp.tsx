@@ -1,6 +1,7 @@
 import "./game.css";
 
 import { HpBar } from "../components/HpBar";
+import { AudioSettingsButton } from "../components/AudioSettings/AudioSettingsPanel";
 import { ClassSelectModal } from "../components/ClassSelectModal";
 import { ItemCard } from "../components/ItemCard";
 import { LootPopup } from "../components/LootPopup";
@@ -109,7 +110,8 @@ export default function GameApp() {
       <div className="gw">
         <header className="gh">
           <div className="gt">⚔ GLADIUS</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <AudioSettingsButton />
             <button className="btn btm" style={{ fontSize: 11, padding: "4px 10px" }} onClick={toggleLang}>🌐 {t("langBtn")}</button>
             <div className="gd">🪙 {player.gold}</div>
           </div>
