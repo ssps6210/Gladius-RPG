@@ -167,7 +167,6 @@ export default function GameApp() {
                     </span>
                   </div>
                 </div>
-                {wCat && <div className="weapon-trait">{wCat.icon} {wCat.label}：{wCat.traitDesc}</div>}
                 {player.level >= 30 && (
                   <div style={{ marginTop: 8, borderTop: "1px solid #2a1808", paddingTop: 6 }}>
                     {player.jobClass ? (
