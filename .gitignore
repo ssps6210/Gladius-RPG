@@ -2,6 +2,11 @@
 .DS_Store
 Thumbs.db
 desktop.ini
+__MACOSX/
+
+# Archives (keep extracted files, not zips)
+*.zip
+*.7z
 
 # Editor
 .vscode/

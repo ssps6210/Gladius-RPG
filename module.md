@@ -134,7 +134,10 @@ public/
 | 掉落稀有度權重 | `data/rarities.ts` |
 
 ### 加新音效
-- `game/audio.ts` — 新增函式，使用 Web Audio API（無需外部檔案）
+- `game/audio.ts` — 音效模組，載入 `public/sounds/rpg_sound_pack/RPG Sound Pack/` 下的 .wav 檔
+  - `SFX` 物件定義所有音效路徑映射（使用 `%20` 編碼空格）
+  - 模組載入時自動 `fetch` 預載所有音效原始資料，首次播放時解碼為 `AudioBuffer`
+  - 新增音效：在 `SFX` 加路徑，新增對應 `export function playXxx()`
 - 在 `useGameState.ts` 頂部 import，於適當時機呼叫
 
 ### 改 UI 文字（中/英）
