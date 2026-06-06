@@ -41,7 +41,7 @@ export function TavernPage({
         position: "relative", width: "100%", height: 140, marginBottom: 16,
         borderRadius: 6, overflow: "hidden", border: "1px solid #3a2410",
       }}>
-        <img src="./portraits/Tavern.png" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 40%", display: "block" }} />
+        <img src="./portraits/Tavern_people.jpg" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 40%", display: "block" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(10,7,3,0.92) 100%)" }} />
         <div style={{ position: "absolute", bottom: 12, left: 16, fontFamily: "'Cinzel',serif", fontSize: 18, color: "#e8c050", letterSpacing: 3, textShadow: "0 0 20px rgba(200,150,30,0.6)" }}>
           🍺 {t("tabTavern")}

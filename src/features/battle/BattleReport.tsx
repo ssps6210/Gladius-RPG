@@ -30,7 +30,16 @@ export function BattleReport({
     <div className="ba">
       {replay ? (
         <>
-          <div className="btl">{replaySummary?.title}</div>
+          <div style={{
+            position: "relative", width: "100%", height: 120, marginBottom: 14,
+            borderRadius: 6, overflow: "hidden", border: "1px solid #3a2410",
+          }}>
+            <img src="./portraits/Battle_Log.png" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 25%", display: "block" }} />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(10,7,3,0.92) 100%)" }} />
+            <div style={{ position: "absolute", bottom: 10, left: 14, fontFamily: "'Cinzel',serif", fontSize: 16, color: "#e8c050", letterSpacing: 3, textShadow: "0 0 20px rgba(200,150,30,0.6)" }}>
+              {replaySummary?.title}
+            </div>
+          </div>
 
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 10, color: "#5a4020", fontFamily: "'Cinzel',serif", letterSpacing: 1, marginBottom: 4, textAlign: "center" }}>
