@@ -238,7 +238,11 @@ export function useGameState() {
     for (let lv = prevLevel + 1; lv <= next.level; lv++) {
       log.push({ txt: L(`🌟 等級提升！Lv.${lv}！`, `🌟 Level Up! Lv.${lv}!`), type: "win" });
     }
-    if (next.level > prevLevel) playLevelUp();
+    if (next.level > prevLevel) {
+      // Restore to full computed max HP (including equipment + training bonuses)
+      next.hp = cMhp(next);
+      playLevelUp();
+    }
     return next;
   }
 

@@ -56,7 +56,7 @@ export function TavernPage({
 
       {board.length === 0 && <div style={{ color: "#4a3a20", fontStyle: "italic" }}>{t("tavernEmpty")}</div>}
 
-      <div style={{ display: "grid", gap: 10 }}>
+      <div style={{ display: "grid", gap: 14 }}>
         {board.map((quest) => {
           const acceptedState = accepted[quest.id];
           const isAccepted = !!acceptedState?.accepted;
@@ -67,23 +67,48 @@ export function TavernPage({
           const isActive = activeQuestId === quest.id;
 
           return (
-            <article key={quest.id} style={{ border: "1px solid #3a2a10", borderRadius: 6, padding: 10, background: "rgba(0,0,0,0.16)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                <div>
-                  <div style={{ fontSize: 14, color: "#d9be6a" }}>{quest.icon} {tr(quest, "title")}</div>
-                  <div style={{ fontSize: 12, color: "#8a7656", fontStyle: "italic", lineHeight: 1.6, margin: "6px 0", whiteSpace: "pre-line" }}>{tr(quest, "lore")}</div>
-                  <div style={{ fontSize: 12, color: "#6a5030" }}>{L("需求", "Target")}：{monName(quest.targetMonster)} x{quest.reqCount}（Lv.{quest.reqLv}+）</div>
-                  <div style={{ fontSize: 11, color: "#8b7650", marginTop: 4 }}>{tr(quest, "hint")}</div>
-                  <div style={{ fontSize: 11, color: "#c8961e", marginTop: 4 }}>{L("獎勵", "Reward")}：🪙{quest.reward.gold} / ✨{quest.reward.exp} EXP</div>
-                  {isAccepted && <div style={{ fontSize: 11, color: done ? "#4caf50" : "#6a5030", marginTop: 4 }}>{L("進度", "Progress")}：{Math.min(doneCount, quest.reqCount)} / {quest.reqCount}</div>}
+            <article key={quest.id} style={{
+              border: `1px solid ${done ? "#6a4010" : "#5a3a18"}`,
+              borderLeft: `3px solid ${done ? "#c8961e" : "#4a2e12"}`,
+              borderRadius: 3,
+              padding: "12px 14px",
+              background: "linear-gradient(160deg, #241808 0%, #1c1206 60%, #201508 100%)",
+              backgroundImage: "linear-gradient(160deg, #241808 0%, #1c1206 60%, #201508 100%), repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(139,90,20,0.04) 19px, rgba(139,90,20,0.04) 20px)",
+              position: "relative",
+              boxShadow: done ? "0 0 12px rgba(200,150,30,0.15), inset 0 1px 0 rgba(200,150,30,0.05)" : "none",
+            }}>
+              {/* Wax seal area */}
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontFamily: "'Cinzel', serif", fontSize: 13, color: done ? "#e8c050" : "#c8a050", letterSpacing: 1, marginBottom: 6 }}>
+                    {quest.icon} {tr(quest, "title")}
+                  </div>
+                  <div style={{ fontSize: 12, color: "#7a6648", fontStyle: "italic", lineHeight: 1.7, marginBottom: 8, whiteSpace: "pre-line", fontFamily: "'Crimson Text', serif" }}>{tr(quest, "lore")}</div>
+                  <div style={{ height: 1, background: "linear-gradient(90deg, rgba(90,58,24,0.5), transparent)", marginBottom: 8 }} />
+                  <div style={{ fontSize: 11, color: "#6a5030", marginBottom: 3 }}>{L("目標", "Target")}：{monName(quest.targetMonster)} ×{quest.reqCount}　Lv.{quest.reqLv}+</div>
+                  <div style={{ fontSize: 11, color: "#8b7650", marginBottom: 3, fontStyle: "italic" }}>{tr(quest, "hint")}</div>
+                  <div style={{ fontSize: 11, color: "#c8961e", marginBottom: isAccepted ? 3 : 0 }}>
+                    {L("賞金", "Reward")}：🪙{quest.reward.gold} · ✨{quest.reward.exp} EXP
+                  </div>
+                  {isAccepted && (
+                    <div style={{ fontSize: 11, color: done ? "#50c870" : "#6a5030", fontFamily: "'Cinzel', serif" }}>
+                      {done ? "✓ " : ""}{L("進度", "Progress")}：{Math.min(doneCount, quest.reqCount)} / {quest.reqCount}
+                    </div>
+                  )}
                 </div>
-                {isActive && <div style={{ fontSize: 11, color: "#4caf50" }}>{L("進行中", "Active")}</div>}
+                {isActive && !done && (
+                  <div style={{
+                    fontSize: 9, color: "#c8961e", fontFamily: "'Cinzel', serif",
+                    border: "1px solid #5a3a10", borderRadius: 2,
+                    padding: "2px 6px", letterSpacing: 1, whiteSpace: "nowrap",
+                  }}>{L("進行中", "ACTIVE")}</div>
+                )}
               </div>
 
-              <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
                 {!isAccepted && <button className="btn btp" disabled={!!activeQuestId} onClick={() => onAcceptQuest(quest.id)}>{t("tavernAccept")}</button>}
                 {isAccepted && !done && <button className="btn btm" onClick={() => onAbandonQuest(quest.id)}>{t("tavernAbandon")}</button>}
-                {isAccepted && done && <button className="btn btd" onClick={() => onClaimQuest(quest.id)}>{L("領取賞金", "Claim Bounty")}</button>}
+                {isAccepted && done && <button className="btn btd" style={{ letterSpacing: 1 }} onClick={() => onClaimQuest(quest.id)}>{L("領取賞金", "Claim Bounty")}</button>}
               </div>
             </article>
           );
