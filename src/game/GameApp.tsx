@@ -2,6 +2,7 @@ import "./game.css";
 
 import { HpBar } from "../components/HpBar";
 import { AudioSettingsButton } from "../components/AudioSettings/AudioSettingsPanel";
+import { playShopEnter } from "./audio";
 import { ClassSelectModal } from "../components/ClassSelectModal";
 import { ItemCard } from "../components/ItemCard";
 import { LootPopup } from "../components/LootPopup";
@@ -310,7 +311,7 @@ export default function GameApp() {
                 return (
                   <button key={id} className={`nb${tab === id ? " active" : ""}`}
                     style={{ position: "relative" }}
-                    onClick={onSelect}>
+                    onClick={() => { if (id === "shop" && tab !== "shop") playShopEnter(); onSelect(); }}>
                     {label}
                     {badgeCount > 0 && (
                       <span style={{ position: "absolute", top: 4, right: 4, background: "#c84040", color: "#fff",

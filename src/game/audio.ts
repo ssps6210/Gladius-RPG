@@ -37,13 +37,14 @@ const SFX = {
   hit:         `${S}/battle/swing.wav`,
   crit:        `${S}/battle/swing3.wav`,
   block:       `${S}/inventory/metal-ringing.wav`,
-  levelUp:     `${S}/interface/interface5.wav`,
-  loot:        `${S}/interface/interface2.wav`,
+  levelUp:     `${S}/battle/sword-unsheathe.wav`,
+  loot:        `${S}/battle/sword-unsheathe2.wav`,
   gold:        `${S}/inventory/coin.wav`,
-  victory:     `${S}/interface/interface6.wav`,
+  victory:     `${S}/battle/sword-unsheathe3.wav`,
   defeat:      `${S}/misc/random2.wav`,
   enhanceOk:   `${S}/inventory/metal-small1.wav`,
   enhanceFail: `${S}/misc/random3.wav`,
+  shopEnter:   `${S}/world/door.wav`,
 } as const;
 
 function getCtx(): AudioContext | null {
@@ -103,14 +104,15 @@ if (typeof window !== "undefined") {
   );
 }
 
-export function playHit()       { play(SFX.hit, 0.7); }
-export function playCrit()      { play(SFX.crit, 0.9); }
-export function playBlock()     { play(SFX.block, 0.7); }
-export function playLevelUp()   { play(SFX.levelUp, 0.85); }
-export function playLootDrop()  { play(SFX.loot, 0.7); }
-export function playGold()      { play(SFX.gold, 0.65); }
-export function playVictory()   { play(SFX.victory, 0.85); }
-export function playDefeat()    { play(SFX.defeat, 0.7); }
+export function playHit()        { play(SFX.hit, 0.7); }
+export function playCrit()       { play(SFX.crit, 0.9); }
+export function playBlock()      { play(SFX.block, 0.7); }
+export function playLevelUp()    { play(SFX.levelUp, 0.85); }
+export function playLootDrop()   { play(SFX.loot, 0.75); }
+export function playGold()       { play(SFX.gold, 0.65); }
+export function playVictory()    { play(SFX.victory, 0.85); }
+export function playDefeat()     { play(SFX.defeat, 0.7); }
+export function playShopEnter()  { play(SFX.shopEnter, 0.6); }
 export function playEnhance(success: boolean) {
   play(success ? SFX.enhanceOk : SFX.enhanceFail, 0.75);
 }
