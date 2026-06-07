@@ -113,6 +113,27 @@ export default function GameApp() {
           <div className="gt">⚔ GLADIUS</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <AudioSettingsButton />
+            {(() => {
+              const cls = JOB_CLASSES[player.jobClass as keyof typeof JOB_CLASSES];
+              const needsAction = (!player.jobClass && player.level >= 30) || (cls?.tier === 1 && player.level >= 70);
+              const locked = player.level < 30 && !player.jobClass;
+              const label = cls ? `${cls.icon} ${L(cls.name, cls.nameEn)}` : L("⚔ 轉職", "⚔ Class");
+              const tip = locked
+                ? L("Lv.30 解鎖轉職", "Unlocks at Lv.30")
+                : needsAction
+                  ? (player.level >= 70 && cls?.tier === 1 ? L("Lv.70！可升級二轉！", "Lv.70! Tier 2 available!") : L("選擇你的職業！", "Choose your class!"))
+                  : L("點擊更換職業", "Click to change class");
+              return (
+                <button
+                  className={needsAction ? "btn class-btn-ready" : "btn btm"}
+                  style={{ fontSize: 11, padding: "4px 8px", opacity: locked ? 0.4 : 1, cursor: locked ? "not-allowed" : "pointer" }}
+                  onClick={locked ? undefined : openClassModal}
+                  title={tip}
+                >
+                  {label}
+                </button>
+              );
+            })()}
             <button className="btn btm" style={{ fontSize: 11, padding: "4px 10px" }} onClick={toggleLang}>🌐 {t("langBtn")}</button>
             <div className="gd">🪙 {player.gold}</div>
           </div>
@@ -457,6 +478,7 @@ export default function GameApp() {
           open={classModalOpen}
           onChoose={chooseClass}
           currentClass={player.jobClass}
+          playerLevel={player.level}
         />
       </div>
     </>

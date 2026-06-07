@@ -13,6 +13,7 @@ import { playLootDrop, playLevelUp, playVictory, playDefeat, playEnhance, playGo
 import { EXPEDITIONS } from "./data/expeditions";
 import { MERC_DUNGEONS } from "./data/mercenaries";
 import { MONSTERS } from "./data/monsters";
+import { JOB_CLASSES } from "./data/classes";
 import { QUEST_DEFS } from "./data/quests";
 import { TRAIN_STATS } from "./data/trainStats";
 import { WEAPON_CATEGORIES } from "./data/weaponCategories";
@@ -354,9 +355,13 @@ export function useGameState() {
     }
   }, [dungeonInjuredUntil, player]);
 
-  // Auto-open class selection when player first reaches Lv30
+  // Auto-open class selection at Lv30 (first class) and Lv70 (second class)
   useEffect(() => {
+    const cls = player.jobClass ? (JOB_CLASSES as any)[player.jobClass] : null;
+    const isOnTier1 = cls && cls.tier === 1;
     if (player.level >= 30 && !player.jobClass) {
+      setClassModalOpen(true);
+    } else if (player.level >= 70 && isOnTier1) {
       setClassModalOpen(true);
     }
   }, [player.level, player.jobClass]);
@@ -878,6 +883,10 @@ export function useGameState() {
       }
       if (r.type === "item") {
         const d = genLoot(np.level, r.rarity === "mythic" ? 0.6 : r.rarity === "legendary" ? 0.4 : r.rarity === "rare" ? 0.2 : 0.1);
+        drops.push(d);
+      }
+      if (r.type === "weapon") {
+        const d = genLoot(np.level, 0.8, "weapon", r.rarity);
         drops.push(d);
       }
       if (r.type === "scroll") {

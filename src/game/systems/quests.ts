@@ -1,4 +1,5 @@
 import { QUEST_DEFS } from "../data/quests";
+import { JOB_CLASSES } from "../data/classes";
 
 export function getWeekKey() {
   const d = new Date();
@@ -22,8 +23,16 @@ export function initQuestState() {
 
 export function getQuestProgress(questId: any, playerStats: any, questState: any) {
   const def = QUEST_DEFS[questId];
-
   if (!def) return 0;
+
+  if (def.special === "class1") {
+    const cls = JOB_CLASSES[playerStats.jobClass as keyof typeof JOB_CLASSES];
+    return cls && cls.tier === 1 ? 1 : 0;
+  }
+  if (def.special === "class2") {
+    const cls = JOB_CLASSES[playerStats.jobClass as keyof typeof JOB_CLASSES];
+    return cls && cls.tier === 2 ? 1 : 0;
+  }
 
   const base = (questState.progress[questId] && questState.progress[questId].baseVal) || 0;
   const current = playerStats[def.field] || 0;
@@ -36,6 +45,16 @@ export function isQuestDone(questId: any, playerStats: any, questState: any) {
 
   if (!def) return false;
   if (questState.progress[questId] && questState.progress[questId].collected) return false;
+
+  if (def.special === "class1") {
+    const cls = JOB_CLASSES[playerStats.jobClass as keyof typeof JOB_CLASSES];
+    return !!(cls && cls.tier === 1);
+  }
+
+  if (def.special === "class2") {
+    const cls = JOB_CLASSES[playerStats.jobClass as keyof typeof JOB_CLASSES];
+    return !!(cls && cls.tier === 2);
+  }
 
   if (def.special === "enh7") {
     const equip = playerStats.equipment || {};

@@ -85,16 +85,48 @@ export const getSetEffects = (player: any) => {
   return aggregateSetEffects(setBonuses);
 };
 
+export interface ClassEffects {
+  blockChance: number;       // Warrior/Paladin: chance to block
+  blockReflect: number;      // Paladin: reflect % of blocked damage (0–1)
+  inspireChance: number;     // Bard/ShadowDancer: chance to skip enemy attack
+  dodgeChance: number;       // ShadowDancer: full dodge chance
+  regenPerRound: number;     // Cleric: fixed HP regen
+  regenPctPerRound: number;  // Archbishop: % of maxHp to regen
+  firstRoundCrit: boolean;   // Rogue/Assassin: guaranteed first-round crit
+  bonusCritChance: number;   // Rogue: extra crit %; Assassin: extra crit %
+  critMultiplier: number;    // default 2; Assassin: 3.5
+  classLifesteal: number;    // ShadowFiend: % of damage healed (0–100)
+  rageMode: boolean;         // Berserker: double ATK when HP < 30%
+  holyWrathChance: number;   // Inquisitor: chance for ×2 holy damage
+  arcaneBurst: boolean;      // Spellsinger: every 3rd round bonus ATK×1.5
+}
+
+const BASE_CE: ClassEffects = {
+  blockChance: 0, blockReflect: 0, inspireChance: 0, dodgeChance: 0,
+  regenPerRound: 0, regenPctPerRound: 0,
+  firstRoundCrit: false, bonusCritChance: 0, critMultiplier: 2,
+  classLifesteal: 0, rageMode: false, holyWrathChance: 0, arcaneBurst: false,
+};
+
 /** Get class-based combat effect modifiers for a player */
-export const getClassEffects = (player: any) => {
+export const getClassEffects = (player: any): ClassEffects => {
   const cls = JOB_CLASSES[player.jobClass as keyof typeof JOB_CLASSES];
-  if (!cls) return { blockChance: 0, inspireChance: 0, regenPerRound: 0, firstRoundCrit: false, bonusCritChance: 0 };
+  if (!cls) return { ...BASE_CE };
   switch (cls.id) {
-    case "warrior": return { blockChance: 0.15, inspireChance: 0, regenPerRound: 0, firstRoundCrit: false, bonusCritChance: 0 };
-    case "bard":    return { blockChance: 0, inspireChance: 0.20, regenPerRound: 0, firstRoundCrit: false, bonusCritChance: 0 };
-    case "cleric":  return { blockChance: 0, inspireChance: 0, regenPerRound: 8, firstRoundCrit: false, bonusCritChance: 0 };
-    case "rogue":   return { blockChance: 0, inspireChance: 0, regenPerRound: 0, firstRoundCrit: true, bonusCritChance: 15 };
-    default:        return { blockChance: 0, inspireChance: 0, regenPerRound: 0, firstRoundCrit: false, bonusCritChance: 0 };
+    case "warrior":      return { ...BASE_CE, blockChance: 0.15 };
+    case "bard":         return { ...BASE_CE, inspireChance: 0.20 };
+    case "cleric":       return { ...BASE_CE, regenPerRound: 8 };
+    case "rogue":        return { ...BASE_CE, firstRoundCrit: true, bonusCritChance: 15 };
+    // Tier 2
+    case "berserker":    return { ...BASE_CE, rageMode: true };
+    case "paladin":      return { ...BASE_CE, blockChance: 0.30, blockReflect: 0.30 };
+    case "assassin":     return { ...BASE_CE, firstRoundCrit: true, bonusCritChance: 20, critMultiplier: 3.5 };
+    case "shadowFiend":  return { ...BASE_CE, classLifesteal: 20 };
+    case "archbishop":   return { ...BASE_CE, regenPctPerRound: 5 };
+    case "inquisitor":   return { ...BASE_CE, regenPerRound: 0, holyWrathChance: 0.20 };
+    case "shadowDancer": return { ...BASE_CE, dodgeChance: 0.30 };
+    case "spellsinger":  return { ...BASE_CE, arcaneBurst: true };
+    default:             return { ...BASE_CE };
   }
 };
 
@@ -252,14 +284,22 @@ export function applyMonsterTrait(enemy: any, dmgToEnemy: any, log: any[]) {
   return finalDmg;
 }
 
-export function enemyAttackPlayer(enemy: any, pDef: any, specials: any, np: any, pMhp: any, log: any[], round: any, setEffects?: { damageReduction: number }, blockChance?: number) {
+export function enemyAttackPlayer(enemy: any, pDef: any, specials: any, np: any, pMhp: any, log: any[], round: any, setEffects?: { damageReduction: number }, blockChance?: number, classEffects?: ClassEffects) {
   const attackResult = resolveEnemyAttack(enemy, pDef, specials, np, log, round);
   np = attackResult.np;
   let damageTaken = attackResult.damageTaken;
-  // Warrior: block chance halves incoming damage
+  // Warrior/Paladin: block chance halves incoming damage; Paladin reflects on block
   if (blockChance && blockChance > 0 && Math.random() < blockChance) {
     damageTaken = Math.max(1, Math.floor(damageTaken / 2));
-    log.push({ txt: L("🛡 【戰士】格擋成功！傷害減半！", "🛡 [Warrior] Block! Damage halved!"), type: "hit" });
+    const reflectDmg = classEffects?.blockReflect && classEffects.blockReflect > 0
+      ? Math.max(1, Math.floor(damageTaken * classEffects.blockReflect))
+      : 0;
+    if (reflectDmg > 0) {
+      enemy.hp = Math.max(0, enemy.hp - reflectDmg);
+      log.push({ txt: L(`🛡 【聖騎士】格擋反彈！傷害減半+反彈${reflectDmg}！`, `🛡 [Paladin] Block + Reflect ${reflectDmg}!`), type: "hit" });
+    } else {
+      log.push({ txt: L("🛡 【戰士】格擋成功！傷害減半！", "🛡 [Warrior] Block! Damage halved!"), type: "hit" });
+    }
   }
   // Apply set bonus: damage reduction on incoming attacks
   if (setEffects && setEffects.damageReduction > 0) {
@@ -382,7 +422,7 @@ export function resolvePlayerCombatRound(
   firstRound: any,
   bleed: any,
   setEffects?: { critChance: number; lifesteal: number; damageReduction: number },
-  classEffects?: { blockChance: number; inspireChance: number; regenPerRound: number; firstRoundCrit: boolean; bonusCritChance: number },
+  classEffects?: ClassEffects,
 ) {
   let nextBleed = bleed;
   let totalDmgDealt = 0;
@@ -414,17 +454,22 @@ export function resolvePlayerCombatRound(
     log.push({ txt: L("⚡ 先制一擊！×1.5", "⚡ First strike! ×1.5"), type: "hit" });
   }
 
-  const dmg = Math.max(1, Math.floor((pAtk - rawDef + Math.floor(Math.random() * 5) - 2) * dmgMult));
+  let effectivePAtk = pAtk;
+  if (classEffects?.rageMode && np.hp < pMhp * 0.3) {
+    effectivePAtk = pAtk * 2;
+    log.push({ txt: L("🔥 【狂戰士】暴怒！攻擊翻倍！", "🔥 [Berserker] Rage! ATK doubled!"), type: "hit" });
+  }
+  const dmg = Math.max(1, Math.floor((effectivePAtk - rawDef + Math.floor(Math.random() * 5) - 2) * dmgMult));
   const specResult = applySpec(specials, dmg, enemy);
   let healed = specResult.healed;
   let extra = specResult.extra;
   let isCrit = specResult.isCrit;
 
-  // Rogue: first round always crits
   if (!isCrit && classEffects?.firstRoundCrit && firstRound) {
-    extra += dmg;
+    const critMult = classEffects.critMultiplier ?? 2;
+    extra += Math.floor(dmg * (critMult - 1));
     isCrit = true;
-    log.push({ txt: L("🗡️ 【強盜】首擊爆擊！", "🗡️ [Rogue] First-strike crit!"), type: "hit" });
+    log.push({ txt: critMult > 2 ? L("💀 【暗殺者】首擊爆擊！", "💀 [Assassin] First-strike crit!") : L("🗡️ 【強盜】首擊爆擊！", "🗡️ [Rogue] First-strike crit!"), type: "hit" });
   }
 
   // Apply set bonus: extra crit chance
@@ -434,11 +479,11 @@ export function resolvePlayerCombatRound(
     setTriggered = true;
   }
 
-  // Rogue: bonus crit chance on top of set effects
   if (!isCrit && classEffects && classEffects.bonusCritChance > 0 && Math.random() * 100 < classEffects.bonusCritChance) {
-    extra += dmg;
+    const critMult = classEffects.critMultiplier ?? 2;
+    extra += Math.floor(dmg * (critMult - 1));
     isCrit = true;
-    log.push({ txt: L("🗡️ 【強盜】爆擊！", "🗡️ [Rogue] Crit!"), type: "hit" });
+    log.push({ txt: critMult > 2 ? L("💀 【暗殺者】爆擊！", "💀 [Assassin] Crit!") : L("🗡️ 【強盜】爆擊！", "🗡️ [Rogue] Crit!"), type: "hit" });
   }
 
   // Apply set bonus: lifesteal
@@ -463,15 +508,47 @@ export function resolvePlayerCombatRound(
   if (actualDmg > 0) {
     log.push({ txt: L(`回合${round}: 你→${enemy.icon}${enemy.name} ${actualDmg}${isCrit ? "💥" : ""}`, `R${round}: You→${enemy.icon}${LF(enemy, "name")} ${actualDmg}${isCrit ? "💥" : ""}`), type: "hit" });
   }
+
+  // Inquisitor: holy wrath — extra attack equal to base damage
+  if (classEffects?.holyWrathChance && classEffects.holyWrathChance > 0 && enemy.hp > 0 && Math.random() < classEffects.holyWrathChance) {
+    enemy.hp = Math.max(0, enemy.hp - actualDmg);
+    totalDmgDealt += actualDmg;
+    log.push({ txt: L(`⚡ 【神裁官】神聖審判！+${actualDmg}傷害！`, `⚡ [Inquisitor] Holy Wrath! +${actualDmg} damage!`), type: "hit" });
+  }
+
+  // Spellsinger: arcane burst every 3rd round
+  if (classEffects?.arcaneBurst && round % 3 === 0 && enemy.hp > 0) {
+    const arcaneDmg = Math.floor(effectivePAtk * 1.5);
+    enemy.hp = Math.max(0, enemy.hp - arcaneDmg);
+    totalDmgDealt += arcaneDmg;
+    log.push({ txt: L(`🔮 【法術詩人】奧術爆發！+${arcaneDmg}傷害`, `🔮 [Spellsinger] Arcane Burst! +${arcaneDmg} damage`), type: "hit" });
+  }
+
   if (healed > 0) {
     np.hp = Math.min(np.hp + healed, pMhp);
     log.push({ txt: L(`🩸 吸血+${healed}HP`, `🩸 Lifesteal +${healed} HP`), type: "heal" });
+  }
+
+  // ShadowFiend: lifesteal on hit
+  if (classEffects?.classLifesteal && classEffects.classLifesteal > 0 && actualDmg > 0) {
+    const stolen = Math.floor((actualDmg * classEffects.classLifesteal) / 100);
+    if (stolen > 0) {
+      np.hp = Math.min(np.hp + stolen, pMhp);
+      log.push({ txt: L(`🌑 【影魔】吸命+${stolen}HP`, `🌑 [Shadow Fiend] Lifesteal +${stolen} HP`), type: "heal" });
+    }
   }
 
   // Cleric: regen per round
   if (classEffects && classEffects.regenPerRound > 0 && np.hp > 0) {
     np.hp = Math.min(np.hp + classEffects.regenPerRound, pMhp);
     log.push({ txt: L(`✝️ 神聖回復+${classEffects.regenPerRound}HP`, `✝️ Holy Regen +${classEffects.regenPerRound} HP`), type: "heal" });
+  }
+
+  // Archbishop: % of max HP regen per round
+  if (classEffects?.regenPctPerRound && classEffects.regenPctPerRound > 0 && np.hp > 0) {
+    const archRegen = Math.min(999, Math.floor(pMhp * classEffects.regenPctPerRound / 100));
+    np.hp = Math.min(np.hp + archRegen, pMhp);
+    log.push({ txt: L(`☀️ 【大主教】神聖光輝+${archRegen}HP`, `☀️ [Archbishop] Divine Light +${archRegen} HP`), type: "heal" });
   }
 
   // Apply set bonus: damage reduction on incoming attacks (applied later in enemyAttackPlayer)
@@ -533,14 +610,16 @@ function runCombatEncounter(
     }
 
     if (!roundResult.stunned) {
-      // Bard: inspire — 20% chance to skip enemy attack
       const inspired = classEffects.inspireChance > 0 && Math.random() < classEffects.inspireChance;
+      const dodged = !inspired && classEffects.dodgeChance > 0 && Math.random() < classEffects.dodgeChance;
       if (inspired) {
         log.push({ txt: L("🎵 【吟遊詩人】旋律激勵！敵方本回合無法攻擊！", "🎵 [Bard] Inspiring melody! Enemy can't attack!"), type: "hit" });
+      } else if (dodged) {
+        log.push({ txt: L("🌀 【影舞者】完美閃避！傷害全免！", "🌀 [Shadow Dancer] Perfect dodge!"), type: "hit" });
       } else {
         const attackResult = hooks.enemyAttack
           ? hooks.enemyAttack({ enemy, np, pDef, pMhp, specials, log, round })
-          : enemyAttackPlayer(enemy, pDef, specials, np, pMhp, log, round, setEffects, classEffects.blockChance);
+          : enemyAttackPlayer(enemy, pDef, specials, np, pMhp, log, round, setEffects, classEffects.blockChance, classEffects);
         np = attackResult.np || np;
         totalDmgTaken += attackResult.damageTaken || 0;
       }
