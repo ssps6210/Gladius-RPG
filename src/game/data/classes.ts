@@ -63,7 +63,7 @@ export const JOB_CLASSES: Record<JobClassId, JobClass> = {
   berserker: {
     id: "berserker", tier: 2, reqLevel: 70, prereq: "warrior",
     name: "狂戰士", nameEn: "Berserker", icon: "🔥",
-    portrait: "./portraits/Warrior.png",
+    portrait: "./portraits/Berserker1.png",
     atkBonus: 50, defBonus: -10, hpPct: 5, spdBonus: 10,
     desc: "+50攻擊 -10防禦 +5%HP +10速度。被動：HP低於30%時攻擊力翻倍。",
     descEn: "+50 ATK -10 DEF +5% HP +10 SPD. Passive: ATK doubles when HP < 30%.",
@@ -119,7 +119,7 @@ export const JOB_CLASSES: Record<JobClassId, JobClass> = {
   spellsinger: {
     id: "spellsinger", tier: 2, reqLevel: 70, prereq: "bard",
     name: "法術詩人", nameEn: "Spellsinger", icon: "🔮",
-    portrait: "./portraits/Bard.png",
+    portrait: "./portraits/Spellsinger.jpg",
     atkBonus: 30, defBonus: 5, hpPct: 0, spdBonus: 15,
     desc: "+30攻擊 +5防禦 +15速度。每3回合施放奧術爆發，額外造成攻擊力×1.5傷害。",
     descEn: "+30 ATK +5 DEF +15 SPD. Every 3 rounds, deal bonus arcane damage equal to ATK×1.5.",

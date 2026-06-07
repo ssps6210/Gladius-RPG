@@ -73,9 +73,18 @@ export function InventoryTab({
 
   return (
     <div>
+      <div style={{ position: "relative", height: 140, borderRadius: 6, overflow: "hidden", marginBottom: 14 }}>
+        <img src="./portraits/inventory.png" alt="Inventory" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 60%)" }} />
+        <div style={{ position: "absolute", bottom: 10, left: 14 }}>
+          <div style={{ fontFamily: "'Cinzel',serif", fontSize: 17, color: "#e8c87a", textShadow: "0 2px 8px rgba(0,0,0,0.9)", letterSpacing: 1 }}>
+            {t("tabInventory")}
+          </div>
+        </div>
+      </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
         <div className="stl" style={{ margin: 0, border: "none", padding: 0, flex: 1 }}>
-          {t("tabInventory")} <span style={{ color: "#6a5030", fontSize: 13 }}>— {inventoryCount}{t("invCount")}</span>
+          <span style={{ color: "#6a5030", fontSize: 13 }}>{inventoryCount}{t("invCount")}</span>
         </div>
         <button className="btn btm" style={{ fontSize: 10, padding: "5px 10px" }} onClick={onSortInventory}>{t("invSort")}</button>
         <button className="btn btd" style={{ fontSize: 10, padding: "5px 10px" }} onClick={onSellJunk}>{L("🗑 賣普通品", "🗑 Sell junk")}</button>
