@@ -19,9 +19,12 @@ import { calculateSetBonuses } from "./data/sets";
 import { JOB_CLASSES, GLADIATOR_PORTRAIT } from "./data/classes";
 import { useLanguage } from "./i18n/LanguageContext";
 import { useGameState } from "./useGameState";
+import { useTutorial } from "./hooks/useTutorial";
+import { TutorialOverlay } from "../components/Tutorial/TutorialOverlay";
 
 export default function GameApp() {
   const { t, tr, L, toggleLang } = useLanguage();
+  const { tutorialStep, advanceTutorial, skipTutorial } = useTutorial();
   const state = useGameState();
   const {
     acceptTavernQuestAction,
@@ -332,6 +335,7 @@ export default function GameApp() {
                 return (
                   <button key={id} className={`nb${tab === id ? " active" : ""}`}
                     style={{ position: "relative" }}
+                    data-tutorial={id}
                     onClick={() => { if (id === "shop" && tab !== "shop") playShopEnter(); onSelect(); }}>
                     {label}
                     {badgeCount > 0 && (
@@ -481,6 +485,13 @@ export default function GameApp() {
           playerLevel={player.level}
         />
       </div>
+
+      <TutorialOverlay
+        step={tutorialStep}
+        activeTab={tab}
+        onAdvance={advanceTutorial}
+        onSkip={skipTutorial}
+      />
     </>
   );
 }

@@ -117,7 +117,7 @@ it("renders inventory controls, filters, and item actions", () => {
   );
 
   expect(screen.getByText("背包")).toBeInTheDocument();
-  expect(screen.getByText("— 2件")).toBeInTheDocument();
+  expect(screen.getByText("2件")).toBeInTheDocument();
   expect(screen.getByText("全部")).toBeInTheDocument();
   expect(screen.getByText("武器")).toBeInTheDocument();
   expect(screen.getByText("回復 25HP")).toBeInTheDocument();

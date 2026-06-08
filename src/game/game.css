@@ -579,6 +579,8 @@
 @keyframes questPulse{0%,100%{box-shadow:0 0 0 transparent}50%{box-shadow:0 0 12px rgba(200,150,30,.4)}}
 @keyframes classPulse{0%,100%{box-shadow:0 0 0 transparent;border-color:#3a2810}50%{box-shadow:0 0 10px rgba(200,150,30,.55);border-color:#c8961e}}
 .class-btn-ready{animation:classPulse 2s ease-in-out infinite!important;color:#e0a830!important}
+@keyframes tutSpotPulse{0%,100%{box-shadow:0 0 0 9999px rgba(0,0,0,.78),0 0 0 2px #c8961e44}50%{box-shadow:0 0 0 9999px rgba(0,0,0,.82),0 0 0 3px #c8961eaa}}
+.tutorial-spotlight{animation:tutSpotPulse 2s ease-in-out infinite}
 .quest-notify{
   position:fixed;top:70px;right:16px;z-index:200;
   background:linear-gradient(135deg,#2a1e08,#1a1208);
