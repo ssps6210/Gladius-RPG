@@ -452,7 +452,9 @@ export default function GameApp() {
                   isEmpty={inventoryItems.length === 0}
                   inventoryItems={inventoryItems}
                   onSortInventory={sortInventory}
-                  onSellJunk={() => sellJunk("normal")}
+                  onSellJunk={() => sellJunk(sellThreshold)}
+                  sellThreshold={sellThreshold}
+                  onSellThresholdChange={setSellThreshold}
                 />
               )}
             </div>

@@ -31,6 +31,7 @@ export function SellThresholdControl({ value, onChange, onSell }: SellThresholdC
         <option value="magic">{L("🟢 魔法以下", "🟢 Magic & below")}</option>
         <option value="rare">{L("🔵 稀有以下", "🔵 Rare & below")}</option>
         <option value="legendary">{L("🟣 傳說以下", "🟣 Legendary & below")}</option>
+        <option value="mythic">{L("🔴 神話以下", "🔴 Mythic & below")}</option>
       </select>
       <button className="btn btd" style={{ fontSize: 10, padding: "7px 14px" }} onClick={onSell}>{t("shopSellAll")}</button>
     </div>

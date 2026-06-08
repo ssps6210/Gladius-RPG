@@ -3,10 +3,13 @@ import { useState } from "react";
 import { WEAPON_CATEGORIES } from "../../game/data/weaponCategories";
 import { getRarity } from "../../game/systems";
 import { useLanguage } from "../../game/i18n/LanguageContext";
+import { SellThresholdControl } from "../shop/SellThresholdControl";
 
 import { AffixLines } from "../../components/AffixLines";
 
 type GameState = ReturnType<typeof import("../../game/useGameState").useGameState>;
+
+type ItemRarity = "normal" | "magic" | "rare" | "legendary" | "mythic";
 
 type InventoryTabProps = {
   inventoryCount: number;
@@ -15,6 +18,8 @@ type InventoryTabProps = {
   inventoryItems: GameState["inventoryItems"];
   onSortInventory: GameState["sortInventory"];
   onSellJunk: () => void;
+  sellThreshold: ItemRarity;
+  onSellThresholdChange: (v: ItemRarity) => void;
 };
 
 function StatDiff({ label, newVal, oldVal }: { label: string; newVal: number; oldVal: number }) {
@@ -67,6 +72,8 @@ export function InventoryTab({
   inventoryItems,
   onSortInventory,
   onSellJunk,
+  sellThreshold,
+  onSellThresholdChange,
 }: InventoryTabProps) {
   const { t, tr, L } = useLanguage();
   const [hoveredUid, setHoveredUid] = useState<string | null>(null);
@@ -87,7 +94,7 @@ export function InventoryTab({
           <span style={{ color: "#6a5030", fontSize: 13 }}>{inventoryCount}{t("invCount")}</span>
         </div>
         <button className="btn btm" style={{ fontSize: 10, padding: "5px 10px" }} onClick={onSortInventory}>{t("invSort")}</button>
-        <button className="btn btd" style={{ fontSize: 10, padding: "5px 10px" }} onClick={onSellJunk}>{L("🗑 賣普通品", "🗑 Sell junk")}</button>
+        <SellThresholdControl value={sellThreshold} onChange={onSellThresholdChange} onSell={onSellJunk} />
       </div>
       <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 12 }}>
         {inventoryFilterOptions.map((filter) => (
