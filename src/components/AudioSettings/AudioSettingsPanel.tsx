@@ -94,9 +94,6 @@ export function AudioSettingsButton() {
             </span>
             <ToggleSwitch on={settings.bgmEnabled} onToggle={toggleBgm} />
           </div>
-          <div style={{ fontSize: 9, color: "#4a3820", marginTop: 4, fontStyle: "italic", fontFamily: "'Crimson Text', serif" }}>
-            {L("（BGM 即將推出）", "(BGM coming soon)")}
-          </div>
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 import "./game.css";
+import { useEffect } from "react";
 
 import { HpBar } from "../components/HpBar";
 import { AudioSettingsButton } from "../components/AudioSettings/AudioSettingsPanel";
@@ -21,11 +22,18 @@ import { useLanguage } from "./i18n/LanguageContext";
 import { useGameState } from "./useGameState";
 import { useTutorial } from "./hooks/useTutorial";
 import { TutorialOverlay } from "../components/Tutorial/TutorialOverlay";
+import { startBgm } from "./audio";
 
 export default function GameApp() {
   const { t, tr, L, toggleLang } = useLanguage();
   const { tutorialStep, advanceTutorial, skipTutorial } = useTutorial();
   const state = useGameState();
+
+  useEffect(() => {
+    const handler = () => { startBgm(); document.removeEventListener("pointerdown", handler); };
+    document.addEventListener("pointerdown", handler);
+    return () => document.removeEventListener("pointerdown", handler);
+  }, []);
   const {
     acceptTavernQuestAction,
     abandonTavernQuestAction,

@@ -23,8 +23,12 @@ function _save() {
 
 export function getAudioSettings(): Readonly<AudioSettings> { return _settings; }
 export function setSeEnabled(v: boolean)    { _settings = { ..._settings, seEnabled: v };                             _save(); }
-export function setBgmEnabled(v: boolean)   { _settings = { ..._settings, bgmEnabled: v };                            _save(); }
-export function setMasterVolume(v: number)  { _settings = { ..._settings, masterVolume: Math.max(0, Math.min(1, v)) }; _save(); }
+export function setBgmEnabled(v: boolean)   { _settings = { ..._settings, bgmEnabled: v };                            _save(); syncBgm(); }
+export function setMasterVolume(v: number)  {
+  _settings = { ..._settings, masterVolume: Math.max(0, Math.min(1, v)) };
+  _save();
+  if (_bgmGain) _bgmGain.gain.value = BGM_VOL * _settings.masterVolume;
+}
 
 // ── AudioContext + buffer caches ─────────────────────────────────────────
 let ctx: AudioContext | null = null;
@@ -93,6 +97,39 @@ async function play(url: string, vol: number) {
   if (!_settings.seEnabled) return;
   const buf = await loadBuf(url);
   if (buf) playBuf(buf, vol * _settings.masterVolume);
+}
+
+// ── BGM ───────────────────────────────────────────────────────────────────
+const BGM_URL = "./sounds/bgm.mp3";
+const BGM_VOL = 0.32; // quieter than SFX
+
+let _bgmSource: AudioBufferSourceNode | null = null;
+let _bgmGain: GainNode | null = null;
+
+export async function startBgm() {
+  if (!_settings.bgmEnabled || _bgmSource) return;
+  const ac = getCtx();
+  if (!ac) return;
+  const buf = await loadBuf(BGM_URL);
+  if (!buf || _bgmSource) return; // guard re-entry after await
+  _bgmGain = ac.createGain();
+  _bgmGain.gain.value = BGM_VOL * _settings.masterVolume;
+  _bgmGain.connect(ac.destination);
+  _bgmSource = ac.createBufferSource();
+  _bgmSource.buffer = buf;
+  _bgmSource.loop = true;
+  _bgmSource.connect(_bgmGain);
+  _bgmSource.onended = () => { _bgmSource = null; _bgmGain = null; };
+  _bgmSource.start();
+}
+
+export function stopBgm() {
+  if (_bgmSource) { try { _bgmSource.stop(); } catch { /* ignore */ } _bgmSource = null; }
+  _bgmGain = null;
+}
+
+export function syncBgm() {
+  if (_settings.bgmEnabled) { startBgm(); } else { stopBgm(); }
 }
 
 // Prefetch raw audio bytes eagerly so first-play has no network delay
