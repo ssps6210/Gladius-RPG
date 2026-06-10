@@ -104,8 +104,12 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
   const [classModalOpen, setClassModalOpen] = useState(false);
   const [enhanceAnim, setEnhanceAnim] = useState<string | null>(null);
   const [arenaOpponents, setArenaOpponents] = useState<GameArenaOpponent[]>([]);
-  const [dungeonInjuredUntil, setDungeonInjuredUntil] = useState(0);
-  const [arenaInjuredUntil, setArenaInjuredUntil] = useState(0);
+  const [dungeonInjuredUntil, setDungeonInjuredUntil] = useState(
+    () => (initialSave.player as any).dungeonInjuredUntil ?? 0,
+  );
+  const [arenaInjuredUntil, setArenaInjuredUntil] = useState(
+    () => (initialSave.player as any).arenaInjuredUntil ?? 0,
+  );
   const [arenaRefreshes, setArenaRefreshes] = useState(5);
   const [arenaLastDate, setArenaLastDate] = useState("");
   const [questState, setQuestState] = useState<GameQuestState>(() => initQuestState());
@@ -115,11 +119,27 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
     progress: { ...(((initialSave.player as GamePlayer).monsterKills as Record<string, number>) || {}) },
   }));
 
+  const buildSave = useCallback(() => ({
+    player: { ...player, dungeonInjuredUntil, arenaInjuredUntil },
+    inventory,
+  }), [arenaInjuredUntil, dungeonInjuredUntil, inventory, player]);
+
   const save = useCallback(() => {
-    saveGameState({ player, inventory }, slot);
+    saveGameState(buildSave(), slot);
     setSaveMsg(t("savedMsg"));
     setTimeout(() => setSaveMsg(""), 2000);
-  }, [inventory, player, slot]);
+  }, [buildSave, slot]);
+
+  const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (autoSaveTimeoutRef.current) clearTimeout(autoSaveTimeoutRef.current);
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      saveGameState(buildSave(), slot);
+    }, 1500);
+    return () => {
+      if (autoSaveTimeoutRef.current) clearTimeout(autoSaveTimeoutRef.current);
+    };
+  }, [buildSave, slot]);
 
   const reset = () => {
     if (!confirm(t("confirmReset"))) return;

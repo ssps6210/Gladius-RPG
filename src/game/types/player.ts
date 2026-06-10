@@ -32,5 +32,7 @@ export type RuntimePlayer = {
   highestLevel: number;
   jobClass: string;
   saveVersion: number;
+  dungeonInjuredUntil: number;
+  arenaInjuredUntil: number;
   [key: string]: unknown;
 };

@@ -51,6 +51,8 @@ export function createInitialPlayer(): RuntimePlayer {
     highestLevel: 1,
     jobClass: "",
     saveVersion: CURRENT_SAVE_VERSION,
+    dungeonInjuredUntil: 0,
+    arenaInjuredUntil: 0,
   };
 }
 
