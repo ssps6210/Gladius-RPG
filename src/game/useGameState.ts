@@ -882,7 +882,7 @@ export function useGameState() {
         np = lvUp(np, r.value, 0, log);
       }
       if (r.type === "item") {
-        const d = genLoot(np.level, r.rarity === "mythic" ? 0.6 : r.rarity === "legendary" ? 0.4 : r.rarity === "rare" ? 0.2 : 0.1);
+        const d = genLoot(np.level, 0.8, null, r.rarity);
         drops.push(d);
       }
       if (r.type === "weapon") {
