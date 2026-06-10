@@ -60,13 +60,8 @@ export function DungeonTab({
           <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: "#e05050", marginBottom: 6 }}>
             ⚔ {L("你因落敗而受傷，無法出戰", "You are wounded from defeat and cannot fight")}
           </div>
-          <div style={{ fontSize: 11, color: "#7a3030", marginBottom: 10 }}>
-            {L("傷勢尚未痊癒，需等待恢復或花費金幣立即治療", "Still recovering — wait or pay to heal now")}
-          </div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" as const }}>
-            <button className="btn btm" onClick={onHealFull}>
-              💊 {L(`立即恢復（${tavernRestCost} 🪙）`, `Heal Now (${tavernRestCost} 🪙)`)}
-            </button>
+          <div style={{ fontSize: 11, color: "#7a3030" }}>
+            {L("傷勢尚未痊癒，需等待恢復", "Still recovering — rest and wait")}
           </div>
         </div>
       )}
