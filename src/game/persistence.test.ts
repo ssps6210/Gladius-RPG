@@ -69,7 +69,7 @@ describe("migrateGameState", () => {
       ...INITIAL_EQUIPMENT,
       weapon: { uid: "blade-1", name: "短劍" },
     });
-    expect(save.inventory).toEqual([{ uid: "loot-1", name: "戰利品" }]);
+    expect(save.inventory).toEqual([expect.objectContaining({ uid: "loot-1", name: "戰利品" })]);
   });
 
   it("falls back safely when provided payloads are malformed", () => {
@@ -189,7 +189,7 @@ describe("loadGameState", () => {
       ...INITIAL_EQUIPMENT,
       weapon: { uid: "blade-1", name: "短劍" },
     });
-    expect(save.inventory).toEqual([{ uid: "loot-1", name: "戰利品" }]);
+    expect(save.inventory).toEqual([expect.objectContaining({ uid: "loot-1", name: "戰利品" })]);
   });
 
   it("falls back safely when stored payloads are malformed", () => {

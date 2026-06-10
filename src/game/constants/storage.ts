@@ -13,6 +13,8 @@ export function getSlotKeys(slot: SaveSlot) {
   return { player: `g_pl_${slot}`, inventory: `g_inv_${slot}` } as const;
 }
 
+export const CURRENT_SAVE_VERSION = 1;
+
 export function createInitialEquipment(): RuntimeEquipment {
   return Object.fromEntries(
     EQUIPMENT_SLOT_IDS.map((slot) => [slot, null] as const),
@@ -48,6 +50,7 @@ export function createInitialPlayer(): RuntimePlayer {
     monsterKills: {},
     highestLevel: 1,
     jobClass: "",
+    saveVersion: CURRENT_SAVE_VERSION,
   };
 }
 

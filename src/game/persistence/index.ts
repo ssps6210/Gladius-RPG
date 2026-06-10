@@ -1,6 +1,7 @@
 import {
   createInitialEquipment,
   createInitialPlayer,
+  CURRENT_SAVE_VERSION,
   LEGACY_KEYS,
   getSlotKeys,
   type SaveSlot,
@@ -70,6 +71,34 @@ function mergeMonsterKills(monsterKills: unknown): Record<string, number> {
   return merged;
 }
 
+/**
+ * Handles field renames across save versions.
+ * Add a new block here whenever a player field is renamed or restructured.
+ */
+function migratePlayerFields(raw: Record<string, unknown>): Record<string, unknown> {
+  const p = { ...raw };
+  const v = typeof p.saveVersion === "number" ? p.saveVersion : 0;
+
+  // v0 → v1: no field renames yet; just stamp the version
+  if (v < 1) {
+    // example of future use:
+    // if ("atk_trained" in p && !("trainedAtk" in p)) { p.trainedAtk = p.atk_trained; delete p.atk_trained; }
+  }
+
+  p.saveVersion = CURRENT_SAVE_VERSION;
+  return p;
+}
+
+/** Fill in safe defaults for any item fields that older saves may be missing. */
+function sanitizeItem(raw: Record<string, unknown>): RuntimeItem {
+  return {
+    enhLv: 0,
+    specials: [],
+    affixes: [],
+    ...raw,
+  } as RuntimeItem;
+}
+
 function mergePlayer(player: unknown): RuntimePlayer {
   const initialPlayer = createInitialPlayer();
 
@@ -77,13 +106,15 @@ function mergePlayer(player: unknown): RuntimePlayer {
     return initialPlayer;
   }
 
+  const migrated = migratePlayerFields(player);
+
   const mergedPlayer: RuntimePlayer = {
     ...initialPlayer,
-    equipment: mergeEquipment(player.equipment),
-    monsterKills: mergeMonsterKills(player.monsterKills),
+    equipment: mergeEquipment(migrated.equipment),
+    monsterKills: mergeMonsterKills(migrated.monsterKills),
   };
 
-  for (const [key, value] of Object.entries(player)) {
+  for (const [key, value] of Object.entries(migrated)) {
     if (key === "equipment" || key === "monsterKills") {
       continue;
     }
@@ -115,7 +146,9 @@ function parseInventory(storage: Storage | null, keys: { inventory: string }): R
   if (!storage) return [];
   try {
     const parsed = JSON.parse(storage.getItem(keys.inventory) ?? "[]");
-    return Array.isArray(parsed) ? parsed.filter((entry): entry is RuntimeItem => isRecord(entry)) : [];
+    return Array.isArray(parsed)
+      ? parsed.filter(isRecord).map(sanitizeItem)
+      : [];
   } catch {
     return [];
   }

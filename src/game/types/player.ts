@@ -31,5 +31,6 @@ export type RuntimePlayer = {
   monsterKills: Record<string, number>;
   highestLevel: number;
   jobClass: string;
+  saveVersion: number;
   [key: string]: unknown;
 };
