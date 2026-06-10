@@ -28,6 +28,7 @@ const BGM_FOR_TAB: Record<string, string> = {
   tavern: "./sounds/bgm_tavern.mp3",
   shop:   "./sounds/bgm_shop.mp3",
   arena:  "./sounds/bgm_arena.mp3",
+  train:  "./sounds/bgm_blacksmith.mp3",
 };
 
 export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./constants/storage").SaveSlot; onExitToMenu?: () => void }) {
@@ -98,6 +99,7 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
     openClassModal,
     closeClassModal,
     classModalOpen,
+    goToTavern,
     startArenaBattle,
     tAtk,
     tDef,
@@ -389,6 +391,12 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
                   selectedScrolls={selectedScrolls}
                   mercDungeonCards={mercDungeonCards}
                   onAddFreeMercScroll={addFreeMercScroll}
+                  playerHp={player.hp}
+                  playerMaxHp={tMhp}
+                  dungeonInjuredUntil={recovery.dungeonInjuredUntil}
+                  tavernRestCost={tavernRestCost}
+                  onGoToTavern={goToTavern}
+                  onHealFull={restAtInn}
                 />
               )}
 

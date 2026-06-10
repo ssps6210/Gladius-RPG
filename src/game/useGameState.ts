@@ -1020,6 +1020,7 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
 
   const openClassModal = () => setClassModalOpen(true);
   const closeClassModal = () => setClassModalOpen(false);
+  const goToTavern = () => setTab("tavern");
 
   const skipReplay = () => {
     setReplay((r) => (r ? { ...r, cursor: r.lines.length } : null));
@@ -1350,6 +1351,7 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
     openClassModal,
     closeClassModal,
     classModalOpen,
+    goToTavern,
     startArenaBattle,
     startBattle,
     startExpedition,

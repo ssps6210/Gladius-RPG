@@ -59,9 +59,9 @@ export function TavernPage({
       <div style={{ display: "grid", gap: 14 }}>
         {board.map((quest) => {
           const acceptedState = accepted[quest.id];
-          const isAccepted = !!acceptedState?.accepted;
+          const isAccepted = !!acceptedState?.accepted && !acceptedState?.concluded;
           const currentKills = progress[quest.targetMonster] ?? 0;
-          const baseKills = acceptedState?.baseKills ?? 0;
+          const baseKills = isAccepted ? (acceptedState?.baseKills ?? 0) : 0;
           const doneCount = Math.max(0, currentKills - baseKills);
           const done = doneCount >= quest.reqCount;
           const isActive = activeQuestId === quest.id;
