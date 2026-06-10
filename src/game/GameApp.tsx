@@ -22,7 +22,13 @@ import { useLanguage } from "./i18n/LanguageContext";
 import { useGameState } from "./useGameState";
 import { useTutorial } from "./hooks/useTutorial";
 import { TutorialOverlay } from "../components/Tutorial/TutorialOverlay";
-import { startBgm } from "./audio";
+import { startBgm, switchBgm } from "./audio";
+
+const BGM_FOR_TAB: Record<string, string> = {
+  tavern:  "./sounds/bgm_tavern.mp3",
+  shop:    "./sounds/bgm_shop.mp3",
+  battle:  "./sounds/bgm_battle.mp3",
+};
 
 export default function GameApp() {
   const { t, tr, L, toggleLang } = useLanguage();
@@ -34,6 +40,10 @@ export default function GameApp() {
     document.addEventListener("pointerdown", handler);
     return () => document.removeEventListener("pointerdown", handler);
   }, []);
+
+  useEffect(() => {
+    switchBgm(BGM_FOR_TAB[tab] ?? "./sounds/bgm.mp3");
+  }, [tab]);
   const {
     acceptTavernQuestAction,
     abandonTavernQuestAction,

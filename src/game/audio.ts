@@ -100,18 +100,17 @@ async function play(url: string, vol: number) {
 }
 
 // ── BGM ───────────────────────────────────────────────────────────────────
-const BGM_URL = "./sounds/bgm.mp3";
-const BGM_VOL = 0.32; // quieter than SFX
+const BGM_VOL = 0.32;
 
 let _bgmSource: AudioBufferSourceNode | null = null;
 let _bgmGain: GainNode | null = null;
+let _currentBgmUrl: string | null = null;
 
-export async function startBgm() {
-  if (!_settings.bgmEnabled || _bgmSource) return;
+async function _playBgmUrl(url: string) {
   const ac = getCtx();
   if (!ac) return;
-  const buf = await loadBuf(BGM_URL);
-  if (!buf || _bgmSource) return; // guard re-entry after await
+  const buf = await loadBuf(url);
+  if (!buf || _currentBgmUrl !== url) return; // guard: url changed while loading
   _bgmGain = ac.createGain();
   _bgmGain.gain.value = BGM_VOL * _settings.masterVolume;
   _bgmGain.connect(ac.destination);
@@ -128,8 +127,19 @@ export function stopBgm() {
   _bgmGain = null;
 }
 
+export async function switchBgm(url: string) {
+  if (_currentBgmUrl === url && _bgmSource) return;
+  stopBgm();
+  _currentBgmUrl = url;
+  if (!_settings.bgmEnabled) return;
+  await _playBgmUrl(url);
+}
+
+export function startBgm() { switchBgm("./sounds/bgm.mp3"); }
+
 export function syncBgm() {
-  if (_settings.bgmEnabled) { startBgm(); } else { stopBgm(); }
+  if (_settings.bgmEnabled) { if (_currentBgmUrl) switchBgm(_currentBgmUrl); else startBgm(); }
+  else { stopBgm(); }
 }
 
 // Prefetch raw audio bytes eagerly so first-play has no network delay
