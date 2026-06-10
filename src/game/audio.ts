@@ -114,17 +114,22 @@ async function _playBgmUrl(url: string) {
   _bgmGain = ac.createGain();
   _bgmGain.gain.value = BGM_VOL * _settings.masterVolume;
   _bgmGain.connect(ac.destination);
-  _bgmSource = ac.createBufferSource();
-  _bgmSource.buffer = buf;
-  _bgmSource.loop = true;
-  _bgmSource.connect(_bgmGain);
-  _bgmSource.onended = () => { _bgmSource = null; _bgmGain = null; };
-  _bgmSource.start();
+  const src = ac.createBufferSource();
+  _bgmSource = src;
+  src.buffer = buf;
+  src.loop = true;
+  src.connect(_bgmGain);
+  // Only clear if this specific source is still the active one.
+  // Without this guard, a stopped source's onended can null out a newer source.
+  src.onended = () => { if (_bgmSource === src) { _bgmSource = null; _bgmGain = null; } };
+  src.start();
 }
 
 export function stopBgm() {
-  if (_bgmSource) { try { _bgmSource.stop(); } catch { /* ignore */ } _bgmSource = null; }
+  const src = _bgmSource;
+  _bgmSource = null; // clear first so onended guard fires false for this src
   _bgmGain = null;
+  if (src) { try { src.stop(); } catch { /* ignore */ } }
 }
 
 export async function switchBgm(url: string) {
