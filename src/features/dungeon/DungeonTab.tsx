@@ -36,8 +36,6 @@ export function DungeonTab({
   const { t, tr, L } = useLanguage();
   const now = Date.now();
   const isInjured = now < dungeonInjuredUntil;
-  const isWounded = playerHp > 0 && playerHp < playerMaxHp;
-  const showPanel = isInjured || isWounded;
   return (
     <div>
       <div style={{
@@ -50,7 +48,7 @@ export function DungeonTab({
           🗺️ {t("tabDungeon")}
         </div>
       </div>
-      {showPanel && (
+      {isInjured && (
         <div style={{
           background: "linear-gradient(160deg,#2a0e0e,#1a0808)",
           border: "1px solid #6a1a1a",
@@ -62,24 +60,10 @@ export function DungeonTab({
           <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: "#e05050", marginBottom: 6 }}>
             ⚔ {L("你因落敗而受傷，無法出戰", "You are wounded from defeat and cannot fight")}
           </div>
-          {isInjured && (
-            <div style={{ fontSize: 11, color: "#7a3030", marginBottom: 10 }}>
-              {L(
-                `傷勢尚未痊癒，需等待或前往酒館治療`,
-                `You are still recovering — rest at the inn or wait`,
-              )}
-            </div>
-          )}
-          {!isInjured && isWounded && (
-            <div style={{ fontSize: 11, color: "#7a3030", marginBottom: 10 }}>
-              {L(`HP ${playerHp} / ${playerMaxHp}`, `HP ${playerHp} / ${playerMaxHp}`)}
-              {" "}{L("— 未滿血，部分遭遇可能危險", "— not at full HP, some encounters may be risky")}
-            </div>
-          )}
+          <div style={{ fontSize: 11, color: "#7a3030", marginBottom: 10 }}>
+            {L("傷勢尚未痊癒，需等待恢復或花費金幣立即治療", "Still recovering — wait or pay to heal now")}
+          </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" as const }}>
-            <button className="btn btp" onClick={onGoToTavern}>
-              🍺 {L("前往酒館治療", "Go to Inn")}
-            </button>
             <button className="btn btm" onClick={onHealFull}>
               💊 {L(`立即恢復（${tavernRestCost} 🪙）`, `Heal Now (${tavernRestCost} 🪙)`)}
             </button>
