@@ -25,9 +25,8 @@ import { TutorialOverlay } from "../components/Tutorial/TutorialOverlay";
 import { startBgm, switchBgm } from "./audio";
 
 const BGM_FOR_TAB: Record<string, string> = {
-  tavern:  "./sounds/bgm_tavern.mp3",
-  shop:    "./sounds/bgm_shop.mp3",
-  battle:  "./sounds/bgm_battle.mp3",
+  tavern: "./sounds/bgm_tavern.mp3",
+  shop:   "./sounds/bgm_shop.mp3",
 };
 
 export default function GameApp() {
@@ -42,8 +41,13 @@ export default function GameApp() {
   }, []);
 
   useEffect(() => {
-    switchBgm(BGM_FOR_TAB[tab] ?? "./sounds/bgm.mp3");
-  }, [tab]);
+    if (tab === "battle") {
+      const isBoss = !!(replay as any)?.dungeon?.boss;
+      switchBgm(isBoss ? "./sounds/bgm_boss.mp3" : "./sounds/bgm_battle.mp3");
+    } else {
+      switchBgm(BGM_FOR_TAB[tab] ?? "./sounds/bgm.mp3");
+    }
+  }, [tab, replay]);
   const {
     acceptTavernQuestAction,
     abandonTavernQuestAction,
