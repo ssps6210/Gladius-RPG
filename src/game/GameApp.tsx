@@ -391,12 +391,7 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
                   selectedScrolls={selectedScrolls}
                   mercDungeonCards={mercDungeonCards}
                   onAddFreeMercScroll={addFreeMercScroll}
-                  playerHp={player.hp}
-                  playerMaxHp={tMhp}
                   dungeonInjuredUntil={recovery.dungeonInjuredUntil}
-                  tavernRestCost={tavernRestCost}
-                  onGoToTavern={goToTavern}
-                  onHealFull={restAtInn}
                 />
               )}
 
