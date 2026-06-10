@@ -34,20 +34,6 @@ export default function GameApp() {
   const { tutorialStep, advanceTutorial, skipTutorial } = useTutorial();
   const state = useGameState();
 
-  useEffect(() => {
-    const handler = () => { startBgm(); document.removeEventListener("pointerdown", handler); };
-    document.addEventListener("pointerdown", handler);
-    return () => document.removeEventListener("pointerdown", handler);
-  }, []);
-
-  useEffect(() => {
-    if (tab === "battle") {
-      const isBoss = !!(replay as any)?.dungeon?.boss;
-      switchBgm(isBoss ? "./sounds/bgm_boss.mp3" : "./sounds/bgm_battle.mp3");
-    } else {
-      switchBgm(BGM_FOR_TAB[tab] ?? "./sounds/bgm.mp3");
-    }
-  }, [tab, replay]);
   const {
     acceptTavernQuestAction,
     abandonTavernQuestAction,
@@ -130,6 +116,21 @@ export default function GameApp() {
     doSynthesize,
     toggleSynthesisUid,
   } = state;
+
+  useEffect(() => {
+    const handler = () => { startBgm(); document.removeEventListener("pointerdown", handler); };
+    document.addEventListener("pointerdown", handler);
+    return () => document.removeEventListener("pointerdown", handler);
+  }, []);
+
+  useEffect(() => {
+    if (tab === "battle") {
+      const isBoss = !!(replay as any)?.dungeon?.boss;
+      switchBgm(isBoss ? "./sounds/bgm_boss.mp3" : "./sounds/bgm_battle.mp3");
+    } else {
+      switchBgm(BGM_FOR_TAB[tab] ?? "./sounds/bgm.mp3");
+    }
+  }, [tab, replay]);
 
   return (
     <>
