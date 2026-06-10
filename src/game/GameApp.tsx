@@ -27,6 +27,7 @@ import { startBgm, switchBgm } from "./audio";
 const BGM_FOR_TAB: Record<string, string> = {
   tavern: "./sounds/bgm_tavern.mp3",
   shop:   "./sounds/bgm_shop.mp3",
+  arena:  "./sounds/bgm_arena.mp3",
 };
 
 export default function GameApp() {
