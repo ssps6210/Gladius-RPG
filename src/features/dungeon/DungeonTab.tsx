@@ -10,12 +10,12 @@ type DungeonTabProps = {
   selectedScrolls: GameState["selectedScrolls"];
   mercDungeonCards: GameState["mercDungeonCards"];
   onAddFreeMercScroll: GameState["addFreeMercScroll"];
-  playerHp: number;
-  playerMaxHp: number;
-  dungeonInjuredUntil: number;
-  tavernRestCost: number;
-  onGoToTavern: () => void;
-  onHealFull: () => void;
+  playerHp?: number;
+  playerMaxHp?: number;
+  dungeonInjuredUntil?: number;
+  tavernRestCost?: number;
+  onGoToTavern?: () => void;
+  onHealFull?: () => void;
 };
 
 export function DungeonTab({
@@ -26,17 +26,17 @@ export function DungeonTab({
   selectedScrolls,
   mercDungeonCards,
   onAddFreeMercScroll,
-  playerHp,
-  playerMaxHp,
-  dungeonInjuredUntil,
-  tavernRestCost,
+  playerHp = 0,
+  playerMaxHp = 0,
+  dungeonInjuredUntil = 0,
+  tavernRestCost = 0,
   onGoToTavern,
   onHealFull,
 }: DungeonTabProps) {
   const { t, tr, L } = useLanguage();
   const now = Date.now();
   const isInjured = now < dungeonInjuredUntil;
-  const isWounded = playerHp < playerMaxHp;
+  const isWounded = playerHp > 0 && playerHp < playerMaxHp;
   const showPanel = isInjured || isWounded;
   return (
     <div>

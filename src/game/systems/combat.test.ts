@@ -252,8 +252,8 @@ describe("combat system", () => {
     );
 
     expect(result.won).toBe(true);
-    expect(result.finalPlayer.exp).toBe(295);
-    expect(result.finalPlayer.gold).toBe(286);
+    expect(result.finalPlayer.exp).toBe(303);
+    expect(result.finalPlayer.gold).toBe(290);
     expect(result.drops).toEqual([
       { name: "契約", rarityLabel: "稀有" },
       { name: "素材", rarityLabel: "普通" },
@@ -263,7 +263,7 @@ describe("combat system", () => {
         expect.objectContaining({ enemyId: "wolf", count: 1 }),
       ]),
     );
-    expect(result.log.map((entry) => entry.txt)).toContain("💚治癒師回復8HP");
+    expect(result.log.map((entry) => entry.txt)).toContain("💚治癒師回復9HP");
   });
 
   it("keeps regular mercenary-wave player-target attacks on legacy-simple behavior", () => {
@@ -300,7 +300,7 @@ describe("combat system", () => {
       },
     );
 
-    expect(result.log.map((entry) => entry.txt)).toContain("野豬→你 10傷害");
+    expect(result.log.map((entry) => entry.txt)).toContain("野豬→你 12傷害");
     expect(result.log.map((entry) => entry.txt)).not.toContain("💥 🐗野豬 憤怒衝鋒！");
   });
 
@@ -379,9 +379,9 @@ describe("combat system", () => {
     );
 
     const logLines = result.log.map((entry) => entry.txt);
-    expect(logLines).toContain("💚治癒師回復8HP");
+    expect(logLines).toContain("💚治癒師回復9HP");
     expect(logLines).toContain("🔥 燒傷2");
-    expect(logLines.indexOf("💚治癒師回復8HP")).toBeLessThan(logLines.indexOf("🔥 燒傷2"));
+    expect(logLines.indexOf("💚治癒師回復9HP")).toBeLessThan(logLines.indexOf("🔥 燒傷2"));
   });
 });
 

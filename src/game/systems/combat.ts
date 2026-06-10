@@ -818,7 +818,33 @@ export function simulateMercRun(dungeonId: any, initPlayer: any, mercs: any, dep
   const pMhp = cMhp(np);
   const specials = gSpec(np);
   const wc = getWeaponCat(np);
-  const nm = mercs.map((merc: any) => ({ ...merc, curHp: merc.hp, alive: true }));
+  // Scale merc stats with effective dungeon level + rarity so they stay relevant
+  const effectiveLevel = Math.max(1, np.level + (dungeon.lvBonus || 0));
+  const RARITY_MULT: Record<string, number> = {
+    normal: 1.0, magic: 1.2, rare: 1.5, legendary: 2.0, mythic: 2.8,
+  };
+  const nm = mercs.map((merc: any) => {
+    const rarityKey = merc.rarity || merc.scrollGrade || merc.grade || "normal";
+    const rMult = RARITY_MULT[rarityKey] ?? 1.0;
+    const eliteSpecial = (merc.specials || []).find((s: any) => s.type === "all");
+    const firstSpecial = (merc.specials || []).find((s: any) => s.type === "first");
+    const eMult = eliteSpecial ? (1 + (eliteSpecial.val as number)) : 1.0;
+    const fMult = firstSpecial ? (1 + (firstSpecial.val as number)) : 1.0;
+    const lvAtkBonus  = Math.floor(effectiveLevel * 0.8 * rMult * eMult);
+    const lvDefBonus  = Math.floor(effectiveLevel * 0.4 * rMult * eMult);
+    const lvHpBonus   = Math.floor(effectiveLevel * 4.0 * rMult * eMult);
+    const lvHealBonus = Math.floor(effectiveLevel * 0.2 * rMult * eMult);
+    const scaledHp = merc.hp + lvHpBonus;
+    return {
+      ...merc,
+      attack:  Math.floor((merc.attack  + lvAtkBonus) * fMult),
+      defense:  merc.defense + lvDefBonus,
+      heal:     merc.heal ? merc.heal + lvHealBonus : 0,
+      curHp:    scaledHp,
+      maxHp:    scaledHp,
+      alive:    true,
+    };
+  });
   const log: any[] = [];
   const drops: any[] = [];
   const kills: KillRecord[] = [];
@@ -844,11 +870,12 @@ export function simulateMercRun(dungeonId: any, initPlayer: any, mercs: any, dep
       }
       const monsterData = MONSTERS[monsterKey];
       let enemy: AnyRecord;
+      const waveMult = (wave.mult || 1) * 1.15;
       if (monsterData) {
-        enemy = buildEnemy(monsterKey, np.level + dungeon.lvBonus, wave.mult || 1);
+        enemy = buildEnemy(monsterKey, np.level + dungeon.lvBonus, waveMult);
       } else {
         const fallbackKey = Object.keys(MONSTERS)[Math.floor(Math.random() * 6)];
-        enemy = buildEnemy(fallbackKey, np.level + dungeon.lvBonus, wave.mult || 1);
+        enemy = buildEnemy(fallbackKey, np.level + dungeon.lvBonus, waveMult);
         enemy.name = monsterKey;
       }
       log.push({ txt: L(`${enemy.icon}${enemy.name} 出現！HP:${enemy.maxHp} 攻:${enemy.attack} ⚡${enemy.traitDesc}`, `${enemy.icon}${LF(enemy, "name")} appears! HP:${enemy.maxHp} ATK:${enemy.attack} ⚡${LF(enemy, "traitDesc")}`), type: "info" });
@@ -860,7 +887,8 @@ export function simulateMercRun(dungeonId: any, initPlayer: any, mercs: any, dep
             if (!merc.alive || currentEnemy.hp <= 0) {
               continue;
             }
-            const mercDmg = Math.max(1, merc.attack - currentEnemy.defense + Math.floor(Math.random() * 3));
+            const rawMercDmg = Math.floor(merc.attack - currentEnemy.defense * 0.5 + Math.floor(Math.random() * 4));
+            const mercDmg = Math.max(Math.ceil(merc.attack / 8), rawMercDmg);
             currentEnemy.hp = Math.max(0, currentEnemy.hp - mercDmg);
             damageDealt += mercDmg;
             log.push({ txt: `${merc.icon}${merc.name}→${currentEnemy.name} ${mercDmg}`, type: "merc" });

@@ -225,7 +225,7 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
     waveBadges: dungeon.waves.map((wave: any, wi: number) => ({
       enemies: wave.monsters.map((key: any) => (MONSTERS[key] ? MONSTERS[key].icon : "?")).join(""),
       key: wave.label,
-      label: L(wave.label.replace("第", "").replace("波", "") + "波", `W${wi + 1}`),
+      label: L(wave.label.split(" — ")[1]?.trim() ?? `第${wi + 1}波`, `W${wi + 1}`),
     })),
   }));
 
