@@ -1,9 +1,14 @@
 import { render, screen } from "@testing-library/react";
-import { expect, it, vi } from "vitest";
+import { expect, it, vi, beforeEach } from "vitest";
 
 vi.mock("./game/GameApp", () => ({
   default: () => <div>game-shell</div>,
 }));
+
+// Pre-select slot 1 so App skips SaveSlotSelect and renders GameApp + Footer
+beforeEach(() => {
+  localStorage.setItem("gladius_slot", "1");
+});
 
 import App from "./App";
 

@@ -68,13 +68,13 @@ import type {
 
 type SellThreshold = "normal" | "magic" | "rare" | "legendary" | "mythic";
 
-export function useGameState() {
+export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
   const { lang, t, L, tr } = useLanguage();
   useEffect(() => {
     setCombatLang(lang);
   }, [lang]);
 
-  const initialSave = loadGameState();
+  const initialSave = loadGameState(slot);
   const [player, setPlayer] = useState<GamePlayer>(() => initialSave.player as GamePlayer);
 
   const [inventory, setInventory] = useState<GameItem[]>(() => initialSave.inventory as GameItem[]);
@@ -116,14 +116,14 @@ export function useGameState() {
   }));
 
   const save = useCallback(() => {
-    saveGameState({ player, inventory });
+    saveGameState({ player, inventory }, slot);
     setSaveMsg(t("savedMsg"));
     setTimeout(() => setSaveMsg(""), 2000);
-  }, [inventory, player]);
+  }, [inventory, player, slot]);
 
   const reset = () => {
     if (!confirm(t("confirmReset"))) return;
-    clearGameState();
+    clearGameState(slot);
     setPlayer({ ...INITIAL_PLAYER, equipment: { ...INITIAL_EQUIPMENT } });
     setInventory([]);
     setDungeonInjuredUntil(0);
@@ -1014,11 +1014,12 @@ export function useGameState() {
   };
 
   const chooseClass = (classId: string) => {
-    setPlayer((p) => ({ ...p, jobClass: classId }));
+    if (classId) setPlayer((p) => ({ ...p, jobClass: classId }));
     setClassModalOpen(false);
   };
 
   const openClassModal = () => setClassModalOpen(true);
+  const closeClassModal = () => setClassModalOpen(false);
 
   const skipReplay = () => {
     setReplay((r) => (r ? { ...r, cursor: r.lines.length } : null));
@@ -1347,6 +1348,7 @@ export function useGameState() {
     skipReplay,
     chooseClass,
     openClassModal,
+    closeClassModal,
     classModalOpen,
     startArenaBattle,
     startBattle,

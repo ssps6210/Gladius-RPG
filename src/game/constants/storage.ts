@@ -1,9 +1,17 @@
 import { EQUIPMENT_SLOT_IDS, type RuntimeEquipment, type RuntimePlayer } from "../types";
 
+export type SaveSlot = 1 | 2 | 3;
+export const SLOT_KEY = "gladius_slot";
+export const LEGACY_KEYS = { player: "g_pl", inventory: "g_inv" } as const;
+
 export const STORAGE_KEYS = {
   player: "g_pl",
   inventory: "g_inv",
 } as const;
+
+export function getSlotKeys(slot: SaveSlot) {
+  return { player: `g_pl_${slot}`, inventory: `g_inv_${slot}` } as const;
+}
 
 export function createInitialEquipment(): RuntimeEquipment {
   return Object.fromEntries(

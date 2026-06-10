@@ -1,18 +1,6 @@
 import { JOB_CLASSES, TIER1_CLASSES, TIER2_CLASSES, type JobClass } from "../game/data/classes";
 import { useLanguage } from "../game/i18n/LanguageContext";
 
-function getLineage(classId: string): string {
-  const cls = JOB_CLASSES[classId as keyof typeof JOB_CLASSES];
-  return cls?.prereq ?? classId;
-}
-
-function isUnlocked(cls: JobClass, playerLevel: number, currentClass: string | undefined): boolean {
-  if (cls.tier === 1) return playerLevel >= cls.reqLevel;
-  if (playerLevel < cls.reqLevel) return false;
-  const lineage = getLineage(currentClass ?? "");
-  return lineage === cls.prereq;
-}
-
 function ClassCard({
   cls, isActive, locked, onChoose, L,
 }: {
@@ -24,7 +12,6 @@ function ClassCard({
 }) {
   return (
     <button
-      key={cls.id}
       onClick={() => !locked && onChoose(cls.id)}
       style={{
         background: isActive
@@ -63,9 +50,7 @@ function ClassCard({
               {cls.icon} {L(cls.name, cls.nameEn)}
             </div>
             <div style={{ fontSize: 9, color: locked ? "#3a2818" : "#9a8060", lineHeight: 1.4, marginTop: 2 }}>
-              {locked
-                ? L(`需要先轉職為 ${JOB_CLASSES[cls.prereq!]?.name ?? cls.prereq}`, `Requires ${JOB_CLASSES[cls.prereq!]?.nameEn ?? cls.prereq} first`)
-                : L(cls.desc, cls.descEn)}
+              {L(cls.desc, cls.descEn)}
             </div>
           </div>
         </div>
@@ -76,9 +61,7 @@ function ClassCard({
             {L(cls.name, cls.nameEn)}
           </div>
           <div style={{ fontSize: 10, color: "#7a6040", lineHeight: 1.5 }}>
-            {locked
-              ? L(`需要先轉職為 ${JOB_CLASSES[cls.prereq!]?.name ?? cls.prereq}`, `Requires ${JOB_CLASSES[cls.prereq!]?.nameEn ?? cls.prereq}`)
-              : L(cls.desc, cls.descEn)}
+            {L(cls.desc, cls.descEn)}
           </div>
         </div>
       )}
@@ -89,96 +72,136 @@ function ClassCard({
 export function ClassSelectModal({
   open,
   onChoose,
+  onCancel,
   currentClass,
-  playerLevel = 30,
+  playerLevel = 1,
 }: {
   open: boolean;
   onChoose: (classId: string) => void;
+  onCancel?: () => void;
   currentClass?: string;
   playerLevel?: number;
 }) {
   const { L } = useLanguage();
   if (!open) return null;
 
-  const isTier2Eligible = playerLevel >= 70;
-  const subtitle = currentClass
-    ? L("你已有職業。選擇新職業可更換（屬性加成重新計算）", "You have a class. Select a new one to change it.")
-    : isTier2Eligible
-      ? L("Lv.70 達成！可轉職為強力的二轉職業！", "Lv.70 reached! Upgrade to a powerful Tier 2 class!")
-      : L("Lv.30 達成！請選擇你的轉職職業。", "Lv.30 reached! Choose your first class.");
+  const currentCls = JOB_CLASSES[currentClass as keyof typeof JOB_CLASSES];
+  const isTier1 = currentCls?.tier === 1;
+  const isTier2 = currentCls?.tier === 2;
 
-  return (
-    <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      zIndex: 1000, padding: 16, overflowY: "auto",
-    }}>
+  // Tier-2 holders: nothing actionable — don't show
+  if (isTier2) return null;
+
+  // Phase A: No class yet — choose Tier-1 path permanently
+  if (!currentClass || currentClass === "") {
+    return (
       <div style={{
-        background: "linear-gradient(160deg,#1a1208,#0e0a06)",
-        border: "1px solid #5a3a10", borderRadius: 8,
-        padding: 24, maxWidth: 520, width: "100%",
-        boxShadow: "0 0 40px rgba(200,120,30,0.3)",
-        maxHeight: "90vh", overflowY: "auto",
+        position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        zIndex: 1000, padding: 16, overflowY: "auto",
       }}>
-        <div style={{ fontFamily: "'Cinzel',serif", fontSize: 18, color: "#e0a830", textAlign: "center", marginBottom: 6 }}>
-          {L("⚔ 轉職系統", "⚔ Class Change")}
-        </div>
-        <div style={{ fontSize: 11, color: "#6a5028", textAlign: "center", marginBottom: 20 }}>
-          {subtitle}
-        </div>
+        <div style={{
+          background: "linear-gradient(160deg,#1a1208,#0e0a06)",
+          border: "1px solid #5a3a10", borderRadius: 8,
+          padding: 24, maxWidth: 480, width: "100%",
+          boxShadow: "0 0 40px rgba(200,120,30,0.3)",
+          maxHeight: "90vh", overflowY: "auto",
+        }}>
+          <div style={{ fontFamily: "'Cinzel',serif", fontSize: 18, color: "#e0a830", textAlign: "center", marginBottom: 6 }}>
+            {L("⚔ 選擇你的命運", "⚔ Choose Your Path")}
+          </div>
+          <div style={{ fontSize: 11, color: "#9a7030", textAlign: "center", marginBottom: 8 }}>
+            {L("Lv.30 解鎖！請選擇一轉職業。", "Lv.30 reached! Choose your Tier 1 class.")}
+          </div>
+          <div style={{
+            fontSize: 10, color: "#c84040", textAlign: "center",
+            background: "rgba(200,60,40,0.1)", border: "1px solid rgba(200,60,40,0.25)",
+            borderRadius: 4, padding: "8px 12px", marginBottom: 20,
+          }}>
+            ⚠ {L("此選擇永久鎖定！路徑一旦確認，只能沿此路晉升二轉，或重新打檔更換。", "This choice is PERMANENT. You can only advance along this lineage, or restart to change.")}
+          </div>
 
-        {/* Tier 1 */}
-        <div style={{ fontSize: 11, color: "#8a6030", fontFamily: "'Cinzel',serif", marginBottom: 8, borderBottom: "1px solid #2a1e10", paddingBottom: 4 }}>
-          {L("一轉職業 — Lv.30", "Tier 1 Classes — Lv.30")}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            {TIER1_CLASSES.map((cls) => (
+              <ClassCard
+                key={cls.id}
+                cls={cls}
+                isActive={false}
+                locked={playerLevel < cls.reqLevel}
+                onChoose={onChoose}
+                L={L}
+              />
+            ))}
+          </div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
-          {TIER1_CLASSES.map((cls) => (
-            <ClassCard
-              key={cls.id}
-              cls={cls}
-              isActive={currentClass === cls.id}
-              locked={false}
-              onChoose={onChoose}
-              L={L}
-            />
-          ))}
-        </div>
+      </div>
+    );
+  }
 
-        {/* Tier 2 */}
-        <div style={{ fontSize: 11, color: isTier2Eligible ? "#e0a830" : "#4a3820", fontFamily: "'Cinzel',serif", marginBottom: 8, borderBottom: "1px solid #2a1e10", paddingBottom: 4 }}>
-          {L("二轉職業 — Lv.70", "Tier 2 Classes — Lv.70")}
-          {!isTier2Eligible && (
-            <span style={{ fontSize: 10, color: "#4a3020", marginLeft: 8 }}>
-              {L(`（尚需 ${70 - playerLevel} 級）`, `(${70 - playerLevel} levels away)`)}
-            </span>
+  // Phase B: Has Tier-1 — can advance to matching Tier-2 (Lv.70)
+  if (isTier1) {
+    const matchingTier2 = TIER2_CLASSES.filter(c => c.prereq === currentClass);
+    const canAdvance = playerLevel >= 70;
+
+    return (
+      <div style={{
+        position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        zIndex: 1000, padding: 16, overflowY: "auto",
+      }}>
+        <div style={{
+          background: "linear-gradient(160deg,#1a1208,#0e0a06)",
+          border: "1px solid #5a3a10", borderRadius: 8,
+          padding: 24, maxWidth: 480, width: "100%",
+          boxShadow: "0 0 40px rgba(200,120,30,0.3)",
+          maxHeight: "90vh", overflowY: "auto",
+        }}>
+          <div style={{ fontFamily: "'Cinzel',serif", fontSize: 18, color: "#e0a830", textAlign: "center", marginBottom: 6 }}>
+            {L("⚔ 二轉晉升", "⚔ Tier 2 Advancement")}
+          </div>
+          <div style={{ fontSize: 11, color: "#9a7030", textAlign: "center", marginBottom: 8 }}>
+            {currentCls.icon} {L(currentCls.name, currentCls.nameEn)} →{" "}
+            {canAdvance
+              ? L("選擇晉升職業", "Choose advancement")
+              : L(`尚需 ${70 - playerLevel} 級可晉升`, `Need ${70 - playerLevel} more levels`)}
+          </div>
+          <div style={{
+            fontSize: 10, color: "#c8a040", textAlign: "center",
+            background: "rgba(200,140,40,0.08)", border: "1px solid rgba(200,140,40,0.2)",
+            borderRadius: 4, padding: "8px 12px", marginBottom: 20,
+          }}>
+            🔒 {L(`路徑已鎖定：只有此職業的晉升路線可選。`, `Path locked: only this lineage's Tier 2 options are available.`)}
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            {matchingTier2.map((cls) => (
+              <ClassCard
+                key={cls.id}
+                cls={cls}
+                isActive={false}
+                locked={!canAdvance}
+                onChoose={onChoose}
+                L={L}
+              />
+            ))}
+          </div>
+
+          {onCancel && (
+            <button
+              onClick={onCancel}
+              style={{
+                marginTop: 14, width: "100%", background: "transparent",
+                border: "1px solid #3a2810", borderRadius: 4, padding: "6px 0",
+                color: "#5a4020", fontSize: 10, cursor: "pointer",
+              }}
+            >
+              {L("取消", "Cancel")}
+            </button>
           )}
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {TIER2_CLASSES.map((cls) => (
-            <ClassCard
-              key={cls.id}
-              cls={cls}
-              isActive={currentClass === cls.id}
-              locked={!isUnlocked(cls, playerLevel, currentClass)}
-              onChoose={onChoose}
-              L={L}
-            />
-          ))}
-        </div>
-
-        {currentClass && (
-          <button
-            onClick={() => onChoose("")}
-            style={{
-              marginTop: 14, width: "100%", background: "transparent",
-              border: "1px solid #3a2810", borderRadius: 4, padding: "6px 0",
-              color: "#5a4020", fontSize: 10, cursor: "pointer",
-            }}
-          >
-            {L("取消 / 維持現有職業", "Cancel / Keep current class")}
-          </button>
-        )}
       </div>
-    </div>
-  );
+    );
+  }
+
+  return null;
 }

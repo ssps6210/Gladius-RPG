@@ -1,7 +1,9 @@
 import {
   createInitialEquipment,
   createInitialPlayer,
-  STORAGE_KEYS,
+  LEGACY_KEYS,
+  getSlotKeys,
+  type SaveSlot,
 } from "../constants/index";
 import {
   EQUIPMENT_SLOT_IDS,
@@ -100,31 +102,54 @@ function mergePlayer(player: unknown): RuntimePlayer {
   return mergedPlayer;
 }
 
-function parsePlayer(storage: Storage | null): RuntimePlayer {
-  if (!storage) {
-    return createInitialPlayer();
-  }
-
+function parsePlayer(storage: Storage | null, keys: { player: string }): RuntimePlayer {
+  if (!storage) return createInitialPlayer();
   try {
-    return mergePlayer(JSON.parse(storage.getItem(STORAGE_KEYS.player) ?? "null"));
+    return mergePlayer(JSON.parse(storage.getItem(keys.player) ?? "null"));
   } catch {
     return createInitialPlayer();
   }
 }
 
-function parseInventory(storage: Storage | null): RuntimeItem[] {
-  if (!storage) {
-    return [];
-  }
-
+function parseInventory(storage: Storage | null, keys: { inventory: string }): RuntimeItem[] {
+  if (!storage) return [];
   try {
-    const parsed = JSON.parse(storage.getItem(STORAGE_KEYS.inventory) ?? "[]");
-
-    return Array.isArray(parsed)
-      ? parsed.filter((entry): entry is RuntimeItem => isRecord(entry))
-      : [];
+    const parsed = JSON.parse(storage.getItem(keys.inventory) ?? "[]");
+    return Array.isArray(parsed) ? parsed.filter((entry): entry is RuntimeItem => isRecord(entry)) : [];
   } catch {
     return [];
+  }
+}
+
+export function migrateLegacyToSlot1(): void {
+  if (typeof window === "undefined") return;
+  const s = window.localStorage;
+  const slot1Keys = getSlotKeys(1);
+  if (s.getItem(LEGACY_KEYS.player) && !s.getItem(slot1Keys.player)) {
+    s.setItem(slot1Keys.player, s.getItem(LEGACY_KEYS.player)!);
+    s.setItem(slot1Keys.inventory, s.getItem(LEGACY_KEYS.inventory) ?? "[]");
+  }
+  s.removeItem(LEGACY_KEYS.player);
+  s.removeItem(LEGACY_KEYS.inventory);
+}
+
+export type SlotPreview = { name: string; level: number; className: string } | null;
+
+export function getSlotPreview(slot: SaveSlot): SlotPreview {
+  if (typeof window === "undefined") return null;
+  try {
+    const keys = getSlotKeys(slot);
+    const raw = window.localStorage.getItem(keys.player);
+    if (!raw) return null;
+    const p = JSON.parse(raw);
+    if (!p || typeof p !== "object") return null;
+    return {
+      name: typeof p.name === "string" ? p.name : "角鬥士",
+      level: typeof p.level === "number" ? p.level : 1,
+      className: typeof p.jobClass === "string" ? p.jobClass : "",
+    };
+  } catch {
+    return null;
   }
 }
 
@@ -140,33 +165,27 @@ export function migrateGameState(save: {
   };
 }
 
-export function loadGameState(storage?: Storage): GameSave {
+export function loadGameState(slot: SaveSlot, storage?: Storage): GameSave {
   const resolvedStorage = resolveStorage(storage);
-
+  const keys = getSlotKeys(slot);
   return migrateGameState({
-    player: parsePlayer(resolvedStorage),
-    inventory: parseInventory(resolvedStorage),
+    player: parsePlayer(resolvedStorage, keys),
+    inventory: parseInventory(resolvedStorage, keys),
   });
 }
 
-export function saveGameState(save: GameSave, storage?: Storage): void {
+export function saveGameState(save: GameSave, slot: SaveSlot, storage?: Storage): void {
   const resolvedStorage = resolveStorage(storage);
-
-  if (!resolvedStorage) {
-    return;
-  }
-
-  resolvedStorage.setItem(STORAGE_KEYS.player, JSON.stringify(save.player));
-  resolvedStorage.setItem(STORAGE_KEYS.inventory, JSON.stringify(save.inventory));
+  if (!resolvedStorage) return;
+  const keys = getSlotKeys(slot);
+  resolvedStorage.setItem(keys.player, JSON.stringify(save.player));
+  resolvedStorage.setItem(keys.inventory, JSON.stringify(save.inventory));
 }
 
-export function clearGameState(storage?: Storage): void {
+export function clearGameState(slot: SaveSlot, storage?: Storage): void {
   const resolvedStorage = resolveStorage(storage);
-
-  if (!resolvedStorage) {
-    return;
-  }
-
-  resolvedStorage.removeItem(STORAGE_KEYS.player);
-  resolvedStorage.removeItem(STORAGE_KEYS.inventory);
+  if (!resolvedStorage) return;
+  const keys = getSlotKeys(slot);
+  resolvedStorage.removeItem(keys.player);
+  resolvedStorage.removeItem(keys.inventory);
 }

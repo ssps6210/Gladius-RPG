@@ -163,25 +163,25 @@ describe("migrateGameState", () => {
 
 describe("loadGameState", () => {
   it("returns migration-safe defaults when storage is empty", () => {
-    const save = loadGameState(createStorage());
+    const save = loadGameState(1, createStorage());
 
     expect(save.player).toEqual(INITIAL_PLAYER);
     expect(save.inventory).toEqual([]);
   });
 
-  it("loads legacy g_pl and g_inv data through the migration boundary", () => {
+  it("loads slot-keyed g_pl_1 and g_inv_1 data", () => {
     const storage = createStorage({
-      g_pl: JSON.stringify({
+      g_pl_1: JSON.stringify({
         name: "測試角鬥士",
         gold: 999,
         equipment: {
           weapon: { uid: "blade-1", name: "短劍" },
         },
       }),
-      g_inv: JSON.stringify([{ uid: "loot-1", name: "戰利品" }]),
+      g_inv_1: JSON.stringify([{ uid: "loot-1", name: "戰利品" }]),
     });
 
-    const save = loadGameState(storage);
+    const save = loadGameState(1, storage);
 
     expect(save.player.name).toBe("測試角鬥士");
     expect(save.player.gold).toBe(999);
@@ -194,11 +194,11 @@ describe("loadGameState", () => {
 
   it("falls back safely when stored payloads are malformed", () => {
     const storage = createStorage({
-      g_pl: "{bad json",
-      g_inv: JSON.stringify({ not: "an array" }),
+      g_pl_1: "{bad json",
+      g_inv_1: JSON.stringify({ not: "an array" }),
     });
 
-    const save = loadGameState(storage);
+    const save = loadGameState(1, storage);
 
     expect(save.player).toEqual(INITIAL_PLAYER);
     expect(save.inventory).toEqual([]);
@@ -206,7 +206,7 @@ describe("loadGameState", () => {
 });
 
 describe("saveGameState", () => {
-  it("writes the canonical save keys", () => {
+  it("writes the slot-keyed save keys", () => {
     const storage = createStorage();
     const player = {
       ...INITIAL_PLAYER,
@@ -218,23 +218,23 @@ describe("saveGameState", () => {
     };
     const inventory = [{ uid: "loot-2", name: "皮甲" }];
 
-    saveGameState({ player, inventory }, storage);
+    saveGameState({ player, inventory }, 1, storage);
 
-    expect(storage.getItem("g_pl")).toBe(JSON.stringify(player));
-    expect(storage.getItem("g_inv")).toBe(JSON.stringify(inventory));
+    expect(storage.getItem("g_pl_1")).toBe(JSON.stringify(player));
+    expect(storage.getItem("g_inv_1")).toBe(JSON.stringify(inventory));
   });
 });
 
 describe("clearGameState", () => {
-  it("removes the canonical save keys", () => {
+  it("removes the slot-keyed save keys", () => {
     const storage = createStorage({
-      g_pl: JSON.stringify(INITIAL_PLAYER),
-      g_inv: JSON.stringify([]),
+      g_pl_1: JSON.stringify(INITIAL_PLAYER),
+      g_inv_1: JSON.stringify([]),
     });
 
-    clearGameState(storage);
+    clearGameState(1, storage);
 
-    expect(storage.getItem("g_pl")).toBeNull();
-    expect(storage.getItem("g_inv")).toBeNull();
+    expect(storage.getItem("g_pl_1")).toBeNull();
+    expect(storage.getItem("g_inv_1")).toBeNull();
   });
 });

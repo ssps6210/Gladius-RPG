@@ -30,10 +30,10 @@ const BGM_FOR_TAB: Record<string, string> = {
   arena:  "./sounds/bgm_arena.mp3",
 };
 
-export default function GameApp() {
+export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./constants/storage").SaveSlot; onExitToMenu?: () => void }) {
   const { t, tr, L, toggleLang } = useLanguage();
   const { tutorialStep, advanceTutorial, skipTutorial } = useTutorial();
-  const state = useGameState();
+  const state = useGameState(slot);
 
   const {
     acceptTavernQuestAction,
@@ -96,6 +96,7 @@ export default function GameApp() {
     skipReplay,
     chooseClass,
     openClassModal,
+    closeClassModal,
     classModalOpen,
     startArenaBattle,
     tAtk,
@@ -142,19 +143,23 @@ export default function GameApp() {
             <AudioSettingsButton />
             {(() => {
               const cls = JOB_CLASSES[player.jobClass as keyof typeof JOB_CLASSES];
+              const isTier2 = cls?.tier === 2;
+              const notYet = player.level < 30 && !player.jobClass;
               const needsAction = (!player.jobClass && player.level >= 30) || (cls?.tier === 1 && player.level >= 70);
-              const locked = player.level < 30 && !player.jobClass;
+              const canOpen = !notYet && !isTier2;
               const label = cls ? `${cls.icon} ${L(cls.name, cls.nameEn)}` : L("⚔ 轉職", "⚔ Class");
-              const tip = locked
+              const tip = notYet
                 ? L("Lv.30 解鎖轉職", "Unlocks at Lv.30")
-                : needsAction
-                  ? (player.level >= 70 && cls?.tier === 1 ? L("Lv.70！可升級二轉！", "Lv.70! Tier 2 available!") : L("選擇你的職業！", "Choose your class!"))
-                  : L("點擊更換職業", "Click to change class");
+                : isTier2
+                  ? L("路徑已鎖定（二轉）", "Path locked (Tier 2)")
+                  : needsAction
+                    ? (cls?.tier === 1 ? L("Lv.70！可升級二轉！", "Lv.70! Tier 2 available!") : L("選擇你的職業！", "Choose your class!"))
+                    : L("點擊查看晉升路線", "View advancement");
               return (
                 <button
                   className={needsAction ? "btn class-btn-ready" : "btn btm"}
-                  style={{ fontSize: 11, padding: "4px 8px", opacity: locked ? 0.4 : 1, cursor: locked ? "not-allowed" : "pointer" }}
-                  onClick={locked ? undefined : openClassModal}
+                  style={{ fontSize: 11, padding: "4px 8px", opacity: (notYet || isTier2) ? 0.4 : 1, cursor: canOpen ? "pointer" : "not-allowed" }}
+                  onClick={canOpen ? openClassModal : undefined}
                   title={tip}
                 >
                   {label}
@@ -221,23 +226,23 @@ export default function GameApp() {
                 {player.level >= 30 && (
                   <div style={{ marginTop: 8, borderTop: "1px solid #2a1808", paddingTop: 6 }}>
                     {player.jobClass ? (
-                      <div
-                        onClick={openClassModal}
-                        style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
-                        title={L("點擊更換職業", "Click to change class")}
-                      >
-                        {(() => {
-                          const cls = JOB_CLASSES[player.jobClass as keyof typeof JOB_CLASSES];
-                          return cls ? (
-                            <>
-                              <span style={{ fontSize: 14 }}>{cls.icon}</span>
-                              <span style={{ fontSize: 11, color: "#c8a060", fontFamily: "'Cinzel',serif" }}>
-                                {L(cls.name, cls.nameEn)}
-                              </span>
-                            </>
-                          ) : null;
-                        })()}
-                      </div>
+                      (() => {
+                        const cls = JOB_CLASSES[player.jobClass as keyof typeof JOB_CLASSES];
+                        const isTier2 = cls?.tier === 2;
+                        return cls ? (
+                          <div
+                            onClick={isTier2 ? undefined : openClassModal}
+                            style={{ cursor: isTier2 ? "default" : "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                            title={isTier2 ? L("路徑已鎖定（二轉）", "Path locked (Tier 2)") : L("點擊晉升職業", "Click to advance class")}
+                          >
+                            <span style={{ fontSize: 14 }}>{cls.icon}</span>
+                            <span style={{ fontSize: 11, color: "#c8a060", fontFamily: "'Cinzel',serif" }}>
+                              {L(cls.name, cls.nameEn)}
+                            </span>
+                            {isTier2 && <span style={{ fontSize: 9, color: "#4a3020" }}>🔒</span>}
+                          </div>
+                        ) : null;
+                      })()
                     ) : (
                       <button
                         onClick={openClassModal}
@@ -346,7 +351,7 @@ export default function GameApp() {
               <div className="pb">
                 <div className="svr">
                   <button className="btn btp" onClick={save}>{t("saveBtn")}</button>
-                  <button className="btn btm" onClick={reset}>{t("resetBtn")}</button>
+                  <button className="btn btm" onClick={() => { reset(); onExitToMenu?.(); }}>{t("resetBtn")}</button>
                 </div>
                 {saveMsg && <div className="svi">{saveMsg}</div>}
               </div>
@@ -507,6 +512,7 @@ export default function GameApp() {
         <ClassSelectModal
           open={classModalOpen}
           onChoose={chooseClass}
+          onCancel={closeClassModal}
           currentClass={player.jobClass}
           playerLevel={player.level}
         />
