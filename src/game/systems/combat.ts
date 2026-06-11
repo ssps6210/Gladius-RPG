@@ -117,15 +117,15 @@ export const getClassEffects = (player: any): ClassEffects => {
     case "bard":         return { ...BASE_CE, inspireChance: 0.20 };
     case "cleric":       return { ...BASE_CE, regenPerRound: 8 };
     case "rogue":        return { ...BASE_CE, firstRoundCrit: true, bonusCritChance: 15 };
-    // Tier 2
-    case "berserker":    return { ...BASE_CE, rageMode: true };
+    // Tier 2 — each inherits tier-1 passives and adds its own
+    case "berserker":    return { ...BASE_CE, blockChance: 0.15, rageMode: true };
     case "paladin":      return { ...BASE_CE, blockChance: 0.30, blockReflect: 0.30 };
     case "assassin":     return { ...BASE_CE, firstRoundCrit: true, bonusCritChance: 20, critMultiplier: 3.5 };
-    case "shadowFiend":  return { ...BASE_CE, classLifesteal: 20 };
-    case "archbishop":   return { ...BASE_CE, regenPctPerRound: 5 };
-    case "inquisitor":   return { ...BASE_CE, regenPerRound: 0, holyWrathChance: 0.20 };
-    case "shadowDancer": return { ...BASE_CE, dodgeChance: 0.30 };
-    case "spellsinger":  return { ...BASE_CE, arcaneBurst: true };
+    case "shadowFiend":  return { ...BASE_CE, firstRoundCrit: true, bonusCritChance: 15, classLifesteal: 20 };
+    case "archbishop":   return { ...BASE_CE, regenPerRound: 8, regenPctPerRound: 5 };
+    case "inquisitor":   return { ...BASE_CE, regenPerRound: 8, holyWrathChance: 0.20 };
+    case "shadowDancer": return { ...BASE_CE, inspireChance: 0.20, dodgeChance: 0.30 };
+    case "spellsinger":  return { ...BASE_CE, inspireChance: 0.20, arcaneBurst: true };
     default:             return { ...BASE_CE };
   }
 };
