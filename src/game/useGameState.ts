@@ -1034,7 +1034,18 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
   };
 
   const chooseClass = (classId: string) => {
-    if (classId) setPlayer((p) => ({ ...p, jobClass: classId }));
+    const target = JOB_CLASSES[classId as keyof typeof JOB_CLASSES];
+    if (!target) return;
+    setPlayer((p) => {
+      const cur = JOB_CLASSES[p.jobClass as keyof typeof JOB_CLASSES];
+      // Block all changes once tier-2 is locked
+      if (cur?.tier === 2) return p;
+      // Block tier-1 → different tier-1 (cross-lineage)
+      if (cur?.tier === 1 && target.tier === 1) return p;
+      // Block tier-2 → tier-1 downgrade
+      if (cur?.tier === 1 && target.tier === 2 && target.prereq !== p.jobClass) return p;
+      return { ...p, jobClass: classId };
+    });
     setClassModalOpen(false);
   };
 
