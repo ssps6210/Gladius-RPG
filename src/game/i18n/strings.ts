@@ -1,8 +1,7 @@
-export type Lang = "zh" | "en";
+export type Lang = "zh" | "zh_cn" | "en";
 
-// UI string table restored from the classic build. Data names (monsters,
-// items, quests, etc.) are localized via *En fields on the data objects and
-// the `tr()` helper, not through this table.
+// UI string table. Data names (monsters, items, quests, etc.) are localized
+// via *En / *Cn fields on data objects and the `tr()` helper, not here.
 export const LANG: Record<Lang, Record<string, any>> = {
   zh: {
     // Nav
@@ -125,12 +124,139 @@ export const LANG: Record<Lang, Record<string, any>> = {
     emptySlot2: "空槽", saveLabel: "存檔",
     victory: "勝利", defeat: "落敗", success: "成功", failLabel: "失敗", maxLabel: "最高",
     potionLabel: "藥水", mercLabel: "📜傭兵",
-    // Synthesis (new content)
     synthTitle: "🔮 裝備合成 - 融合裝備提升稀有度",
     synthPick: "選擇要合成的裝備：",
     setEffectTitle: "🛡 套裝效果",
+    langBtn: "简体",
+  },
+
+  zh_cn: {
+    // Nav
+    tabDungeon: "地下城", tabArena: "🏟 竞技场", tabTavern: "🍺 酒馆",
+    tabQuest: "📋 任务", tabShop: "商店", tabInventory: "背包", tabForge: "⚒ 锻造",
+    // Header
+    saveBtn: "💾 存档", resetBtn: "🔄 重置",
+    // Character panel
+    charTitle: "角色", equipTitle: "装备", clickUnequip: "（点击卸下）",
+    statAtk: "攻击", statDef: "防御", statSpd: "速度", statMaxHp: "最大HP",
+    statHp: "生命", trained: "训",
+    // Equipment slots
+    slotWeapon: "武器", slotOffhand: "副手", slotArmor: "胸甲",
+    slotHelmet: "头盔", slotGloves: "手套", slotBoots: "靴子",
+    slotRing: "戒指", slotAmulet: "护符", slotEmpty: "（空）",
+    // Rarity
+    rarCommon: "普通", rarMagic: "魔法", rarRare: "稀有",
+    rarLegendary: "传说", rarMythic: "神话",
+    // Dungeon
+    expTitle: "🗺 探险 — 单怪快速战斗",
+    expSubtitle: "挑战单一怪物，风险低、速度快，是练级与赚金的好选择。",
+    dunTitle: "⚔️ 副本 — 多波怪物＋Boss",
+    tierNormal: "普通", tierHero: "英雄", tierLegend: "传说",
+    btnCharge: "⚔ 出征！", btnRunAgain: "⚔ 再次出征", btnBack: "🏠 返回",
+    injuredTitle: "身受重伤，无法出战", injuredSub: "剩余禁战时间：约",
+    injuredMin: "分钟", goTavern: "🛌 前往酒馆住宿",
+    mercDunTitle: "🏴 佣兵副本", mercParty: "佣兵队",
+    btnDeploy: "出发！", scrollsSelected: "卷轴已选",
+    addToParty: "选入佣兵队", removeFromParty: "移除",
+    // Shop
+    shopBuy: "🏪 购买", shopAuction: "🏆 竞标", shopSell: "💰 卖出",
+    shopRefresh: "🔄 刷新", shopSellAll: "🗑 一键卖出", shopSort: "📂 整理",
+    shopSellDesc: "出售背包中的装备，回收金币",
+    sellBelow: "以下", sellAll: "全部（全卖）",
+    bidBtn: "出价", claimBtn: "领取", buyBtn: "购买",
+    // Inventory
+    invTitle: "背包", filterAll: "全部", filterWeapon: "武器",
+    filterArmor: "防具", filterAcc: "饰品", filterScroll: "📜 佣兵卷轴",
+    invSort: "📂 整理", invSell: "🗑 卖出",
+    // Forge
+    forgeEnhTitle: "锻造强化", forgeTrainTitle: "训练场",
+    enhBtn: "强化！", enhLog: "强化记录",
+    trainBtn: "训练", trainDesc: "永久提升属性",
+    trainAtk: "攻击力", trainDef: "防御力", trainHp: "生命值", trainSpd: "速度",
+    // Arena
+    arenaTitle: "🏟 竞技场", arenaSub: "— 挑战对手掠夺金币",
+    arenaWeak: "较弱", arenaNormal: "相当", arenaStrong: "较强",
+    arenaFreeRefresh: "🔄 免费刷新", arenaFreeLeft: "次剩余",
+    arenaChallenge: "⚔ 挑战！", arenaResting: "🛌 休息中",
+    arenaCarries: "携带", arenaPlunder: "预估掠夺",
+    arenaWins: "胜", arenaLosses: "败",
+    arenaInjTitle: "正在养伤中", arenaInjSub: "上次竞技场落败，需要休息才能再次出战",
+    arenaRulesTitle: "竞技场规则",
+    // Tavern
+    tavernBoard: "今日告示板", tavernQuests: "个任务",
+    tavernRefresh: "🔄 刷新告示板", tavernCost: "花费",
+    tavernAccept: "接受委托", tavernAbandon: "放弃",
+    tavernCollect: "🎁 领取奖励", tavernDone: "✅ 任务完成！可以领取奖励",
+    tavernProgress: "已击杀", tavernTarget: "目标：",
+    tavernComplete: "── 任务终结 ──", tavernClaimed: "── 已完成 · 奖励已领取 ──",
+    tavernSealComplete: "── 赏金已入账，任务终结 ──",
+    tavernLeave: "收下赏金，离开酒馆",
+    innTitle: "酒馆旅店", innNeedRest: "你需要休息！", innGood: "状态良好，无需休息",
+    innFee: "住宿费：", innScales: "（随等级增加）",
+    innEffect: "住宿效果：HP 回满 · 解除所有禁战状态（地下城 + 竞技场）",
+    innBtn: "🛏 住宿休息",
+    // Quest
+    questTitle: "任务", questDaily: "📅 每日", questWeekly: "📆 每周",
+    questAchieve: "🏆 成就", questCollect: "领取！",
+    questDailyReset: "每日任务在午夜重置", questWeeklyReset: "每周任务在周一重置",
+    questAchieveDesc: "成就任务永不重置，完成后即锁定",
+    questReady: "✅ 已完成，可领取！", questDone: "✓ 已领取",
+    // Loot popup
+    equipNow: "直接装备", toBag: "放入背包", discard: "丢弃",
+    // Battle
+    battleTitle: "战斗回放", battleEnd: "— 战斗结束 —",
+    battleRound: "回合", battleWave: "第", waveSuffix: "波",
+    // Misc
+    savedMsg: "存档成功！", confirmReset: "确定重置？",
+    confirmSellLegend: "确定卖出所有【传说】以下装备？此操作无法复原！",
+    confirmSellMythic: "确定卖出所有【神话】以下装备（包含神话）？此操作无法复原！",
+    lootTitle: "✨ 战利品掉落 ✨",
+    btnEquip: "⚔ 装备", btnToBag: "🎒 背包", btnDiscard: "🗑 丢弃",
+    scrollToBag: "📜 收入背包",
+    battleWait: "战斗回放中...",
+    btnSkip: "⏩ 跳过", btnArenaBack: "🏟 返回竞技场",
+    btnReturn: "↩ 返回", btnChargeDun: "选择副本出发！",
+    dunDesc: "挑战完整副本：三波怪物加上强力Boss，掉落更丰厚。",
+    mercTitle: "🏴 佣兵副本 — 契约卷轴系统",
+    mercScrollDesc: "卷轴稀有度越高，佣兵越强，词条加成越多。卷轴使用后消耗。",
+    noScrolls: "背包中没有佣兵契约卷轴",
+    selectMercs: "选择佣兵（点击勾选）：",
+    trainHall: "训练场", trainSub: "— 永久提升属性",
+    trainDesc2: "花费金币永久提升基础属性。费用随等级与已训练次数增加。",
+    trainSafe: "保护机制：训练不会让金币低于 50。",
+    enhTitle2: "⚒ 装备强化 — 提升装备属性",
+    enhDesc1: "选择装备强化，最高",
+    enhDesc2: "金币只在尝试时扣除，失败不会双重惩罚。",
+    enhSelect: "选择要强化的装备：",
+    enhEquipped: "⚔ 已装备", enhMax: "✦ 已达最高 +10",
+    auctDesc: "竞标高品质装备，出价最高者得标",
+    auctRefresh: "🔄 刷新竞标",
+    currentBid: "目前出价：🪙", bidders: "人竞标",
+    topBidder: "✓ 目前最高出价", minBid: "最低加价 🪙", btnClaim: "🎁 领取",
+    sellDesc: "出售背包中的装备，回收金币", sortBag: "📂 整理背包",
+    sellWarn: "⚠️ 已装备的装备不受影响，但背包中的高品质装备将被卖出",
+    noSellable: "背包中没有可出售的装备", sellFor: "售 🪙",
+    invCount: "件", scrollSelected: "✓ 已选（去副本）",
+    tavernBoardTitle: "🍺 酒馆告示板", tavernBoardSub: "— 接取悬赏任务",
+    tavernBoardDesc: "每天自动刷新，或花金币提早刷新。",
+    tavernEmpty: "今天的委托已全部完成，明天再来看看",
+    lvLocked: "🔒 等级不足",
+    arenaDesc1: "挑战随机对手，胜利可掠夺对方金币（10-25%）。",
+    arenaDesc2: "败北则受伤休息 30 分钟，且损失金币。",
+    arenaRestTime: "剩余休息时间", arenaEmpty: "点击「免费刷新」开始寻找对手",
+    arenaFind: "🔄 寻找对手",
+    arenaWeakDesc: "— 容易击败，掠夺金币较少",
+    arenaNormDesc: "— 胜负各半，掠夺金币适中",
+    arenaStrongDesc: "— 难以击败，掠夺金币丰厚",
+    emptySlot2: "空槽", saveLabel: "存档",
+    victory: "胜利", defeat: "落败", success: "成功", failLabel: "失败", maxLabel: "最高",
+    potionLabel: "药水", mercLabel: "📜佣兵",
+    synthTitle: "🔮 装备合成 - 融合装备提升稀有度",
+    synthPick: "选择要合成的装备：",
+    setEffectTitle: "🛡 套装效果",
     langBtn: "English",
   },
+
   en: {
     tabDungeon: "Dungeon", tabArena: "🏟 Arena", tabTavern: "🍺 Tavern",
     tabQuest: "📋 Quests", tabShop: "Shop", tabInventory: "Inventory", tabForge: "⚒ Forge",
@@ -240,6 +366,6 @@ export const LANG: Record<Lang, Record<string, any>> = {
     synthTitle: "🔮 Synthesis — Fuse gear to raise rarity",
     synthPick: "Select gear to synthesize:",
     setEffectTitle: "🛡 Set Bonus",
-    langBtn: "中文",
+    langBtn: "繁體",
   },
 };

@@ -10,20 +10,23 @@ interface LanguageValue {
   toggleLang: () => void;
   /** UI string lookup with zh fallback. */
   t: (key: string) => string;
-  /** Localize a data field: returns obj[field+"En"] in English, else obj[field]. */
+  /** Localize a data field: returns obj[field+"En"] in English,
+   *  obj[field+"Cn"] in Simplified, else obj[field]. */
   tr: (obj: any, field: string) => any;
-  /** Inline pick between a zh and en value. */
-  L: (zh: any, en: any) => any;
+  /** Inline pick: zh = Traditional, en = English, cn = Simplified (defaults to zh). */
+  L: (zh: any, en: any, cn?: any) => any;
 }
 
 const LanguageContext = createContext<LanguageValue | null>(null);
 
 const STORAGE_KEY = "g_lang";
+const CYCLE: Lang[] = ["zh", "zh_cn", "en"];
 
 function loadLang(): Lang {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved === "en" ? "en" : "zh";
+    if (saved === "en" || saved === "zh_cn" || saved === "zh") return saved;
+    return "zh";
   } catch {
     return "zh";
   }
@@ -42,17 +45,28 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<LanguageValue>(() => {
-    const t = (key: string) => (LANG[lang] && LANG[lang][key]) ?? LANG.zh[key] ?? key;
+    const t = (key: string) =>
+      (LANG[lang] && LANG[lang][key]) ?? LANG.zh[key] ?? key;
+
     const tr = (obj: any, field: string) => {
       if (!obj) return obj;
       if (lang === "en") return obj[`${field}En`] ?? obj[field];
+      if (lang === "zh_cn") return obj[`${field}Cn`] ?? obj[field];
       return obj[field];
     };
-    const L = (zh: any, en: any) => (lang === "en" ? en : zh);
+
+    const L = (zh: any, en: any, cn?: any) => {
+      if (lang === "en") return en;
+      if (lang === "zh_cn") return cn ?? zh;
+      return zh;
+    };
+
+    const nextLang = CYCLE[(CYCLE.indexOf(lang) + 1) % CYCLE.length];
+
     return {
       lang,
       setLang,
-      toggleLang: () => setLang(lang === "en" ? "zh" : "en"),
+      toggleLang: () => setLang(nextLang),
       t,
       tr,
       L,

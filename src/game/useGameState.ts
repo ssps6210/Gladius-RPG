@@ -135,7 +135,7 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
     if (autoSaveTimeoutRef.current) clearTimeout(autoSaveTimeoutRef.current);
     autoSaveTimeoutRef.current = setTimeout(() => {
       saveGameState(buildSave(), slot);
-    }, 1500);
+    }, 600000);
     return () => {
       if (autoSaveTimeoutRef.current) clearTimeout(autoSaveTimeoutRef.current);
     };
