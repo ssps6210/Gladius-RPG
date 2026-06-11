@@ -120,7 +120,7 @@ export const getClassEffects = (player: any): ClassEffects => {
     // Tier 2 — each inherits tier-1 passives and adds its own
     case "berserker":    return { ...BASE_CE, blockChance: 0.15, rageMode: true };
     case "paladin":      return { ...BASE_CE, blockChance: 0.30, blockReflect: 0.30 };
-    case "assassin":     return { ...BASE_CE, firstRoundCrit: true, bonusCritChance: 20, critMultiplier: 3.5 };
+    case "assassin":     return { ...BASE_CE, firstRoundCrit: true, bonusCritChance: 35, critMultiplier: 3.5 };
     case "shadowFiend":  return { ...BASE_CE, firstRoundCrit: true, bonusCritChance: 15, classLifesteal: 20 };
     case "archbishop":   return { ...BASE_CE, regenPerRound: 8, regenPctPerRound: 5 };
     case "inquisitor":   return { ...BASE_CE, regenPerRound: 8, holyWrathChance: 0.20 };
