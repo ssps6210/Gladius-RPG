@@ -34,7 +34,7 @@ const BGM_FOR_TAB: Record<string, string> = {
 
 export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./constants/storage").SaveSlot; onExitToMenu?: () => void }) {
   const { t, tr, L, toggleLang } = useLanguage();
-  const { tutorialStep, advanceTutorial, skipTutorial } = useTutorial();
+  const { tutorialStep, advanceTutorial, skipTutorial, restartTutorial } = useTutorial();
   const state = useGameState(slot);
 
   const {
@@ -173,6 +173,9 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
                 </button>
               );
             })()}
+            {tutorialStep === null && (
+              <button className="btn btm" style={{ fontSize: 10, padding: "3px 7px", opacity: 0.6 }} onClick={restartTutorial} title={L("重新播放新手教學", "Replay tutorial", "重新播放新手教学")}>❓</button>
+            )}
             <button className="btn btm" style={{ fontSize: 11, padding: "4px 10px" }} onClick={toggleLang}>🌐 {t("langBtn")}</button>
             <div className="gd">🪙 {player.gold}</div>
           </div>

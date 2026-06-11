@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 
 const LS_KEY = "gladius_tutorial_done";
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
 export function useTutorial() {
   const [step, setStep] = useState<number | null>(() => {
