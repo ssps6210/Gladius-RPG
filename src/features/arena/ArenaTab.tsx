@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getRarity } from "../../game/systems";
 import { useLanguage } from "../../game/i18n/LanguageContext";
 import type { GameArenaOpponent, GamePlayer } from "../../game/appTypes";
+import { ARENA_NPC_PLAYERS } from "../../game/data/arenaLeaderboard";
 
 export function ArenaTab({ player, arenaOpponents, arenaInjuredUntil, arenaRefreshes, onRefresh, onFight, onInit }: {
   player: GamePlayer;
@@ -135,6 +136,75 @@ export function ArenaTab({ player, arenaOpponents, arenaInjuredUntil, arenaRefre
         🟠 <span style={{ color: "#e07020" }}>{t("arenaStrong")}</span> {t("arenaStrongDesc")}<br />
         {L("每天 5 次免費刷新，或花費金幣額外刷新。敗北休息 30 分鐘。", "5 free refreshes daily, or pay gold for more. Defeat = 30 min rest.", "每天 5 次免费刷新，或花费金币额外刷新。败北休息 30 分钟。")}
       </div>
+
+      {/* Leaderboard */}
+      {(() => {
+        const playerWins = player.totalArenaWins || 0;
+        const combined = [
+          ...ARENA_NPC_PLAYERS.map(npc => ({
+            id: npc.id,
+            name: tr(npc, "name"),
+            level: npc.level,
+            wins: npc.wins,
+            losses: npc.losses,
+            classIcon: npc.classIcon,
+            isPlayer: false,
+          })),
+          {
+            id: "player",
+            name: player.name || L("你", "You", "你"),
+            level: player.level,
+            wins: playerWins,
+            losses: 0,
+            classIcon: "🧑",
+            isPlayer: true,
+          },
+        ].sort((a, b) => b.wins - a.wins);
+
+        const playerRank = combined.findIndex(e => e.isPlayer) + 1;
+
+        return (
+          <div style={{ marginTop: 20 }}>
+            <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: "#c8961e", marginBottom: 10, letterSpacing: 1 }}>
+              🏆 {L("競技場排行榜", "Arena Leaderboard", "竞技场排行榜")}
+            </div>
+            <div style={{ fontSize: 11, color: "#5a4020", marginBottom: 8, fontStyle: "italic" }}>
+              {L(`你目前排名第 ${playerRank} 名`, `Your rank: #${playerRank}`, `你目前排名第 ${playerRank} 名`)}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              {combined.slice(0, 15).map((entry, idx) => (
+                <div
+                  key={entry.id}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "6px 10px", borderRadius: 4,
+                    background: entry.isPlayer
+                      ? "linear-gradient(90deg,#2a1e06,#1e1608)"
+                      : idx < 3 ? "rgba(200,150,30,0.06)" : "rgba(0,0,0,0.2)",
+                    border: entry.isPlayer
+                      ? "1px solid #c8961e66"
+                      : idx < 3 ? "1px solid #3a2a1044" : "1px solid #1a1208",
+                  }}
+                >
+                  <div style={{
+                    width: 22, textAlign: "center", fontSize: 11,
+                    color: idx === 0 ? "#f0d050" : idx === 1 ? "#c0c0c0" : idx === 2 ? "#cd7f32" : "#4a3820",
+                    fontFamily: "'Cinzel',serif",
+                  }}>
+                    {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`}
+                  </div>
+                  <div style={{ fontSize: 13 }}>{entry.classIcon}</div>
+                  <div style={{ flex: 1, fontSize: 11, color: entry.isPlayer ? "#e8c050" : "#8a7050" }}>
+                    {entry.name}
+                  </div>
+                  <div style={{ fontSize: 10, color: "#5a4020" }}>Lv.{entry.level}</div>
+                  <div style={{ fontSize: 10, color: "#4caf50" }}>{entry.wins}{t("arenaWins")}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

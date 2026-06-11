@@ -34,5 +34,6 @@ export type RuntimePlayer = {
   saveVersion: number;
   dungeonInjuredUntil: number;
   arenaInjuredUntil: number;
+  prestige?: number;
   [key: string]: unknown;
 };

@@ -65,6 +65,10 @@ function CompareTooltip({ newItem, equipped }: { newItem: any; equipped: any }) 
   );
 }
 
+const RARITY_RANK: Record<string, number> = {
+  normal: 0, magic: 1, rare: 2, legendary: 3, mythic: 4,
+};
+
 export function InventoryTab({
   inventoryCount,
   inventoryFilterOptions,
@@ -77,6 +81,29 @@ export function InventoryTab({
 }: InventoryTabProps) {
   const { t, tr, L } = useLanguage();
   const [hoveredUid, setHoveredUid] = useState<string | null>(null);
+  const [rarityFilter, setRarityFilter] = useState<string>("all");
+  const [sortMode, setSortMode] = useState<"default" | "enhLv" | "rarity">("default");
+
+  const displayedItems = [...inventoryItems]
+    .filter(({ item }) => {
+      if (rarityFilter === "all") return true;
+      if (item.type === "potion") return true;
+      const rank = RARITY_RANK[item.rarity] ?? 0;
+      const threshold = RARITY_RANK[rarityFilter] ?? 0;
+      return rank >= threshold;
+    })
+    .sort((a, b) => {
+      if (sortMode === "default") return 0;
+      if (sortMode === "enhLv") {
+        const diff = (b.item.enhLv || 0) - (a.item.enhLv || 0);
+        if (diff !== 0) return diff;
+        return (RARITY_RANK[b.item.rarity] ?? 0) - (RARITY_RANK[a.item.rarity] ?? 0);
+      }
+      if (sortMode === "rarity") {
+        return (RARITY_RANK[b.item.rarity] ?? 0) - (RARITY_RANK[a.item.rarity] ?? 0);
+      }
+      return 0;
+    });
 
   return (
     <div>
@@ -91,9 +118,24 @@ export function InventoryTab({
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
         <div className="stl" style={{ margin: 0, border: "none", padding: 0, flex: 1 }}>
-          <span style={{ color: "#6a5030", fontSize: 13 }}>{inventoryCount}{t("invCount")}</span>
+          <span style={{ color: "#6a5030", fontSize: 13 }}>
+            {displayedItems.length !== inventoryCount
+              ? `${displayedItems.length}/${inventoryCount}${t("invCount")}`
+              : `${inventoryCount}${t("invCount")}`}
+          </span>
         </div>
         <button className="btn btm" style={{ fontSize: 10, padding: "5px 10px" }} onClick={onSortInventory}>{t("invSort")}</button>
+        <button
+          className="btn btm"
+          style={{ fontSize: 10, padding: "5px 10px" }}
+          onClick={() => setSortMode(m => m === "default" ? "enhLv" : m === "enhLv" ? "rarity" : "default")}
+        >
+          {sortMode === "default"
+            ? L("排序: 預設", "Sort: Default", "排序: 预设")
+            : sortMode === "enhLv"
+              ? L("排序: 強化", "Sort: +Lv", "排序: 强化")
+              : L("排序: 稀有", "Sort: Rarity", "排序: 稀有")}
+        </button>
         <SellThresholdControl value={sellThreshold} onChange={onSellThresholdChange} onSell={onSellJunk} />
       </div>
       <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 12 }}>
@@ -101,9 +143,28 @@ export function InventoryTab({
           <div key={filter.id} className={`wcat-btn${filter.isActive ? " active" : ""}`} onClick={filter.onSelect}>{filter.label}</div>
         ))}
       </div>
+      {/* Rarity filter */}
+      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 10 }}>
+        {[
+          { id: "all",       label: L("全部", "All", "全部") },
+          { id: "magic",     label: L("魔法+", "Magic+", "魔法+"), color: "#4caf50" },
+          { id: "rare",      label: L("稀有+", "Rare+", "稀有+"), color: "#4a9fd4" },
+          { id: "legendary", label: L("傳說+", "Legend+", "传说+"), color: "#9c50d4" },
+          { id: "mythic",    label: L("神話", "Mythic", "神话"), color: "#e07020" },
+        ].map(({ id, label, color }) => (
+          <div
+            key={id}
+            className={`wcat-btn${rarityFilter === id ? " active" : ""}`}
+            style={rarityFilter === id && color ? { borderColor: color, color } : undefined}
+            onClick={() => setRarityFilter(id)}
+          >
+            {label}
+          </div>
+        ))}
+      </div>
       {isEmpty && <div style={{ color: "#4a3a20", fontStyle: "italic" }}>{t("slotEmpty")}</div>}
       <div className="ig">
-        {inventoryItems.map(({ item, currentEquipped, currentEquipped2, secondarySlotId, onEquip, onEquip2, onSelectMerc, onSell, onUse, price, rarity, selectLabel }) => {
+        {displayedItems.map(({ item, currentEquipped, currentEquipped2, secondarySlotId, onEquip, onEquip2, onSelectMerc, onSell, onUse, price, rarity, selectLabel }) => {
           if (item.type === "potion") {
             return (
               <div key={item.uid} className="ii">

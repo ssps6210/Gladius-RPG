@@ -53,6 +53,7 @@ export function createInitialPlayer(): RuntimePlayer {
     saveVersion: CURRENT_SAVE_VERSION,
     dungeonInjuredUntil: 0,
     arenaInjuredUntil: 0,
+    prestige: 0,
   };
 }
 

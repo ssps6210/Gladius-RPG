@@ -6,6 +6,7 @@ import { JOB_CLASSES } from "../data/classes";
 import { applyEnhanceBonus } from "../lib/items";
 import { SLOT_EFFECTIVENESS } from "../types/shared";
 import type { KillRecord } from "../types/combat";
+import type { DungeonModifier } from "../data/dungeonModifiers";
 
 type AnyRecord = Record<string, any>;
 
@@ -697,12 +698,19 @@ export function simulateExpedition(expedition: any, initPlayer: any, deps: Comba
   return { log, finalPlayer: np, drops, kills, won: result.won };
 }
 
-export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: CombatDeps) {
+export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: CombatDeps, modifier?: DungeonModifier) {
   const { lvUp, genLoot, genMercScroll } = deps;
   let np = { ...initPlayer };
-  const pAtk = cAtk(np);
-  const pDef = cDef(np);
-  const pMhp = cMhp(np);
+
+  // Prestige bonus: each prestige level grants +5% to all combat stats
+  const prestigeMult = 1 + ((np.prestige || 0) * 0.05);
+
+  const pAtk = Math.floor(cAtk(np) * prestigeMult * (modifier?.playerAtkMult ?? 1));
+  const pDef = Math.floor(cDef(np) * prestigeMult * (modifier?.playerDefMult ?? 1));
+  const pMhp = Math.floor(cMhp(np) * prestigeMult * (modifier?.playerHpMult ?? 1));
+  if (modifier?.playerHpMult) {
+    np.hp = Math.min(np.hp, pMhp);
+  }
   const specials = gSpec(np);
   const wc = getWeaponCat(np);
   const log: any[] = [];
@@ -718,6 +726,9 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
 
   log.push({ txt: `⚔️ ${L("進入", "Entering")} ${LF(dungeon, "name")}${_combatLang === "en" ? ` [${LF(tier, "label")}]` : `【${LF(tier, "label")}】`}`, type: "title" });
   log.push({ txt: `"${LF(dungeon, "lore")}"`, type: "info" });
+  if (modifier) {
+    log.push({ txt: `${modifier.icon} ${L("副本詞綴", "Modifier", "副本词缀")}：${LF(modifier, "label")} — ${LF(modifier, "desc")}`, type: "info" });
+  }
   if (wc) {
     log.push({ txt: `🗡 ${wc.label} — ${wc.traitDesc}`, type: "info" });
   }
@@ -732,6 +743,10 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
         break;
       }
       const enemy = buildEnemy(monsterKey, np.level, tier.mult);
+      if (modifier?.monsterHpMult) {
+        enemy.maxHp = Math.floor(enemy.maxHp * modifier.monsterHpMult);
+        enemy.hp = enemy.maxHp;
+      }
       log.push({ txt: L(`${enemy.icon}${enemy.name} 出現！(HP:${enemy.maxHp} 攻:${enemy.attack} ⚡${enemy.traitDesc})`, `${enemy.icon}${LF(enemy, "name")} appears! (HP:${enemy.maxHp} ATK:${enemy.attack} ⚡${LF(enemy, "traitDesc")})`), type: "info" });
       const result = fightMonster(enemy, np, pAtk, pDef, pMhp, specials, wc, log, bleedRef);
       np = result.np;
@@ -743,8 +758,8 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
       if (result.won) {
         recordKill(kills, monsterKey, enemy.name);
         totalKills += 1;
-        const expGain = Math.floor(enemy.expReward * tier.expMult);
-        const goldGain = Math.floor(enemy.goldReward * tier.goldMult);
+        const expGain = Math.floor(enemy.expReward * tier.expMult * (modifier?.expMult ?? 1));
+        const goldGain = Math.floor(enemy.goldReward * tier.goldMult * (modifier?.goldMult ?? 1));
         np = lvUp(np, expGain, goldGain, log);
         log.push({ txt: L(`✅ 擊敗${enemy.name}！+${expGain}EXP +${goldGain}金`, `✅ Defeated ${LF(enemy, "name")}! +${expGain} EXP +${goldGain} gold`), type: "win" });
         if (Math.random() < 0.2 + tier.lootBonus * 0.5) {
@@ -757,7 +772,7 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
         break;
       }
     }
-    if (np.hp > 0) {
+    if (np.hp > 0 && !modifier?.noWaveHeal) {
       np.hp = Math.min(pMhp, np.hp + Math.floor(pMhp * 0.12));
     }
   }
@@ -766,6 +781,10 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
     log.push({ txt: "━━━━━━━━━━━━━━━━━━", type: "sep" });
     log.push({ txt: `🔥 ${LF(dungeon, "bossIntro")}`, type: "title" });
     const boss = buildEnemy(dungeon.boss, np.level, tier.mult, true);
+    if (modifier?.monsterHpMult) {
+      boss.maxHp = Math.floor(boss.maxHp * modifier.monsterHpMult);
+      boss.hp = boss.maxHp;
+    }
     log.push({ txt: `${boss.icon}${LF(boss, "name")} ｜ HP:${boss.maxHp} ${L("攻", "ATK", "攻")}:${boss.attack} ${L("防", "DEF", "防")}:${boss.defense}`, type: "info" });
     log.push({ txt: `👹 ${L("Boss特性", "Boss trait", "Boss特性")}：${LF(boss, "traitDesc")}`, type: "info" });
     const result = fightMonster(boss, np, pAtk, pDef, pMhp, specials, wc, log, bleedRef);
@@ -778,8 +797,8 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
     if (result.won) {
       recordKill(kills, dungeon.boss || boss.key || boss.name, boss.name, "boss");
       totalKills += 1;
-      const expGain = Math.floor(boss.expReward * tier.expMult);
-      const goldGain = Math.floor(boss.goldReward * tier.goldMult);
+      const expGain = Math.floor(boss.expReward * tier.expMult * (modifier?.expMult ?? 1));
+      const goldGain = Math.floor(boss.goldReward * tier.goldMult * (modifier?.goldMult ?? 1));
       np = lvUp(np, expGain, goldGain, log);
       log.push({ txt: L(`👑 擊敗Boss ${boss.name}！+${expGain}EXP +${goldGain}金`, `👑 Boss ${LF(boss, "name")} defeated! +${expGain} EXP +${goldGain} gold`, `👑 击败Boss ${LF(boss, "name")}！+${expGain}EXP +${goldGain}金`), type: "win" });
       if (Math.random() < 0.6 + tier.lootBonus) {

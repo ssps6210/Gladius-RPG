@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { BattleLog } from "../../components/BattleLog";
 import { ReplayLog } from "../../components/ReplayLog";
 import { useLanguage } from "../../game/i18n/LanguageContext";
@@ -26,6 +27,14 @@ export function BattleReport({
   onSkip: () => void;
 }) {
   const { t, L } = useLanguage();
+  const [quickMode, setQuickMode] = useState(false);
+
+  useEffect(() => {
+    if (quickMode && replay && replay.cursor < replay.lines.length) {
+      onSkip();
+    }
+  }, [quickMode]); // only trigger on quickMode change
+
   return (
     <div className="ba">
       {replay ? (
@@ -53,9 +62,32 @@ export function BattleReport({
             </div>
           </div>
 
-          <ReplayLog lines={replay.lines} cursor={replay.cursor} />
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+            <button
+              className="btn btm"
+              style={{ fontSize: 10, padding: "3px 10px" }}
+              onClick={() => setQuickMode(q => !q)}
+            >
+              {quickMode
+                ? L("📜 詳細", "📜 Details", "📜 详细")
+                : L("⚡ 速覽", "⚡ Quick", "⚡ 速览")}
+            </button>
+          </div>
 
-          {replaySummary?.showBattleSummary && (
+          {quickMode ? (
+            <div style={{ padding: "12px 14px", background: "#0c0a06", border: "1px solid #2a1a08", borderRadius: 5, marginBottom: 12, textAlign: "center" }}>
+              <div style={{ fontSize: 32, marginBottom: 6 }}>
+                {replay.won ? "🏆" : "💀"}
+              </div>
+              <div style={{ fontFamily: "'Cinzel',serif", fontSize: 14, color: replay.won ? "#4caf50" : "#c84040" }}>
+                {replay.won ? L("勝利！", "Victory!", "胜利！") : L("敗北...", "Defeated...", "败北...")}
+              </div>
+            </div>
+          ) : (
+            <ReplayLog lines={replay.lines} cursor={replay.cursor} />
+          )}
+
+          {(replaySummary?.showBattleSummary || quickMode) && (
             <div style={{ marginTop: 12 }}>
               <div style={{ fontSize: 10, color: "#5a4020", fontFamily: "'Cinzel',serif", letterSpacing: 1, marginBottom: 4, textAlign: "center" }}>
                 {L("戰鬥摘要", "Battle Summary", "战斗摘要")}

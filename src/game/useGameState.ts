@@ -17,6 +17,8 @@ import { JOB_CLASSES, TIER2_CLASSES } from "./data/classes";
 import { QUEST_DEFS } from "./data/quests";
 import { TRAIN_STATS } from "./data/trainStats";
 import { WEAPON_CATEGORIES } from "./data/weaponCategories";
+import { rollDungeonModifier } from "./data/dungeonModifiers";
+import type { DungeonModifier } from "./data/dungeonModifiers";
 import { TRAIN_STAT_DISPLAY_KEYS } from "./lib/display";
 import { applyEnhanceBonus, calcSellPrice, enhanceCost } from "./lib/items";
 import { trainCost } from "./lib/training";
@@ -112,6 +114,7 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
   );
   const [arenaRefreshes, setArenaRefreshes] = useState(5);
   const [arenaLastDate, setArenaLastDate] = useState("");
+  const [modifierPending, setModifierPending] = useState<{ dungeon: any; tier: any; modifier: DungeonModifier } | null>(null);
   const [questState, setQuestState] = useState<GameQuestState>(() => initQuestState());
   const [questNotify, setQuestNotify] = useState<string | null>(null);
   const [tavernQuestState, setTavernQuestState] = useState(() => ({
@@ -296,8 +299,22 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
       setTab("tavern");
       return;
     }
+    // Show modifier preview modal before starting
+    setModifierPending({ dungeon, tier, modifier: rollDungeonModifier() });
+  };
 
-    const result = simulateRun(dungeon, tier, { ...player }, { lvUp, genLoot, genMercScroll });
+  const confirmModifier = () => {
+    if (!modifierPending) return;
+    const { dungeon, tier, modifier } = modifierPending;
+    setModifierPending(null);
+    doStartBattle(dungeon, tier, modifier);
+  };
+
+  const cancelModifier = () => setModifierPending(null);
+
+  const doStartBattle = (dungeon: any, tier: any, modifier: DungeonModifier) => {
+    const now = Date.now();
+    const result = simulateRun(dungeon, tier, { ...player }, { lvUp, genLoot, genMercScroll }, modifier);
     const fp = result.finalPlayer;
     const mergedKills = mergeMonsterKills((fp.monsterKills as Record<string, number>) || {}, result.kills || []);
     const killCount = dungeon.waves.flatMap((w: any) => w.monsters).length + (dungeon.boss ? 1 : 0);
@@ -1054,6 +1071,38 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
   const closeClassModal = () => setClassModalOpen(false);
   const goToTavern = () => setTab("tavern");
 
+  const doPrestige = () => {
+    const currentPrestige = (player.prestige as number) || 0;
+    if (player.level < 85 || currentPrestige >= 10) return;
+    const newPrestige = currentPrestige + 1;
+    const resetPlayer: any = {
+      ...INITIAL_PLAYER,
+      name: player.name,
+      gold: Math.floor(player.gold * 0.2),
+      trainedAtk: player.trainedAtk,
+      trainedDef: player.trainedDef,
+      trainedHp: player.trainedHp,
+      trainedSpd: player.trainedSpd,
+      totalKills: player.totalKills,
+      totalBossKills: player.totalBossKills,
+      totalDungeons: player.totalDungeons,
+      totalExpeditions: player.totalExpeditions,
+      totalArenaWins: player.totalArenaWins,
+      totalGoldEarned: player.totalGoldEarned,
+      totalEnhances: player.totalEnhances,
+      totalTrains: player.totalTrains,
+      totalMercRuns: player.totalMercRuns,
+      monsterKills: player.monsterKills,
+      highestLevel: player.highestLevel,
+      prestige: newPrestige,
+    };
+    setPlayer(resetPlayer);
+    setInventory([]);
+    setReplay(null);
+    setTab("dungeon");
+    setClassModalOpen(false);
+  };
+
   const skipReplay = () => {
     setReplay((r) => (r ? { ...r, cursor: r.lines.length } : null));
   };
@@ -1384,6 +1433,10 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
     closeClassModal,
     classModalOpen,
     goToTavern,
+    doPrestige,
+    modifierPending,
+    confirmModifier,
+    cancelModifier,
     startArenaBattle,
     startBattle,
     startExpedition,

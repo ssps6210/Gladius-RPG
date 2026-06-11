@@ -11,6 +11,7 @@ import { StoryModal } from "../components/StoryModal/StoryModal";
 import { ArenaTab } from "../features/arena/ArenaTab";
 import { BattleReport } from "../features/battle/BattleReport";
 import { DungeonTab } from "../features/dungeon/DungeonTab";
+import { DungeonModifierModal } from "../features/dungeon/DungeonModifierModal";
 import { InventoryTab } from "../features/inventory/InventoryTab";
 import { QuestTab } from "../features/quests/QuestTab";
 import { ShopTab } from "../features/shop/ShopTab";
@@ -100,6 +101,10 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
     closeClassModal,
     classModalOpen,
     goToTavern,
+    doPrestige,
+    modifierPending,
+    confirmModifier,
+    cancelModifier,
     startArenaBattle,
     tAtk,
     tDef,
@@ -255,6 +260,31 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
                       </button>
                     )}
                   </div>
+                )}
+                {/* Prestige display + button */}
+                {((player.prestige as number) || 0) > 0 && (
+                  <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 5, fontSize: 11 }}>
+                    <span style={{ color: "#d4a030" }}>⭐</span>
+                    <span style={{ color: "#c8961e", fontFamily: "'Cinzel',serif" }}>
+                      {L("轉生", "Prestige", "转生")} ×{(player.prestige as number) || 0}
+                    </span>
+                    <span style={{ fontSize: 10, color: "#4caf50" }}>
+                      (+{((player.prestige as number) || 0) * 5}%)
+                    </span>
+                  </div>
+                )}
+                {player.level >= 85 && ((player.prestige as number) || 0) < 10 && (
+                  <button
+                    className="btn btp"
+                    style={{ width: "100%", fontSize: 10, marginTop: 6, background: "linear-gradient(90deg,#8b5a14,#c8961e)", borderColor: "#d4a030" }}
+                    onClick={() => {
+                      if (confirm(L("確定要轉生嗎？等級歸1、裝備清空，保留訓練值與20%金幣。每轉生一次全屬性+5%。", "Prestige? Level resets to 1, equipment cleared, training kept, 20% gold kept. +5% all stats per prestige.", "确定要转生吗？等级归1、装备清空，保留训练值与20%金币。每转生一次全属性+5%。"))) {
+                        doPrestige();
+                      }
+                    }}
+                  >
+                    {L("⭐ 轉生（Lv.85）", "⭐ Prestige (Lv.85)", "⭐ 转生（Lv.85）")}
+                  </button>
                 )}
               </div>
             </div>
@@ -520,6 +550,16 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
           playerLevel={player.level}
           monsterKills={player.monsterKills}
         />
+
+        {modifierPending && (
+          <DungeonModifierModal
+            modifier={modifierPending.modifier}
+            dungeonName={tr(modifierPending.dungeon, "name")}
+            tierLabel={tr(modifierPending.tier, "label")}
+            onConfirm={confirmModifier}
+            onCancel={cancelModifier}
+          />
+        )}
       </div>
 
       <TutorialOverlay
