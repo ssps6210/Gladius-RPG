@@ -8,7 +8,7 @@ export function MercenaryRunSummary({ result }: MercenaryRunSummaryProps) {
   const { L } = useLanguage();
   return (
     <section>
-      <h3>{L("倖存傭兵", "Surviving Mercs")}：{result.survivors}</h3>
+      <h3>{L("倖存傭兵", "Surviving Mercs", "幸存佣兵")}：{result.survivors}</h3>
       {result.summary.map((line) => (
         <div key={line}>{line}</div>
       ))}

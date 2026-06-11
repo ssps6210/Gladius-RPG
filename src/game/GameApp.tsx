@@ -149,14 +149,14 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
               const notYet = player.level < 30 && !player.jobClass;
               const needsAction = (!player.jobClass && player.level >= 30) || (cls?.tier === 1 && player.level >= 70);
               const canOpen = !notYet && !isTier2;
-              const label = cls ? `${cls.icon} ${L(cls.name, cls.nameEn)}` : L("⚔ 轉職", "⚔ Class");
+              const label = cls ? `${cls.icon} ${L(cls.name, cls.nameEn)}` : L("⚔ 轉職", "⚔ Class", "⚔ 转职");
               const tip = notYet
-                ? L("Lv.30 解鎖轉職", "Unlocks at Lv.30")
+                ? L("Lv.30 解鎖轉職", "Unlocks at Lv.30", "Lv.30 解锁转职")
                 : isTier2
-                  ? L("路徑已鎖定（二轉）", "Path locked (Tier 2)")
+                  ? L("路徑已鎖定（二轉）", "Path locked (Tier 2)", "路径已锁定（二转）")
                   : needsAction
-                    ? (cls?.tier === 1 ? L("Lv.70！可升級二轉！", "Lv.70! Tier 2 available!") : L("選擇你的職業！", "Choose your class!"))
-                    : L("點擊查看晉升路線", "View advancement");
+                    ? (cls?.tier === 1 ? L("Lv.70！可升級二轉！", "Lv.70! Tier 2 available!", "Lv.70！可升级二转！") : L("選擇你的職業！", "Choose your class!", "选择你的职业！"))
+                    : L("點擊查看晉升路線", "View advancement", "点击查看晋升路线");
               return (
                 <button
                   className={needsAction ? "btn class-btn-ready" : "btn btm"}
@@ -235,7 +235,7 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
                           <div
                             onClick={isTier2 ? undefined : openClassModal}
                             style={{ cursor: isTier2 ? "default" : "pointer", display: "flex", alignItems: "center", gap: 6 }}
-                            title={isTier2 ? L("路徑已鎖定（二轉）", "Path locked (Tier 2)") : L("點擊晉升職業", "Click to advance class")}
+                            title={isTier2 ? L("路徑已鎖定（二轉）", "Path locked (Tier 2)", "路径已锁定（二转）") : L("點擊晉升職業", "Click to advance class", "点击晋升职业")}
                           >
                             <span style={{ fontSize: 14 }}>{cls.icon}</span>
                             <span style={{ fontSize: 11, color: "#c8a060", fontFamily: "'Cinzel',serif" }}>
@@ -251,7 +251,7 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
                         className="btn btp"
                         style={{ width: "100%", fontSize: 10 }}
                       >
-                        {L("⚔ 選擇職業（Lv30解鎖）", "⚔ Choose Class (Lv30)")}
+                        {L("⚔ 選擇職業（Lv30解鎖）", "⚔ Choose Class (Lv30)", "⚔ 选择职业（Lv30解锁）")}
                       </button>
                     )}
                   </div>
@@ -337,7 +337,7 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
                           ))}
                           {activePieces < totalPieces && (
                             <div style={{ fontSize: 9, color: "#4a3020", marginTop: 3 }}>
-                              {L("未裝備", "Missing")}: {set.itemNames.filter(name => !equippedNames.includes(name)).join(L("、", ", "))}
+                              {L("未裝備", "Missing", "未装备")}: {set.itemNames.filter(name => !equippedNames.includes(name)).join(L("、", ", "))}
                             </div>
                           )}
                         </div>
@@ -378,7 +378,7 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
                   </button>
                 );
               })}
-              {replay && <button className={`nb${tab === "battle" ? " active" : ""}`} onClick={openBattleReport}>{replay.won ? "🏆" : "⚔"} {L("報告", "Report")}</button>}
+              {replay && <button className={`nb${tab === "battle" ? " active" : ""}`} onClick={openBattleReport}>{replay.won ? "🏆" : "⚔"} {L("報告", "Report", "报告")}</button>}
             </div>
 
             <div className="ca">

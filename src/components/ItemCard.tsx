@@ -43,11 +43,11 @@ export function ItemCard({ item, onEquip, onUse, footer }: { item: any; onEquip?
       {cat && <div className="icat">{cat.icon} {tr(cat, "label")}</div>}
       {!cat && slotDef && <div className="icat">{slotDef.icon} {tr(slotDef, "label")}</div>}
       <div className="iis">
-        {item.attack > 0  && <div style={{ color: item.attack > 50 ? "#f5c040" : item.attack > 25 ? "#e8a030" : "#5a4020" }}>{L("攻擊", "ATK")} +{item.attack}</div>}
-        {item.defense > 0 && <div style={{ color: item.defense > 40 ? "#80c0f0" : item.defense > 20 ? "#4a9fd4" : "#5a4020" }}>{L("防禦", "DEF")} +{item.defense}</div>}
+        {item.attack > 0  && <div style={{ color: item.attack > 50 ? "#f5c040" : item.attack > 25 ? "#e8a030" : "#5a4020" }}>{L("攻擊", "ATK", "攻击")} +{item.attack}</div>}
+        {item.defense > 0 && <div style={{ color: item.defense > 40 ? "#80c0f0" : item.defense > 20 ? "#4a9fd4" : "#5a4020" }}>{L("防禦", "DEF", "防御")} +{item.defense}</div>}
         {item.hp > 0      && <div style={{ color: item.hp > 80 ? "#f06060" : item.hp > 40 ? "#c84040" : "#5a4020" }}>HP +{item.hp}</div>}
         {item.speed > 0   && <div style={{ color: "#5a9050" }}>{L("速度", "SPD")} +{item.speed}</div>}
-        {item.heal        && <div style={{ color: "#50a860" }}>{L("回復", "Heal")} {item.heal} HP</div>}
+        {item.heal        && <div style={{ color: "#50a860" }}>{L("回復", "Heal", "回复")} {item.heal} HP</div>}
       </div>
       {cat && <div className="icat" style={{ color: "#d08030", fontSize: 10 }}>{tr(cat, "traitDesc")}</div>}
       <AffixLines affixes={item.affixes} />
@@ -63,7 +63,7 @@ export function ItemCard({ item, onEquip, onUse, footer }: { item: any; onEquip?
         return null;
       })()}
       <div style={{ marginTop: 7, display: "flex", flexDirection: "column", gap: 4 }}>
-        {onEquip && <button className="btn btp" style={{ width: "100%", fontSize: 10 }} onClick={onEquip}>{L("裝備", "Equip")}</button>}
+        {onEquip && <button className="btn btp" style={{ width: "100%", fontSize: 10 }} onClick={onEquip}>{L("裝備", "Equip", "装备")}</button>}
         {onUse   && <button className="btn btm" style={{ width: "100%", fontSize: 10 }} onClick={onUse}>{L("使用", "Use")}</button>}
         {footer}
       </div>

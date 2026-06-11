@@ -35,7 +35,7 @@ export function StoryModal({ story, onDismiss }: StoryModalProps) {
             fontFamily: "'Cinzel', serif", fontSize: 10, letterSpacing: 4,
             color: "#8b5a14", textTransform: "uppercase" as const, marginBottom: 14,
           }}>
-            ✦ {L("懸賞完成", "BOUNTY COMPLETE")} ✦
+            ✦ {L("懸賞完成", "BOUNTY COMPLETE", "悬赏完成")} ✦
           </div>
           <div style={{ fontSize: 44, marginBottom: 10, filter: "drop-shadow(0 0 12px rgba(200,150,30,0.5))" }}>
             {story.icon}
@@ -81,7 +81,7 @@ export function StoryModal({ story, onDismiss }: StoryModalProps) {
             color: "#e8c050",
             letterSpacing: 1,
           }}>
-            🪙 {story.reward.gold} {L("金幣", "Gold")} &nbsp;·&nbsp; ✨ {story.reward.exp} EXP
+            🪙 {story.reward.gold} {L("金幣", "Gold", "金币")} &nbsp;·&nbsp; ✨ {story.reward.exp} EXP
           </div>
         </div>
 

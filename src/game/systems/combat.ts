@@ -15,7 +15,7 @@ let _combatLang: "zh" | "zh_cn" | "en" = "zh";
 export function setCombatLang(lang: "zh" | "zh_cn" | "en") {
   _combatLang = lang;
 }
-const L = (zh: string, en: string) => (_combatLang === "en" ? en : zh);
+const L = (zh: string, en: string, cn?: string) => (_combatLang === "en" ? en : _combatLang === "zh_cn" ? (cn ?? zh) : zh);
 /** Localize a data field by language (name/label/traitDesc → *En / *Cn fallback). */
 const LF = (obj: any, field: string) => {
   if (!obj) return "";
@@ -663,9 +663,9 @@ export function simulateExpedition(expedition: any, initPlayer: any, deps: Comba
   }
 
   const enemy = buildEnemy(expedition.monster, np.level, 1);
-  log.push({ txt: `━━ ${enemy.icon}${LF(enemy, "name")} ｜ HP:${enemy.maxHp} ${L("攻", "ATK")}:${enemy.attack} ${L("防", "DEF")}:${enemy.defense} ━━`, type: "sep" });
+  log.push({ txt: `━━ ${enemy.icon}${LF(enemy, "name")} ｜ HP:${enemy.maxHp} ${L("攻", "ATK", "攻")}:${enemy.attack} ${L("防", "DEF", "防")}:${enemy.defense} ━━`, type: "sep" });
   log.push({ txt: `📜 ${enemy.lore}`, type: "info" });
-  log.push({ txt: `⚡ ${L("特性", "Trait")}：${LF(enemy, "traitDesc")}`, type: "info" });
+  log.push({ txt: `⚡ ${L("特性", "Trait", "特性")}：${LF(enemy, "traitDesc")}`, type: "info" });
 
   const result = fightMonster(enemy, np, pAtk, pDef, pMhp, specials, wc, log, bleedRef);
   np = result.np;
@@ -674,7 +674,7 @@ export function simulateExpedition(expedition: any, initPlayer: any, deps: Comba
     const expGain = Math.floor(enemy.expReward * expedition.expMult);
     const goldGain = Math.floor(enemy.goldReward * expedition.goldMult);
     np = lvUp(np, expGain, goldGain, log);
-    log.push({ txt: L(`✅ 擊敗${enemy.name}！+${expGain}EXP +${goldGain}金`, `✅ Defeated ${LF(enemy, "name")}! +${expGain} EXP +${goldGain} gold`), type: "win" });
+    log.push({ txt: L(`✅ 擊敗${enemy.name}！+${expGain}EXP +${goldGain}金`, `✅ Defeated ${LF(enemy, "name")}! +${expGain} EXP +${goldGain} gold`, `✅ 击败${LF(enemy, "name")}！+${expGain}EXP +${goldGain}金`), type: "win" });
     if (Math.random() < 0.3 + expedition.lootBonus) {
       const drop = genLoot(np.level, expedition.lootBonus);
       drops.push(drop);
@@ -683,17 +683,17 @@ export function simulateExpedition(expedition: any, initPlayer: any, deps: Comba
     if (Math.random() < 0.08 + expedition.lootBonus * 0.5) {
       const scroll = genMercScroll(np.level);
       drops.push(scroll);
-      log.push({ txt: L(`📜 傭兵契約捲軸：${scroll.rarityLabel}【${scroll.name}】`, `📜 Merc Scroll: ${LF(scroll, "rarityLabel")} [${LF(scroll, "name")}]`), type: "loot" });
+      log.push({ txt: L(`📜 傭兵契約捲軸：${scroll.rarityLabel}【${scroll.name}】`, `📜 Merc Scroll: ${LF(scroll, "rarityLabel")} [${LF(scroll, "name")}]`, `📜 佣兵契约卷轴：${scroll.rarityLabel}【${scroll.name}】`), type: "loot" });
     }
   } else {
-    log.push({ txt: L(`💀 被${enemy.name}擊敗！`, `💀 Defeated by ${LF(enemy, "name")}!`), type: "lose" });
+    log.push({ txt: L(`💀 被${enemy.name}擊敗！`, `💀 Defeated by ${LF(enemy, "name")}!`, `💀 被${LF(enemy, "name")}击败！`), type: "lose" });
     np.gold = Math.max(50, np.gold - Math.min(300, Math.floor(np.gold * 0.08)));
     np.hp = Math.floor(cMhp(np) * 0.3);
   }
 
   log.push({ txt: "─────────────────", type: "sep" });
   const expAvgDps = (result.rounds || 0) > 0 ? Math.round(result.totalDmgDealt / result.rounds) : 0;
-  log.push({ txt: `📊 ${result.won ? L("勝利", "Victory") : L("落敗", "Defeat")} · ${L("造成", "Dealt")}${result.totalDmgDealt} · ${L("均傷", "Avg DPS")}${expAvgDps} · ${L("承受", "Taken")}${result.totalDmgTaken} · ${L("爆擊", "Crits")}${result.crits}${L("次", "")}${(result.setTriggers || 0) > 0 ? ` · ${L("套裝觸發", "Set procs")}${result.setTriggers}${L("次", "")}` : ""}`, type: result.won ? "win" : "lose" });
+  log.push({ txt: `📊 ${result.won ? L("勝利", "Victory", "胜利") : L("落敗", "Defeat", "落败")} · ${L("造成", "Dealt", "造成")}${result.totalDmgDealt} · ${L("均傷", "Avg DPS", "均伤")}${expAvgDps} · ${L("承受", "Taken", "承受")}${result.totalDmgTaken} · ${L("爆擊", "Crits", "暴击")}${result.crits}${L("次", "", "次")}${(result.setTriggers || 0) > 0 ? ` · ${L("套裝觸發", "Set procs", "套装触发")}${result.setTriggers}${L("次", "", "次")}` : ""}`, type: result.won ? "win" : "lose" });
   return { log, finalPlayer: np, drops, kills, won: result.won };
 }
 
@@ -766,8 +766,8 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
     log.push({ txt: "━━━━━━━━━━━━━━━━━━", type: "sep" });
     log.push({ txt: `🔥 ${LF(dungeon, "bossIntro")}`, type: "title" });
     const boss = buildEnemy(dungeon.boss, np.level, tier.mult, true);
-    log.push({ txt: `${boss.icon}${LF(boss, "name")} ｜ HP:${boss.maxHp} ${L("攻", "ATK")}:${boss.attack} ${L("防", "DEF")}:${boss.defense}`, type: "info" });
-    log.push({ txt: `👹 ${L("Boss特性", "Boss trait")}：${LF(boss, "traitDesc")}`, type: "info" });
+    log.push({ txt: `${boss.icon}${LF(boss, "name")} ｜ HP:${boss.maxHp} ${L("攻", "ATK", "攻")}:${boss.attack} ${L("防", "DEF", "防")}:${boss.defense}`, type: "info" });
+    log.push({ txt: `👹 ${L("Boss特性", "Boss trait", "Boss特性")}：${LF(boss, "traitDesc")}`, type: "info" });
     const result = fightMonster(boss, np, pAtk, pDef, pMhp, specials, wc, log, bleedRef);
     np = result.np;
     totalDmgDealt += result.totalDmgDealt;
@@ -781,7 +781,7 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
       const expGain = Math.floor(boss.expReward * tier.expMult);
       const goldGain = Math.floor(boss.goldReward * tier.goldMult);
       np = lvUp(np, expGain, goldGain, log);
-      log.push({ txt: L(`👑 擊敗Boss ${boss.name}！+${expGain}EXP +${goldGain}金`, `👑 Boss ${LF(boss, "name")} defeated! +${expGain} EXP +${goldGain} gold`), type: "win" });
+      log.push({ txt: L(`👑 擊敗Boss ${boss.name}！+${expGain}EXP +${goldGain}金`, `👑 Boss ${LF(boss, "name")} defeated! +${expGain} EXP +${goldGain} gold`, `👑 击败Boss ${LF(boss, "name")}！+${expGain}EXP +${goldGain}金`), type: "win" });
       if (Math.random() < 0.6 + tier.lootBonus) {
         const drop = genLoot(np.level, tier.lootBonus + 0.1);
         drops.push(drop);
@@ -790,10 +790,10 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
       if (Math.random() < 0.25 + tier.lootBonus) {
         const scroll = genMercScroll(np.level);
         drops.push(scroll);
-        log.push({ txt: L(`📜 Boss掉落契約捲軸：${scroll.rarityLabel}【${scroll.name}】`, `📜 Boss scroll drop: ${LF(scroll, "rarityLabel")} [${LF(scroll, "name")}]`), type: "loot" });
+        log.push({ txt: L(`📜 Boss掉落契約捲軸：${scroll.rarityLabel}【${scroll.name}】`, `📜 Boss scroll drop: ${LF(scroll, "rarityLabel")} [${LF(scroll, "name")}]`, `📜 Boss掉落契约卷轴：${scroll.rarityLabel}【${scroll.name}】`), type: "loot" });
       }
     } else {
-      log.push({ txt: L(`💀 敗於Boss ${boss.name}！`, `💀 Defeated by Boss ${LF(boss, "name")}!`), type: "lose" });
+      log.push({ txt: L(`💀 敗於Boss ${boss.name}！`, `💀 Defeated by Boss ${LF(boss, "name")}!`, `💀 败于Boss ${LF(boss, "name")}！`), type: "lose" });
     }
   }
 
@@ -805,9 +805,9 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
   const totalMonsters = dungeon.waves.flatMap((wave: any) => wave.monsters).length + 1;
   log.push({ txt: "─────────────────", type: "sep" });
   const avgDps = totalRounds > 0 ? Math.round(totalDmgDealt / totalRounds) : 0;
-  log.push({ txt: L("📊 戰鬥結算", "📊 Battle Summary"), type: "title" });
-  log.push({ txt: `${won ? L("🏆 副本完成！", "🏆 Dungeon cleared!") : L("💀 副本失敗", "💀 Dungeon failed")} · ${L("擊殺", "Kills")}${totalKills}/${totalMonsters}`, type: won ? "win" : "lose" });
-  log.push({ txt: `⚔ ${L("造成", "Dealt")}${totalDmgDealt} · ${L("均傷", "Avg DPS")}${avgDps} · ${L("承受", "Taken")}${totalDmgTaken} · ${L("爆擊", "Crits")}${totalCrits}${L("次", "")}${totalSetTriggers > 0 ? ` · ${L("套裝觸發", "Set procs")}${totalSetTriggers}${L("次", "")}` : ""} · ${L("掉落", "Drops")}${drops.length}${L("件", "")}`, type: "info" });
+  log.push({ txt: L("📊 戰鬥結算", "📊 Battle Summary", "📊 战斗结算"), type: "title" });
+  log.push({ txt: `${won ? L("🏆 副本完成！", "🏆 Dungeon cleared!", "🏆 副本完成！") : L("💀 副本失敗", "💀 Dungeon failed", "💀 副本失败")} · ${L("擊殺", "Kills", "击杀")}${totalKills}/${totalMonsters}`, type: won ? "win" : "lose" });
+  log.push({ txt: `⚔ ${L("造成", "Dealt", "造成")}${totalDmgDealt} · ${L("均傷", "Avg DPS", "均伤")}${avgDps} · ${L("承受", "Taken", "承受")}${totalDmgTaken} · ${L("爆擊", "Crits", "暴击")}${totalCrits}${L("次", "", "次")}${totalSetTriggers > 0 ? ` · ${L("套裝觸發", "Set procs", "套装触发")}${totalSetTriggers}${L("次", "", "次")}` : ""} · ${L("掉落", "Drops", "掉落")}${drops.length}${L("件", "", "件")}`, type: "info" });
   return { log, finalPlayer: np, drops, kills, won };
 }
 
@@ -856,9 +856,9 @@ export function simulateMercRun(dungeonId: any, initPlayer: any, mercs: any, dep
   let totalMercCrits = 0;
   let totalMercSetTriggers = 0;
 
-  log.push({ txt: L(`🏴 傭兵副本：${dungeon.icon}${dungeon.label}`, `🏴 Merc Dungeon: ${dungeon.icon}${LF(dungeon, "label")}`), type: "title" });
+  log.push({ txt: L(`🏴 傭兵副本：${dungeon.icon}${dungeon.label}`, `🏴 Merc Dungeon: ${dungeon.icon}${LF(dungeon, "label")}`, `🏴 佣兵副本：${dungeon.icon}${LF(dungeon, "label")}`), type: "title" });
   log.push({ txt: `"${LF(dungeon, "lore")}"`, type: "info" });
-  log.push({ txt: `📢 ${L("傭兵", "Mercs")}：${nm.map((merc: any) => LF(merc, "name")).join(L("、", ", "))}`, type: "info" });
+  log.push({ txt: `📢 ${L("傭兵", "Mercs", "佣兵")}：${nm.map((merc: any) => LF(merc, "name")).join(L("、", ", ", "、"))}`, type: "info" });
 
   for (let waveIndex = 0; waveIndex < dungeon.waves.length; waveIndex += 1) {
     const wave = dungeon.waves[waveIndex];
@@ -944,8 +944,8 @@ export function simulateMercRun(dungeonId: any, initPlayer: any, mercs: any, dep
       isBoss: true,
     };
     log.push({ txt: "━━━━━━━━━━━━━━━━━━", type: "sep" });
-    log.push({ txt: L(`👑 副本首領：${bossData.icon}${bossData.name} 登場！`, `👑 Dungeon Boss: ${bossData.icon}${LF(bossData, "name")} enters!`), type: "title" });
-    log.push({ txt: `HP:${bossEnemy.maxHp} ${L("攻", "ATK")}:${bossEnemy.attack} ${L("防", "DEF")}:${bossEnemy.defense}`, type: "info" });
+    log.push({ txt: L(`👑 副本首領：${bossData.icon}${bossData.name} 登場！`, `👑 Dungeon Boss: ${bossData.icon}${LF(bossData, "name")} enters!`, `👑 副本首领：${bossData.icon}${LF(bossData, "name")} 登场！`), type: "title" });
+    log.push({ txt: `HP:${bossEnemy.maxHp} ${L("攻", "ATK", "攻")}:${bossEnemy.attack} ${L("防", "DEF", "防")}:${bossEnemy.defense}`, type: "info" });
     const bleedRef = { val: 0 };
     const result = fightMonster(bossEnemy, np, pAtk, pDef, pMhp, specials, getWeaponCat(np), log, bleedRef);
     np = result.np;
@@ -955,12 +955,12 @@ export function simulateMercRun(dungeonId: any, initPlayer: any, mercs: any, dep
     if (result.won) {
       recordKill(kills, bossData.name, bossData.name, "boss");
       np = lvUp(np, bossEnemy.expReward, bossEnemy.goldReward, log);
-      log.push({ txt: L(`👑 擊敗首領${bossData.name}！+${bossEnemy.expReward}EXP`, `👑 Boss ${LF(bossData, "name")} defeated! +${bossEnemy.expReward} EXP`), type: "win" });
+      log.push({ txt: L(`👑 擊敗首領${bossData.name}！+${bossEnemy.expReward}EXP`, `👑 Boss ${LF(bossData, "name")} defeated! +${bossEnemy.expReward} EXP`, `👑 击败首领${LF(bossData, "name")}！+${bossEnemy.expReward}EXP`), type: "win" });
       const scrollBonus = (dungeon.reward && dungeon.reward.scrollBonus) || 0.3;
       if (Math.random() < scrollBonus) {
         const scroll = genMercScroll(np.level);
         drops.push(scroll);
-        log.push({ txt: L(`📜 首領掉落契約捲軸：${scroll.rarityLabel}【${scroll.name}】`, `📜 Boss scroll drop: ${LF(scroll, "rarityLabel")} [${LF(scroll, "name")}]`), type: "loot" });
+        log.push({ txt: L(`📜 首領掉落契約捲軸：${scroll.rarityLabel}【${scroll.name}】`, `📜 Boss scroll drop: ${LF(scroll, "rarityLabel")} [${LF(scroll, "name")}]`, `📜 首领掉落契约卷轴：${scroll.rarityLabel}【${scroll.name}】`), type: "loot" });
       }
       if (Math.random() < 0.4) {
         const drop = genLoot(np.level, 0.2);
@@ -968,7 +968,7 @@ export function simulateMercRun(dungeonId: any, initPlayer: any, mercs: any, dep
         log.push({ txt: L(`✨ 掉落：${drop.rarityLabel}【${drop.name}】`, `✨ Drop: ${LF(drop, "rarityLabel")} [${LF(drop, "name")}]`), type: "loot" });
       }
     } else {
-      log.push({ txt: L(`💀 敗於首領${bossData.name}！`, `💀 Defeated by Boss ${LF(bossData, "name")}!`), type: "lose" });
+      log.push({ txt: L(`💀 敗於首領${bossData.name}！`, `💀 Defeated by Boss ${LF(bossData, "name")}!`, `💀 败于首领${LF(bossData, "name")}！`), type: "lose" });
     }
   }
 
@@ -978,7 +978,7 @@ export function simulateMercRun(dungeonId: any, initPlayer: any, mercs: any, dep
     np.hp = Math.floor(cMhp(np) * 0.3);
   }
   log.push({ txt: "─────────────────", type: "sep" });
-  log.push({ txt: `📊 ${won ? L("勝利", "Victory") : L("落敗", "Defeat")} · ${L("造成", "Dealt")}${totalDmgDealt} · ${L("承受", "Taken")}${totalDmgTaken} · ${L("爆擊", "Crits")}${totalMercCrits}${L("次", "")}${totalMercSetTriggers > 0 ? ` · ${L("套裝觸發", "Set procs")}${totalMercSetTriggers}${L("次", "")}` : ""} · ${L("掉落", "Drops")}${drops.length}${L("件", "")}`, type: won ? "win" : "lose" });
+  log.push({ txt: `📊 ${won ? L("勝利", "Victory", "胜利") : L("落敗", "Defeat", "落败")} · ${L("造成", "Dealt", "造成")}${totalDmgDealt} · ${L("承受", "Taken", "承受")}${totalDmgTaken} · ${L("爆擊", "Crits", "暴击")}${totalMercCrits}${L("次", "", "次")}${totalMercSetTriggers > 0 ? ` · ${L("套裝觸發", "Set procs", "套装触发")}${totalMercSetTriggers}${L("次", "", "次")}` : ""} · ${L("掉落", "Drops", "掉落")}${drops.length}${L("件", "", "件")}`, type: won ? "win" : "lose" });
   return { log, finalPlayer: np, drops, kills, won };
 }
 
@@ -1053,15 +1053,15 @@ export function simulateArenaBattle(player: any, opponent: any) {
   if (won) {
     goldPlundered = Math.floor(opponent.goldCarried * (0.10 + Math.random() * 0.15));
     log.push({ txt: `━━━━━━━━━━━━━━━━━━`, type: "sep" });
-    log.push({ txt: L(`🏆 勝利！擊敗 ${opponent.name}！`, `🏆 Victory! Defeated ${LF(opponent, "name")}!`), type: "win" });
-    log.push({ txt: L(`💰 掠奪金幣 ${goldPlundered}（對手攜帶 ${opponent.goldCarried}）`, `💰 Plundered ${goldPlundered} gold (foe carried ${opponent.goldCarried})`), type: "win" });
+    log.push({ txt: L(`🏆 勝利！擊敗 ${opponent.name}！`, `🏆 Victory! Defeated ${LF(opponent, "name")}!`, `🏆 胜利！击败 ${LF(opponent, "name")}！`), type: "win" });
+    log.push({ txt: L(`💰 掠奪金幣 ${goldPlundered}（對手攜帶 ${opponent.goldCarried}）`, `💰 Plundered ${goldPlundered} gold (foe carried ${opponent.goldCarried})`, `💰 掠夺金币 ${goldPlundered}（对手携带 ${opponent.goldCarried}）`), type: "win" });
   } else {
     log.push({ txt: `━━━━━━━━━━━━━━━━━━`, type: "sep" });
-    log.push({ txt: L(`💀 落敗！被 ${opponent.name} 擊倒！`, `💀 Defeated by ${LF(opponent, "name")}!`), type: "lose" });
-    log.push({ txt: L(`🛌 你需要休息 30 分鐘才能再戰`, `🛌 Rest 30 min before fighting again`), type: "lose" });
+    log.push({ txt: L(`💀 落敗！被 ${opponent.name} 擊倒！`, `💀 Defeated by ${LF(opponent, "name")}!`, `💀 落败！被 ${LF(opponent, "name")} 击倒！`), type: "lose" });
+    log.push({ txt: L(`🛌 你需要休息 30 分鐘才能再戰`, `🛌 Rest 30 min before fighting again`, `🛌 你需要休息 30 分钟才能再战`), type: "lose" });
   }
   log.push({ txt: `─────────────────`, type: "sep" });
-  log.push({ txt: `📊 ${L("造成", "Dealt")} ${result.totalDmgDealt} · ${L("承受", "Taken")} ${result.totalDmgTaken} · ${L("爆擊", "Crits")} ${result.crits}${L("次", "")}${(result.setTriggers || 0) > 0 ? ` · ${L("套裝觸發", "Set procs")}${result.setTriggers}${L("次", "")}` : ""}`, type: "info" });
+  log.push({ txt: `📊 ${L("造成", "Dealt", "造成")} ${result.totalDmgDealt} · ${L("承受", "Taken", "承受")} ${result.totalDmgTaken} · ${L("爆擊", "Crits", "暴击")} ${result.crits}${L("次", "", "次")}${(result.setTriggers || 0) > 0 ? ` · ${L("套裝觸發", "Set procs", "套装触发")}${result.setTriggers}${L("次", "", "次")}` : ""}`, type: "info" });
 
   return { log, finalPlayer: result.np, won, goldPlundered };
 }

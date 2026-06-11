@@ -45,7 +45,7 @@ export function AudioSettingsButton() {
         className="btn btm"
         style={{ fontSize: 13, padding: "4px 8px", lineHeight: 1 }}
         onClick={() => setOpen(o => !o)}
-        title={L("音效設定", "Sound Settings")}
+        title={L("音效設定", "Sound Settings", "音效设置")}
       >
         {settings.seEnabled ? "🔊" : "🔇"}
       </button>
@@ -64,13 +64,13 @@ export function AudioSettingsButton() {
         }}>
           {/* Header */}
           <div style={{ fontSize: 10, letterSpacing: 3, color: "#8b5a14", marginBottom: 14, textTransform: "uppercase" as const }}>
-            ⚙ {L("音效設定", "Sound Settings")}
+            ⚙ {L("音效設定", "Sound Settings", "音效设置")}
           </div>
 
           {/* Master Volume */}
           <div style={{ marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#c8a878", marginBottom: 6 }}>
-              <span>{L("總音量", "Master Vol")}</span>
+              <span>{L("總音量", "Master Vol", "总音量")}</span>
               <span style={{ color: "#e8c050" }}>{volPct}%</span>
             </div>
             <input
@@ -90,7 +90,7 @@ export function AudioSettingsButton() {
           {/* BGM Toggle */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontSize: 11, color: settings.bgmEnabled ? "#c8a878" : "#5a4828" }}>
-              🎵 {L("音樂 BGM", "Music BGM")}
+              🎵 {L("音樂 BGM", "Music BGM", "音乐 BGM")}
             </span>
             <ToggleSwitch on={settings.bgmEnabled} onToggle={toggleBgm} />
           </div>

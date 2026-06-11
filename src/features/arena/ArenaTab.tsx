@@ -57,7 +57,7 @@ export function ArenaTab({ player, arenaOpponents, arenaInjuredUntil, arenaRefre
 
       <div className="arena-refresh-bar">
         <div style={{ color: "#8a7050" }}>
-          {L("今日免費刷新：", "Free refreshes: ")}<span style={{ color: "#c8961e", fontFamily: "'Cinzel',serif" }}>{arenaRefreshes}</span>/5{t("arenaFreeLeft")}
+          {L("今日免費刷新：", "Free refreshes: ", "今日免费刷新：")}<span style={{ color: "#c8961e", fontFamily: "'Cinzel',serif" }}>{arenaRefreshes}</span>/5{t("arenaFreeLeft")}
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button className="btn btp" style={{ fontSize: 10, padding: "5px 12px" }}
@@ -66,7 +66,7 @@ export function ArenaTab({ player, arenaOpponents, arenaInjuredUntil, arenaRefre
           </button>
           <button className="btn btm" style={{ fontSize: 10, padding: "5px 12px" }}
             onClick={() => onRefresh(false)}>
-            {L(`🪙 花費 ${50 + player.level * 10} 刷新`, `🪙 Refresh for ${50 + player.level * 10}`)}
+            {L(`🪙 花費 ${50 + player.level * 10} 刷新`, `🪙 Refresh for ${50 + player.level * 10}`, `🪙 花费 ${50 + player.level * 10} 刷新`)}
           </button>
         </div>
       </div>
@@ -133,7 +133,7 @@ export function ArenaTab({ player, arenaOpponents, arenaInjuredUntil, arenaRefre
         🟢 <span style={{ color: "#4caf50" }}>{t("arenaWeak")}</span> {t("arenaWeakDesc")}<br />
         🔵 <span style={{ color: "#4a9fd4" }}>{t("arenaNormal")}</span> {t("arenaNormDesc")}<br />
         🟠 <span style={{ color: "#e07020" }}>{t("arenaStrong")}</span> {t("arenaStrongDesc")}<br />
-        {L("每天 5 次免費刷新，或花費金幣額外刷新。敗北休息 30 分鐘。", "5 free refreshes daily, or pay gold for more. Defeat = 30 min rest.")}
+        {L("每天 5 次免費刷新，或花費金幣額外刷新。敗北休息 30 分鐘。", "5 free refreshes daily, or pay gold for more. Defeat = 30 min rest.", "每天 5 次免费刷新，或花费金币额外刷新。败北休息 30 分钟。")}
       </div>
     </div>
   );

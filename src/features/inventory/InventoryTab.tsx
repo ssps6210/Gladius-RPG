@@ -50,7 +50,7 @@ function CompareTooltip({ newItem, equipped }: { newItem: any; equipped: any }) 
       pointerEvents: "none",
     }}>
       <div style={{ fontSize: 9, color: "#8a6030", fontFamily: "'Cinzel',serif", marginBottom: 4, borderBottom: "1px solid #2a1808", paddingBottom: 3 }}>
-        {equipped ? L("▲ 與已裝備比較", "▲ vs Equipped") : L("（插槽為空）", "(slot empty)")}
+        {equipped ? L("▲ 與已裝備比較", "▲ vs Equipped", "▲ 与已装备比较") : L("（插槽為空）", "(slot empty)", "（插槽为空）")}
       </div>
       {equipped && (
         <div style={{ fontSize: 9, color: "#6a5028", marginBottom: 4, fontStyle: "italic" }}>
@@ -109,11 +109,11 @@ export function InventoryTab({
               <div key={item.uid} className="ii">
                 <div className="iii">{item.icon}</div>
                 <div className="iin">{tr(item, "name")}</div>
-                <div className="iis" style={{ color: "#50a860" }}>{L("回復", "Heal")} {item.heal}HP</div>
+                <div className="iis" style={{ color: "#50a860" }}>{L("回復", "Heal", "回复")} {item.heal}HP</div>
                 <div style={{ color: "#f0c040", fontSize: 11, marginBottom: 4 }}>{L("售", "Sell")} 🪙{price}</div>
                 <div style={{ display: "flex", gap: 4 }}>
                   <button className="btn btm" style={{ flex: 1, fontSize: 9, padding: "5px" }} onClick={onUse}>{L("使用", "Use")}</button>
-                  <button className="btn btd" style={{ flex: 1, fontSize: 9, padding: "5px" }} onClick={onSell}>{L("賣出", "Sell")}</button>
+                  <button className="btn btd" style={{ flex: 1, fontSize: 9, padding: "5px" }} onClick={onSell}>{L("賣出", "Sell", "卖出")}</button>
                 </div>
               </div>
             );
@@ -127,10 +127,10 @@ export function InventoryTab({
                 <div className="iin" style={{ color: rarity.color, textShadow: rarity.glow ? `0 0 8px ${rarity.color}` : "none" }}>{tr(item, "name")}</div>
                 <div style={{ fontSize: 20, margin: "4px 0" }}>{item.icon}</div>
                 <div className="iis">
-                  <div style={{ color: "#c8781e" }}>{L("攻擊", "ATK")} {item.attack}</div>
-                  <div style={{ color: "#4a9fd4" }}>{L("防禦", "DEF")} {item.defense}</div>
+                  <div style={{ color: "#c8781e" }}>{L("攻擊", "ATK", "攻击")} {item.attack}</div>
+                  <div style={{ color: "#4a9fd4" }}>{L("防禦", "DEF", "防御")} {item.defense}</div>
                   <div style={{ color: "#c84040" }}>HP {item.hp}</div>
-                  {item.heal > 0 && <div style={{ color: "#50c890" }}>{L("回復", "Heal")} {item.heal}/{L("回", "rd")}</div>}
+                  {item.heal > 0 && <div style={{ color: "#50c890" }}>{L("回復", "Heal", "回复")} {item.heal}/{L("回", "rd")}</div>}
                 </div>
                 {item.affixes && item.affixes.length > 0 && (
                   <div className="iaf">
@@ -139,7 +139,7 @@ export function InventoryTab({
                         {affix.stat
                           ? `${tr(affix, "tag")}:+${affix.rolledVal || 0}`
                           : affix.special === "all"
-                            ? `${tr(affix, "tag")}:${L("全屬+", "All +")}${Math.round((affix.rolledVal || 0) * 100)}%`
+                            ? `${tr(affix, "tag")}:${L("全屬+", "All +", "全属+")}${Math.round((affix.rolledVal || 0) * 100)}%`
                             : affix.special === "first"
                               ? `${tr(affix, "tag")}:${L("先攻×", "First ×")}${1 + (affix.rolledVal || 0)}`
                               : ""}
@@ -190,7 +190,7 @@ export function InventoryTab({
               <AffixLines affixes={item.affixes} />
               <div style={{ color: "#f0c040", fontSize: 11, margin: "5px 0" }}>{L("售", "Sell")} 🪙{price}</div>
               <div style={{ display: "flex", gap: 4 }}>
-                <button className="btn btp" style={{ flex: 1, fontSize: 9, padding: "5px" }} onClick={onEquip}>{L("裝備", "Equip")}</button>
+                <button className="btn btp" style={{ flex: 1, fontSize: 9, padding: "5px" }} onClick={onEquip}>{L("裝備", "Equip", "装备")}</button>
                 <button className="btn btd" style={{ flex: 1, fontSize: 9, padding: "5px" }} onClick={onSell}>{L("出售", "Sell")}</button>
               </div>
               {onEquip2 && secondarySlotId && (
@@ -201,9 +201,9 @@ export function InventoryTab({
                     onClick={onEquip2}
                     title={currentEquipped2 ? (currentEquipped2 as any).name || "" : ""}
                   >
-                    {L("副槽裝備", "Equip Slot 2")}
+                    {L("副槽裝備", "Equip Slot 2", "副槽装备")}
                     {currentEquipped2
-                      ? <span style={{ color: "#6a5028", marginLeft: 3 }}>({L("替換", "swap")})</span>
+                      ? <span style={{ color: "#6a5028", marginLeft: 3 }}>({L("替換", "swap", "替换")})</span>
                       : <span style={{ color: "#4a3820", marginLeft: 3 }}>({L("空", "empty")})</span>}
                   </button>
                 </div>

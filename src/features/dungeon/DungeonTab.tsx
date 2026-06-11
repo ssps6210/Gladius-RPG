@@ -48,10 +48,10 @@ export function DungeonTab({
           marginBottom: 16,
         }}>
           <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: "#e05050", marginBottom: 6 }}>
-            ⚔ {L("你因落敗而受傷，無法出戰", "You are wounded from defeat and cannot fight")}
+            ⚔ {L("你因落敗而受傷，無法出戰", "You are wounded from defeat and cannot fight", "你因落败而受伤，无法出战")}
           </div>
           <div style={{ fontSize: 11, color: "#7a3030" }}>
-            {L("傷勢尚未痊癒，需等待恢復", "Still recovering — rest and wait")}
+            {L("傷勢尚未痊癒，需等待恢復", "Still recovering — rest and wait", "伤势尚未痊愈，需等待恢复")}
           </div>
         </div>
       )}
@@ -125,7 +125,7 @@ export function DungeonTab({
           <div style={{ padding: "12px", background: "rgba(0,0,0,0.3)", border: "1px solid #2a1a08", borderRadius: 4, fontSize: 12, color: "#4a3020", textAlign: "center", marginBottom: 10 }}>
             {t("noScrolls")}
             <div style={{ marginTop: 8 }}>
-              <button className="btn btm" style={{ fontSize: 10 }} onClick={onAddFreeMercScroll}>{L("🎲 購買隨機捲軸（免費測試）", "🎲 Get Random Scroll (test)")}</button>
+              <button className="btn btm" style={{ fontSize: 10 }} onClick={onAddFreeMercScroll}>{L("🎲 購買隨機捲軸（免費測試）", "🎲 Get Random Scroll (test)", "🎲 购买随机卷轴（免费测试）")}</button>
             </div>
           </div>
         ) : (
@@ -142,7 +142,7 @@ export function DungeonTab({
                     <div style={{ fontSize: 11, color: rarity.color, fontFamily: "'Cinzel',serif", letterSpacing: 0.3, textShadow: rarity.glow ? `0 0 8px ${rarity.color}` : "none" }}>{tr(scroll, "name")}</div>
                     <div style={{ fontSize: 10, color: "#5a4020", marginTop: 3, lineHeight: 1.5 }}>
                       {L("攻", "ATK")}{scroll.attack} {L("防", "DEF")}{scroll.defense} HP{scroll.hp}
-                      {scroll.heal > 0 && <span style={{ color: "#50c890" }}> {L("回復", "Heal")}{scroll.heal}</span>}
+                      {scroll.heal > 0 && <span style={{ color: "#50c890" }}> {L("回復", "Heal", "回复")}{scroll.heal}</span>}
                     </div>
                     {scroll.affixes && scroll.affixes.length > 0 && <div style={{ display: "flex", gap: 2, justifyContent: "center", flexWrap: "wrap", marginTop: 3 }}>
                       {scroll.affixes.map((a, i) => <span key={i} style={{ fontSize: 9, color: a.special ? "#c870d0" : "#6aaa6a", background: "rgba(0,0,0,0.4)", padding: "0 3px", borderRadius: 2 }}>{tr(a, "tag")}</span>)}
@@ -153,7 +153,7 @@ export function DungeonTab({
               })}
             </div>
             {selectedScrolls.length > 0 && <div style={{ margin: "8px 0", padding: "6px 12px", background: "#1a1208", border: "1px solid #3a2a10", borderRadius: 5, fontSize: 12, color: "#c8a848" }}>
-              {L(`已選 ${selectedScrolls.length} 名傭兵 · 出發後捲軸將被消耗`, `${selectedScrolls.length} merc(s) selected · scrolls consumed on deploy`)}
+              {L(`已選 ${selectedScrolls.length} 名傭兵 · 出發後捲軸將被消耗`, `${selectedScrolls.length} merc(s) selected · scrolls consumed on deploy`, `已选 ${selectedScrolls.length} 名佣兵 · 出发后卷轴将被消耗`)}
             </div>}
           </div>
         )}

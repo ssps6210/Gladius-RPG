@@ -22,9 +22,9 @@ export function InnPanel({ player, recovery, restCost, onRest }: InnPanelProps) 
       <p>
         HP：{player.hp} / {player.maxHp}
       </p>
-      {dungeonInjured && <p>{L(`地下城受傷中，尚需約 ${dungeonMinutes} 分鐘`, `Dungeon injury — ~${dungeonMinutes} min left`)}</p>}
-      {arenaInjured && <p>{L(`競技場受傷中，尚需約 ${arenaMinutes} 分鐘`, `Arena injury — ~${arenaMinutes} min left`)}</p>}
-      <button className="btn btm" onClick={onRest}>{L(`🛏 住宿恢復 (-🪙${restCost})`, `🛏 Rest (-🪙${restCost})`)}</button>
+      {dungeonInjured && <p>{L(`地下城受傷中，尚需約 ${dungeonMinutes} 分鐘`, `Dungeon injury — ~${dungeonMinutes} min left`, `地下城受伤中，尚需约 ${dungeonMinutes} 分钟`)}</p>}
+      {arenaInjured && <p>{L(`競技場受傷中，尚需約 ${arenaMinutes} 分鐘`, `Arena injury — ~${arenaMinutes} min left`, `竞技场受伤中，尚需约 ${arenaMinutes} 分钟`)}</p>}
+      <button className="btn btm" onClick={onRest}>{L(`🛏 住宿恢復 (-🪙${restCost})`, `🛏 Rest (-🪙${restCost})`, `🛏 住宿恢复 (-🪙${restCost})`)}</button>
     </div>
   );
 }

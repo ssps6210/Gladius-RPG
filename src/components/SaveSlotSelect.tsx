@@ -34,7 +34,7 @@ function SlotCard({
     }}>
       <div>
         <div style={{ fontSize: 10, color: "#4a3020", fontFamily: "'Cinzel',serif", letterSpacing: 2, marginBottom: 10 }}>
-          {L(`存檔 ${slot}`, `SLOT ${slot}`)}
+          {L(`存檔 ${slot}`, `SLOT ${slot}`, `存档 ${slot}`)}
         </div>
         {preview ? (
           <>
@@ -48,7 +48,7 @@ function SlotCard({
           </>
         ) : (
           <div style={{ fontSize: 12, color: "#3a2a14", fontStyle: "italic", marginTop: 4 }}>
-            {L("— 空存檔 —", "— Empty —")}
+            {L("— 空存檔 —", "— Empty —", "— 空存档 —")}
           </div>
         )}
       </div>
@@ -57,15 +57,15 @@ function SlotCard({
         {preview ? (
           <>
             <button className="btn btp" style={{ flex: 2, fontSize: 11 }} onClick={onContinue}>
-              {L("繼續", "Continue")}
+              {L("繼續", "Continue", "继续")}
             </button>
             <button className="btn btd" style={{ flex: 1, fontSize: 11 }} onClick={onDelete}>
-              {L("刪除", "Delete")}
+              {L("刪除", "Delete", "删除")}
             </button>
           </>
         ) : (
           <button className="btn btp" style={{ flex: 1, fontSize: 11 }} onClick={onNew}>
-            {L("新遊戲", "New Game")}
+            {L("新遊戲", "New Game", "新游戏")}
           </button>
         )}
       </div>
@@ -82,7 +82,7 @@ export function SaveSlotSelect({ onSelect }: { onSelect: (slot: SaveSlot) => voi
   }));
 
   const handleDelete = (slot: SaveSlot) => {
-    if (!confirm(L(`確定刪除存檔 ${slot}？此操作無法復原。`, `Delete Slot ${slot}? This cannot be undone.`))) return;
+    if (!confirm(L(`確定刪除存檔 ${slot}？此操作無法復原。`, `Delete Slot ${slot}? This cannot be undone.`, `确定删除存档 ${slot}？此操作无法复原。`))) return;
     clearGameState(slot);
     setPreviews(p => ({ ...p, [slot]: null }));
   };
@@ -98,7 +98,7 @@ export function SaveSlotSelect({ onSelect }: { onSelect: (slot: SaveSlot) => voi
         ⚔ GLADIUS
       </div>
       <div style={{ fontSize: 11, color: "#4a3820", letterSpacing: 4, marginBottom: 40, textTransform: "uppercase" as const }}>
-        {L("選擇存檔", "Select Save")}
+        {L("選擇存檔", "Select Save", "选择存档")}
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, width: "100%", maxWidth: 600 }}>
@@ -115,7 +115,7 @@ export function SaveSlotSelect({ onSelect }: { onSelect: (slot: SaveSlot) => voi
       </div>
 
       <div style={{ fontSize: 10, color: "#2a1e0e", marginTop: 32 }}>
-        {L("注意：一旦選擇轉職職業，道路將永久鎖定，只能重新打檔更換", "Note: Class path is permanent once chosen — restart to change lineage")}
+        {L("注意：一旦選擇轉職職業，道路將永久鎖定，只能重新打檔更換", "Note: Class path is permanent once chosen — restart to change lineage", "注意：一旦选择转职职业，道路将永久锁定，只能重新打档更换")}
       </div>
     </div>
   );

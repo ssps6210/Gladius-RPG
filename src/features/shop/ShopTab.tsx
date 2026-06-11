@@ -66,7 +66,7 @@ export function ShopTab({
       {shopTab === "buy" && (
         <div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <div style={{ fontSize: 12, color: "#6a5030" }}>{L(`商品已依你的等級(Lv.${playerLevel})生成`, `Items generated for your level (Lv.${playerLevel})`)}</div>
+            <div style={{ fontSize: 12, color: "#6a5030" }}>{L(`商品已依你的等級(Lv.${playerLevel})生成`, `Items generated for your level (Lv.${playerLevel})`, `商品已依你的等级(Lv.${playerLevel})生成`)}</div>
             <button className="btn btm" style={{ fontSize: 10, padding: "5px 12px" }} onClick={refreshShop}>
               {L(`🔄 刷新 (-🪙${refreshShopCost})`, `🔄 Refresh (-🪙${refreshShopCost})`)}
             </button>
@@ -110,7 +110,7 @@ export function ShopTab({
                   </div>
                   {item.affixes && item.affixes.length > 0 && <div className="iaf" style={{ marginBottom: 6 }}>
                     {item.affixes.map((a: any, i: any) => <div key={i} className={`al${a.special ? " as" : ""}`}>
-                      {a.stat ? `${tr(a, "tag")}:+${a.rolledVal}` : a.special === "crit" ? `${tr(a, "tag")}:${a.rolledVal}%${L("爆擊", " Crit")}` : a.special === "lifesteal" ? `${tr(a, "tag")}:${a.rolledVal}%${L("吸血", " LS")}` : tr(a, "tag")}
+                      {a.stat ? `${tr(a, "tag")}:+${a.rolledVal}` : a.special === "crit" ? `${tr(a, "tag")}:${a.rolledVal}%${L("爆擊", " Crit", "爆击")}` : a.special === "lifesteal" ? `${tr(a, "tag")}:${a.rolledVal}%${L("吸血", " LS")}` : tr(a, "tag")}
                     </div>)}
                   </div>}
                   <div className="sic">🪙 {item.cost}</div>
@@ -202,7 +202,7 @@ export function ShopTab({
                     <div className="rb" style={{ color: rarity.color, borderColor: rarity.color + "55", background: `${rarity.color}15` }}>{tr(rarity, "label")}</div>
                     <div className="iin" style={{ color: rarity.color }}>{tr(item, "name")}</div>
                     <div className="iis">{L("攻", "ATK")}{item.attack} {L("防", "DEF")}{item.defense} HP{item.hp}</div>
-                    <div style={{ color: "#f0c040", fontSize: 12, margin: "6px 0" }}>{L("售價", "Sell")} 🪙{price}</div>
+                    <div style={{ color: "#f0c040", fontSize: 12, margin: "6px 0" }}>{L("售價", "Sell", "售价")} 🪙{price}</div>
                     {onSelect && <button className="btn btp" style={{ width: "100%", fontSize: 10, marginBottom: 4 }} onClick={onSelect}>{selectLabel}</button>}
                     <button className="btn btd" style={{ width: "100%", fontSize: 10 }} onClick={onSell}>{L("出售", "Sell")}</button>
                   </div>
@@ -215,7 +215,7 @@ export function ShopTab({
                   onEquip={onEquip}
                   footer={(
                     <>
-                      <div style={{ color: "#f0c040", fontSize: 12, margin: "2px 0 0" }}>{L("售價", "Sell")} 🪙{price}</div>
+                      <div style={{ color: "#f0c040", fontSize: 12, margin: "2px 0 0" }}>{L("售價", "Sell", "售价")} 🪙{price}</div>
                       <button className="btn btd" style={{ width: "100%", fontSize: 10 }} onClick={onSell}>{L("出售", "Sell")}</button>
                     </>
                   )}

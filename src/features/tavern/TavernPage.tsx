@@ -88,11 +88,11 @@ export function TavernPage({
                   <div style={{ fontSize: 11, color: "#6a5030", marginBottom: 3 }}>{L("目標", "Target")}：{monName(quest.targetMonster)} ×{quest.reqCount}　Lv.{quest.reqLv}+</div>
                   <div style={{ fontSize: 11, color: "#8b7650", marginBottom: 3, fontStyle: "italic" }}>{tr(quest, "hint")}</div>
                   <div style={{ fontSize: 11, color: "#c8961e", marginBottom: isAccepted ? 3 : 0 }}>
-                    {L("賞金", "Reward")}：🪙{quest.reward.gold} · ✨{quest.reward.exp} EXP
+                    {L("賞金", "Reward", "赏金")}：🪙{quest.reward.gold} · ✨{quest.reward.exp} EXP
                   </div>
                   {isAccepted && (
                     <div style={{ fontSize: 11, color: done ? "#50c870" : "#6a5030", fontFamily: "'Cinzel', serif" }}>
-                      {done ? "✓ " : ""}{L("進度", "Progress")}：{Math.min(doneCount, quest.reqCount)} / {quest.reqCount}
+                      {done ? "✓ " : ""}{L("進度", "Progress", "进度")}：{Math.min(doneCount, quest.reqCount)} / {quest.reqCount}
                     </div>
                   )}
                 </div>
@@ -101,14 +101,14 @@ export function TavernPage({
                     fontSize: 9, color: "#c8961e", fontFamily: "'Cinzel', serif",
                     border: "1px solid #5a3a10", borderRadius: 2,
                     padding: "2px 6px", letterSpacing: 1, whiteSpace: "nowrap",
-                  }}>{L("進行中", "ACTIVE")}</div>
+                  }}>{L("進行中", "ACTIVE", "进行中")}</div>
                 )}
               </div>
 
               <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
                 {!isAccepted && <button className="btn btp" disabled={!!activeQuestId} onClick={() => onAcceptQuest(quest.id)}>{t("tavernAccept")}</button>}
                 {isAccepted && !done && <button className="btn btm" onClick={() => onAbandonQuest(quest.id)}>{t("tavernAbandon")}</button>}
-                {isAccepted && done && <button className="btn btd" style={{ letterSpacing: 1 }} onClick={() => onClaimQuest(quest.id)}>{L("領取賞金", "Claim Bounty")}</button>}
+                {isAccepted && done && <button className="btn btd" style={{ letterSpacing: 1 }} onClick={() => onClaimQuest(quest.id)}>{L("領取賞金", "Claim Bounty", "领取赏金")}</button>}
               </div>
             </article>
           );

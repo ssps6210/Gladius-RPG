@@ -55,7 +55,7 @@ export function TrainTab({ trainingCards, enhanceLog, enhanceItems, enhanceAnim,
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                 <div style={{ fontFamily: "'Cinzel',serif", fontSize: 14, color: card.color }}>
                   {card.displayValue}
-                  <span style={{ fontSize: 10, color: "#5a4020", marginLeft: 4 }}>{L(`（基礎+${card.current}訓練）`, ` (base +${card.current} trained)`)}</span>
+                  <span style={{ fontSize: 10, color: "#5a4020", marginLeft: 4 }}>{L(`（基礎+${card.current}訓練）`, ` (base +${card.current} trained)`, `（基础+${card.current}训练）`)}</span>
                 </div>
                 <div style={{ fontSize: 12, color: card.canAfford ? "#f0c040" : "#c84040" }}>🪙{card.cost}</div>
               </div>
@@ -75,7 +75,7 @@ export function TrainTab({ trainingCards, enhanceLog, enhanceItems, enhanceAnim,
       <div className="sub">{t("enhTitle2")}</div>
       <div style={{ padding: "8px 12px", background: "#120e06", border: "1px solid #2a1a08", borderRadius: 5, fontSize: 12, color: "#6a5030", marginBottom: 12, lineHeight: 1.7 }}>
         {t("enhDesc1")} <span style={{ color: "#e07020" }}>+10</span>。<br />
-        {L("+1~+3 失敗維持原級，+4以上失敗降一級（不追加扣費）。", "+1~+3 keeps level on fail; +4 and up drops one level on fail (no extra cost).")}<br />
+        {L("+1~+3 失敗維持原級，+4以上失敗降一級（不追加扣費）。", "+1~+3 keeps level on fail; +4 and up drops one level on fail (no extra cost).", "+1~+3 失败维持原级，+4以上失败降一级（不追加扣费）。")}<br />
         <span style={{ color: "#4caf50" }}>{t("enhDesc2")}</span>
       </div>
 
@@ -130,8 +130,8 @@ export function TrainTab({ trainingCards, enhanceLog, enhanceItems, enhanceAnim,
               </div>
               {!isMax && lvData && (
                 <div style={{ fontSize: 10, color: "#5a4020", margin: "4px 0", lineHeight: 1.5 }}>
-                  {L(`下一級：成功率 ${Math.round(lvData.rate * 100)}%`, `Next: ${Math.round(lvData.rate * 100)}% success`)}<br />
-                  {L("費用", "Cost")} 🪙{cost}
+                  {L(`下一級：成功率 ${Math.round(lvData.rate * 100)}%`, `Next: ${Math.round(lvData.rate * 100)}% success`, `下一级：成功率 ${Math.round(lvData.rate * 100)}%`)}<br />
+                  {L("費用", "Cost", "费用")} 🪙{cost}
                 </div>
               )}
               {isSelected && !isMax && (
@@ -143,7 +143,7 @@ export function TrainTab({ trainingCards, enhanceLog, enhanceItems, enhanceAnim,
                   }}
                   disabled={!canAfford}
                   onClick={triggerEnhance}>
-                  {canAfford ? L(`⚒ 強化 +${curLv}→+${curLv + 1}`, `⚒ Enhance +${curLv}→+${curLv + 1}`) : L(`金幣不足 (需${cost})`, `Need ${cost} gold`)}
+                  {canAfford ? L(`⚒ 強化 +${curLv}→+${curLv + 1}`, `⚒ Enhance +${curLv}→+${curLv + 1}`, `⚒ 强化 +${curLv}→+${curLv + 1}`) : L(`金幣不足 (需${cost})`, `Need ${cost} gold`, `金币不足 (需${cost})`)}
                 </button>
               )}
               {isMax && <div style={{ fontSize: 10, color: "#e07020", fontFamily: "'Cinzel',serif" }}>{t("enhMax")}</div>}
@@ -154,9 +154,9 @@ export function TrainTab({ trainingCards, enhanceLog, enhanceItems, enhanceAnim,
       {/* 鍛造合成區塊 */}
       <div className="sub" style={{ marginTop: 24 }}>{t("synthTitle")}</div>
       <div style={{ padding: "8px 12px", background: "#120e06", border: "1px solid #2a1a08", borderRadius: 5, fontSize: 12, color: "#6a5030", marginBottom: 12, lineHeight: 1.7 }}>
-        {L("選擇 2~3 件裝備進行合成，有機會提升稀有度！", "Select 2~3 items to synthesize for a chance to raise rarity!")}<br />
-        {L(`合成消耗 🪙${synthesisGoldCost || "—"} 金幣（每件 30×等級）`, `Cost 🪙${synthesisGoldCost || "—"} gold (30×level each)`)}<br />
-        <span style={{ color: "#9c50d4" }}>{L("稀有度提升機率：2件20%、3件50%，附魔裝備加成", "Upgrade chance: 2pc 20%, 3pc 50%, +bonus from affixed gear")}</span>
+        {L("選擇 2~3 件裝備進行合成，有機會提升稀有度！", "Select 2~3 items to synthesize for a chance to raise rarity!", "选择 2~3 件装备进行合成，有机会提升稀有度！")}<br />
+        {L(`合成消耗 🪙${synthesisGoldCost || "—"} 金幣（每件 30×等級）`, `Cost 🪙${synthesisGoldCost || "—"} gold (30×level each)`, `合成消耗 🪙${synthesisGoldCost || "—"} 金币（每件 30×等级）`)}<br />
+        <span style={{ color: "#9c50d4" }}>{L("稀有度提升機率：2件20%、3件50%，附魔裝備加成", "Upgrade chance: 2pc 20%, 3pc 50%, +bonus from affixed gear", "稀有度提升几率：2件20%、3件50%，附魔装备加成")}</span>
       </div>
 
       {synthesisLog.length > 0 && (
@@ -175,7 +175,7 @@ export function TrainTab({ trainingCards, enhanceLog, enhanceItems, enhanceAnim,
           boxShadow: synthesisResult.rarityGlow || "none",
           textAlign: "center",
         }}>
-          <div style={{ fontSize: 10, color: "#5a4020", marginBottom: 4 }}>{L("合成結果", "Result")}</div>
+          <div style={{ fontSize: 10, color: "#5a4020", marginBottom: 4 }}>{L("合成結果", "Result", "合成结果")}</div>
           <div style={{ fontSize: 22, marginBottom: 4 }}>{synthesisResult.icon}</div>
           <div style={{ fontFamily: "'Cinzel',serif", fontSize: 14, color: synthesisResult.rarityColor || "#c8c8b0", marginBottom: 4 }}>{tr(synthesisResult, "name")}</div>
           {synthesisResult.rarity !== "normal" && <div style={{ fontSize: 10, color: synthesisResult.rarityColor, marginBottom: 4 }}>{tr(synthesisResult, "rarityLabel")}</div>}
@@ -197,7 +197,7 @@ export function TrainTab({ trainingCards, enhanceLog, enhanceItems, enhanceAnim,
 
       {synthesisUids.length > 0 && (
         <div style={{ marginBottom: 8, fontSize: 11, color: "#c8961e", textAlign: "center" }}>
-          {L(`已選擇 ${synthesisUids.length}/3 件 · 費用 🪙${synthesisGoldCost}`, `Selected ${synthesisUids.length}/3 · Cost 🪙${synthesisGoldCost}`)}
+          {L(`已選擇 ${synthesisUids.length}/3 件 · 費用 🪙${synthesisGoldCost}`, `Selected ${synthesisUids.length}/3 · Cost 🪙${synthesisGoldCost}`, `已选择 ${synthesisUids.length}/3 件 · 费用 🪙${synthesisGoldCost}`)}
         </div>
       )}
 
@@ -206,7 +206,7 @@ export function TrainTab({ trainingCards, enhanceLog, enhanceItems, enhanceAnim,
         style={{ width: "100%", fontSize: 12, marginBottom: 12, padding: "8px 0" }}
         disabled={synthesisUids.length < 2}
         onClick={doSynthesize}>
-        {synthesisUids.length < 2 ? L("至少選擇 2 件裝備", "Select at least 2 items") : L(`🔮 合成 (${synthesisUids.length}件, 🪙${synthesisGoldCost})`, `🔮 Synthesize (${synthesisUids.length}, 🪙${synthesisGoldCost})`)}
+        {synthesisUids.length < 2 ? L("至少選擇 2 件裝備", "Select at least 2 items", "至少选择 2 件装备") : L(`🔮 合成 (${synthesisUids.length}件, 🪙${synthesisGoldCost})`, `🔮 Synthesize (${synthesisUids.length}, 🪙${synthesisGoldCost})`)}
       </button>
 
       <div style={{ fontSize: 11, color: "#6a5030", marginBottom: 8, fontFamily: "'Cinzel',serif", letterSpacing: 1 }}>{t("synthPick")}</div>
@@ -236,7 +236,7 @@ export function TrainTab({ trainingCards, enhanceLog, enhanceItems, enhanceAnim,
               </div>
             )}
             <div style={{ fontSize: 10, color: selected ? "#c8961e" : "#5a4020", marginTop: 4 }}>
-              {selected ? L("✓ 已選入合成", "✓ Selected") : L("點擊選入", "Click to select")}
+              {selected ? L("✓ 已選入合成", "✓ Selected", "✓ 已选入合成") : L("點擊選入", "Click to select", "点击选入")}
             </div>
           </div>
         ))}

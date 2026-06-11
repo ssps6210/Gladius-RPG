@@ -58,7 +58,7 @@ export function BattleReport({
           {replaySummary?.showBattleSummary && (
             <div style={{ marginTop: 12 }}>
               <div style={{ fontSize: 10, color: "#5a4020", fontFamily: "'Cinzel',serif", letterSpacing: 1, marginBottom: 4, textAlign: "center" }}>
-                {L("戰鬥摘要", "Battle Summary")}
+                {L("戰鬥摘要", "Battle Summary", "战斗摘要")}
               </div>
               <BattleLog log={replay.lines} />
             </div>

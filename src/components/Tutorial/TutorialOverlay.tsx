@@ -193,7 +193,7 @@ export function TutorialOverlay({
               color: "#3a2818", fontSize: 10, cursor: "pointer", padding: 0,
             }}
           >
-            {L("跳過教學", "Skip")}
+            {L("跳過教學", "Skip", "跳过教学")}
           </button>
           <button
             onClick={onAdvance}
