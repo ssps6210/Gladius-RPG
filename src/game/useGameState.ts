@@ -13,7 +13,7 @@ import { playLootDrop, playLevelUp, playVictory, playDefeat, playEnhance, playGo
 import { EXPEDITIONS } from "./data/expeditions";
 import { MERC_DUNGEONS } from "./data/mercenaries";
 import { MONSTERS } from "./data/monsters";
-import { JOB_CLASSES } from "./data/classes";
+import { JOB_CLASSES, TIER2_CLASSES } from "./data/classes";
 import { QUEST_DEFS } from "./data/quests";
 import { TRAIN_STATS } from "./data/trainStats";
 import { WEAPON_CATEGORIES } from "./data/weaponCategories";
@@ -382,7 +382,8 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
     if (player.level >= 30 && !player.jobClass) {
       setClassModalOpen(true);
     } else if (player.level >= 70 && isOnTier1) {
-      setClassModalOpen(true);
+      const hasTier2 = TIER2_CLASSES.some(c => c.prereq === player.jobClass);
+      if (hasTier2) setClassModalOpen(true);
     }
   }, [player.level, player.jobClass]);
 

@@ -518,6 +518,7 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
           onCancel={closeClassModal}
           currentClass={player.jobClass}
           playerLevel={player.level}
+          monsterKills={player.monsterKills}
         />
       </div>
 

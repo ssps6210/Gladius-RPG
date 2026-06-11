@@ -3,7 +3,8 @@ export type JobClassId =
   | "berserker" | "paladin"
   | "assassin" | "shadowFiend"
   | "archbishop" | "inquisitor"
-  | "shadowDancer" | "spellsinger";
+  | "shadowDancer" | "spellsinger"
+  | "cat";
 
 export interface JobClass {
   id: JobClassId;
@@ -20,6 +21,7 @@ export interface JobClass {
   tier: 1 | 2;
   prereq?: JobClassId;
   reqLevel: number;
+  hidden?: boolean;
 }
 
 export const GLADIATOR_PORTRAIT = "./portraits/Gladiator.jpg";
@@ -124,8 +126,18 @@ export const JOB_CLASSES: Record<JobClassId, JobClass> = {
     desc: "+30攻擊 +5防禦 +15速度。繼承：20%機率跳過敵方攻擊。每3回合施放奧術爆發（×1.5攻擊）。",
     descEn: "+30 ATK +5 DEF +15 SPD. Inherits: 20% inspire. Every 3 rounds, arcane burst (ATK×1.5).",
   },
+
+  // ── Hidden easter egg ────────────────────────────────────────────────────
+  cat: {
+    id: "cat", tier: 1, reqLevel: 30, hidden: true,
+    name: "貓", nameEn: "Cat", icon: "🐱",
+    portrait: "./portraits/Cat.jpg",
+    atkBonus: 0, defBonus: 0, hpPct: 0, spdBonus: 0,
+    desc: "喵。",
+    descEn: "Meow.",
+  },
 };
 
 export const JOB_CLASS_LIST: JobClass[] = Object.values(JOB_CLASSES);
-export const TIER1_CLASSES = JOB_CLASS_LIST.filter(c => c.tier === 1);
+export const TIER1_CLASSES = JOB_CLASS_LIST.filter(c => c.tier === 1 && !c.hidden);
 export const TIER2_CLASSES = JOB_CLASS_LIST.filter(c => c.tier === 2);

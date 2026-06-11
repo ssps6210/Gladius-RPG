@@ -1,29 +1,41 @@
 import { JOB_CLASSES, TIER1_CLASSES, TIER2_CLASSES, type JobClass } from "../game/data/classes";
 import { useLanguage } from "../game/i18n/LanguageContext";
 
+function hasMeow(kills: Record<string, number>): boolean {
+  const active = Object.keys(kills).filter(k => kills[k] > 0);
+  return ["m", "e", "o", "w"].every(letter =>
+    active.some(k => k.toLowerCase().startsWith(letter))
+  );
+}
+
 function ClassCard({
-  cls, isActive, locked, onChoose, L,
+  cls, isActive, locked, onChoose, L, special,
 }: {
   cls: JobClass;
   isActive: boolean;
   locked: boolean;
   onChoose: (id: string) => void;
   L: (zh: string, en: string) => string;
+  special?: boolean;
 }) {
+  const specialBg = "linear-gradient(160deg,#0a1218,#060c10)";
+  const specialBorder = "#2a5060";
   return (
     <button
       onClick={() => !locked && onChoose(cls.id)}
       style={{
-        background: isActive
-          ? "linear-gradient(160deg,#3a2a08,#1e1608)"
-          : locked
-            ? "linear-gradient(160deg,#141010,#0a0808)"
-            : "linear-gradient(160deg,#1a1208,#0e0a06)",
-        border: `1px solid ${isActive ? "#c8901e" : locked ? "#2a1e18" : "#3a2810"}`,
+        background: special
+          ? specialBg
+          : isActive
+            ? "linear-gradient(160deg,#3a2a08,#1e1608)"
+            : locked
+              ? "linear-gradient(160deg,#141010,#0a0808)"
+              : "linear-gradient(160deg,#1a1208,#0e0a06)",
+        border: `1px solid ${special ? specialBorder : isActive ? "#c8901e" : locked ? "#2a1e18" : "#3a2810"}`,
         borderRadius: 6, padding: 0,
         cursor: locked ? "not-allowed" : "pointer",
         textAlign: "left", transition: "all .2s", overflow: "hidden",
-        boxShadow: isActive ? "0 0 12px rgba(200,140,30,0.4)" : "none",
+        boxShadow: special ? "0 0 10px rgba(40,160,200,0.25)" : isActive ? "0 0 12px rgba(200,140,30,0.4)" : "none",
         opacity: locked ? 0.45 : 1,
       }}
     >
@@ -46,7 +58,7 @@ function ClassCard({
             background: "linear-gradient(transparent, rgba(0,0,0,0.85))",
             padding: "16px 8px 8px",
           }}>
-            <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: isActive ? "#e0a830" : locked ? "#4a3820" : "#c8a060" }}>
+            <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: special ? "#60c8e0" : isActive ? "#e0a830" : locked ? "#4a3820" : "#c8a060" }}>
               {cls.icon} {L(cls.name, cls.nameEn)}
             </div>
             <div style={{ fontSize: 9, color: locked ? "#3a2818" : "#9a8060", lineHeight: 1.4, marginTop: 2 }}>
@@ -75,12 +87,14 @@ export function ClassSelectModal({
   onCancel,
   currentClass,
   playerLevel = 1,
+  monsterKills = {},
 }: {
   open: boolean;
   onChoose: (classId: string) => void;
   onCancel?: () => void;
   currentClass?: string;
   playerLevel?: number;
+  monsterKills?: Record<string, number>;
 }) {
   const { L } = useLanguage();
   if (!open) return null;
@@ -133,6 +147,29 @@ export function ClassSelectModal({
               />
             ))}
           </div>
+
+          {hasMeow(monsterKills) && (
+            <>
+              <div style={{
+                margin: "18px 0 10px",
+                borderTop: "1px solid #1a3040",
+                paddingTop: 14,
+                fontSize: 10, color: "#4090a0", textAlign: "center", letterSpacing: 1,
+              }}>
+                {L("??? 隱藏職業解鎖", "??? Hidden class unlocked")}
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <ClassCard
+                  cls={JOB_CLASSES.cat}
+                  isActive={false}
+                  locked={false}
+                  onChoose={onChoose}
+                  L={L}
+                  special
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
     );

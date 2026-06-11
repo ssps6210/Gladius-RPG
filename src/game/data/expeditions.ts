@@ -19,4 +19,7 @@ export const EXPEDITIONS: Array<Record<string, any>> = [
   { id: "e18", name: "石棺禁地", nameEn: "Tomb Forbidden Zone", icon: "🌟", minLv: 45, monster: "ancientGuardian", desc: "踏入石棺禁地挑戰守衛", descEn: "Enter the tomb forbidden zone", expMult: 7.5, goldMult: 2.8, lootBonus: 0.45 },
   { id: "e19", name: "蜥蜴獸荒原", nameEn: "Lizard Wastes", icon: "🦕", minLv: 52, monster: "primordialbeast", desc: "在蜥蜴獸荒原獵殺遠古爬蟲", descEn: "Hunt ancient lizards in the wastes", expMult: 9.0, goldMult: 3.2, lootBonus: 0.48 },
   { id: "e20", name: "遠古王的廢墟", nameEn: "Ancient King's Ruins", icon: "🌌", minLv: 60, monster: "primordialgod", desc: "深入廢墟遺址對抗遠古王", descEn: "Venture into ruins to face the Ancient King", expMult: 12.0, goldMult: 4.0, lootBonus: 0.55 },
+  { id: "e21", name: "食人魔荒地", nameEn: "Ogre Wasteland", icon: "👹", minLv: 4, monster: "ogre", desc: "深入荒地驅逐蠻橫食人魔", descEn: "Drive out brutish ogres from the wasteland", expMult: 1.0, goldMult: 1.0, lootBonus: 0.05 },
+  { id: "e22", name: "土魔像礦場", nameEn: "Earth Golem Mine", icon: "🪨", minLv: 6, monster: "earthGolem", desc: "挑戰守護廢棄礦脈的土魔像", descEn: "Challenge earth golems guarding abandoned veins", expMult: 1.1, goldMult: 0.9, lootBonus: 0.08 },
+  { id: "e23", name: "蠍獅荒漠", nameEn: "Manticore Desert", icon: "🦂", minLv: 10, monster: "manticore", desc: "獵殺潛伏在荒漠中的蠍獅", descEn: "Hunt manticores lurking in the scorched desert", expMult: 1.4, goldMult: 1.1, lootBonus: 0.15 },
 ];
