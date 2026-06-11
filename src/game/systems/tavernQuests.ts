@@ -105,8 +105,11 @@ export function claimTavernQuestReward(state: TavernQuestState): TavernQuestStat
 
   const storyReward: StoryRewardState = {
     title: quest.title,
+    titleEn: quest.titleEn,
+    titleCn: quest.titleCn,
     icon: quest.icon,
     conclusion: quest.conclusion,
+    conclusionCn: quest.conclusionCn,
     reward: quest.reward,
   };
 

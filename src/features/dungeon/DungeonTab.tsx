@@ -85,14 +85,14 @@ export function DungeonTab({
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
             <span style={{ fontSize: 18 }}>{d.icon}</span>
             <div>
-              <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: "#c8961e", letterSpacing: 1 }}>{d.name} <span style={{ fontSize: 10, color: "#5a4020" }}>Lv.{d.minLv}+</span></div>
-              <div style={{ fontSize: 11, color: "#6a5030", fontStyle: "italic" }}>{d.lore}</div>
+              <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: "#c8961e", letterSpacing: 1 }}>{tr(d, "name")} <span style={{ fontSize: 10, color: "#5a4020" }}>Lv.{d.minLv}+</span></div>
+              <div style={{ fontSize: 11, color: "#6a5030", fontStyle: "italic" }}>{tr(d, "lore")}</div>
             </div>
           </div>
           <div style={{ display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" }}>
             {d.waveBadges.map((wave: any, wi: number) => (
               <div key={wi} style={{ fontSize: 10, color: "#5a4030", background: "rgba(0,0,0,0.3)", border: "1px solid #2a1a08", borderRadius: 3, padding: "2px 6px" }}>
-                {wave.enemies} {wave.label}
+                {wave.enemies} {tr(wave, "label")}
               </div>
             ))}
             <div style={{ fontSize: 10, color: "#c84040", background: "rgba(100,0,0,0.2)", border: "1px solid #4a1010", borderRadius: 3, padding: "2px 6px" }}>
@@ -105,7 +105,7 @@ export function DungeonTab({
                 <div key={tier.id} className={`dc${isLocked ? " lk" : ""}`} onClick={onStart}>
                   <div className="di">{d.icon}</div>
                   <div className="dtl" style={{ color: tier.color }}>{tr(tier, "label")}</div>
-                  <div className="dn" style={{ fontSize: 11, color: tier.color }}>{d.name}</div>
+                  <div className="dn" style={{ fontSize: 11, color: tier.color }}>{tr(d, "name")}</div>
                   <div className="drq">Lv.{req}{isLocked ? " 🔒" : ""}</div>
                   <div className="drw">EXP×{tier.expMult} {L("金", "G")}×{tier.goldMult}{tier.lootBonus > 0 && <span style={{ color: "#d4b84a" }}> +{Math.round(tier.lootBonus * 100)}%</span>}</div>
                 </div>

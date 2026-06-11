@@ -1,7 +1,10 @@
 export interface StoryRewardState {
   title: string;
+  titleEn?: string;
+  titleCn?: string;
   icon: string;
   conclusion: string;
+  conclusionCn?: string;
   reward: { gold: number; exp: number };
 }
 
@@ -16,10 +19,17 @@ export interface TavernQuestBoardItem {
   targetMonster: string;
   reqCount: number;
   title: string;
+  titleEn?: string;
+  titleCn?: string;
   icon: string;
   lore: string;
+  loreEn?: string;
+  loreCn?: string;
   hint: string;
+  hintEn?: string;
+  hintCn?: string;
   conclusion: string;
+  conclusionCn?: string;
   reward: TavernQuestReward;
 }
 

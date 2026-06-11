@@ -47,8 +47,8 @@ export function TrainTab({ trainingCards, enhanceLog, enhanceItems, enhanceAnim,
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                 <span style={{ fontSize: 22 }}>{card.icon}</span>
                 <div>
-                  <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: card.color }}>{card.label}</div>
-                  <div style={{ fontSize: 11, color: "#5a4020" }}>{card.desc}</div>
+                  <div style={{ fontFamily: "'Cinzel',serif", fontSize: 13, color: card.color }}>{tr(card, "label")}</div>
+                  <div style={{ fontSize: 11, color: "#5a4020" }}>{tr(card, "desc")}</div>
                 </div>
               </div>
               <div style={{ fontSize: 12, color: "#7a6040", marginBottom: 4 }}>{card.effect}</div>

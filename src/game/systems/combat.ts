@@ -11,15 +11,17 @@ type AnyRecord = Record<string, any>;
 
 // Combat runs synchronously per call, so a module-level language flag lets the
 // many log builders localize without threading `lang` through every signature.
-let _combatLang: "zh" | "en" = "zh";
-export function setCombatLang(lang: "zh" | "en") {
+let _combatLang: "zh" | "zh_cn" | "en" = "zh";
+export function setCombatLang(lang: "zh" | "zh_cn" | "en") {
   _combatLang = lang;
 }
 const L = (zh: string, en: string) => (_combatLang === "en" ? en : zh);
-/** Localize a data field by language (name/label/traitDesc → *En fallback). */
+/** Localize a data field by language (name/label/traitDesc → *En / *Cn fallback). */
 const LF = (obj: any, field: string) => {
   if (!obj) return "";
-  return _combatLang === "en" ? obj[`${field}En`] ?? obj[field] : obj[field];
+  if (_combatLang === "en") return obj[`${field}En`] ?? obj[field];
+  if (_combatLang === "zh_cn") return obj[`${field}Cn`] ?? obj[field];
+  return obj[field];
 };
 
 type CombatDeps = {
@@ -714,8 +716,8 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
   let totalSetTriggers = 0;
   let totalRounds = 0;
 
-  log.push({ txt: L(`⚔️ 進入 ${dungeon.name}【${tier.label}】`, `⚔️ Entering ${LF(dungeon, "name")} [${LF(tier, "label")}]`), type: "title" });
-  log.push({ txt: `"${dungeon.lore}"`, type: "info" });
+  log.push({ txt: `⚔️ ${L("進入", "Entering")} ${LF(dungeon, "name")}${_combatLang === "en" ? ` [${LF(tier, "label")}]` : `【${LF(tier, "label")}】`}`, type: "title" });
+  log.push({ txt: `"${LF(dungeon, "lore")}"`, type: "info" });
   if (wc) {
     log.push({ txt: `🗡 ${wc.label} — ${wc.traitDesc}`, type: "info" });
   }
@@ -724,7 +726,7 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
     if (np.hp <= 0) {
       break;
     }
-    log.push({ txt: `━━ ${wave.label} — ${wave.desc} ━━`, type: "sep" });
+    log.push({ txt: `━━ ${LF(wave, "label")} — ${LF(wave, "desc")} ━━`, type: "sep" });
     for (const monsterKey of wave.monsters) {
       if (np.hp <= 0) {
         break;
@@ -762,7 +764,7 @@ export function simulateRun(dungeon: any, tier: any, initPlayer: any, deps: Comb
 
   if (np.hp > 0 && dungeon.boss) {
     log.push({ txt: "━━━━━━━━━━━━━━━━━━", type: "sep" });
-    log.push({ txt: `🔥 ${dungeon.bossIntro}`, type: "title" });
+    log.push({ txt: `🔥 ${LF(dungeon, "bossIntro")}`, type: "title" });
     const boss = buildEnemy(dungeon.boss, np.level, tier.mult, true);
     log.push({ txt: `${boss.icon}${LF(boss, "name")} ｜ HP:${boss.maxHp} ${L("攻", "ATK")}:${boss.attack} ${L("防", "DEF")}:${boss.defense}`, type: "info" });
     log.push({ txt: `👹 ${L("Boss特性", "Boss trait")}：${LF(boss, "traitDesc")}`, type: "info" });

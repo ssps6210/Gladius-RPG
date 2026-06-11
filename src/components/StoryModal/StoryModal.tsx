@@ -7,7 +7,7 @@ interface StoryModalProps {
 }
 
 export function StoryModal({ story, onDismiss }: StoryModalProps) {
-  const { t, L } = useLanguage();
+  const { t, tr, L } = useLanguage();
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 500,
@@ -44,7 +44,7 @@ export function StoryModal({ story, onDismiss }: StoryModalProps) {
             fontFamily: "'Cinzel', serif", fontSize: 17, color: "#e8c050",
             letterSpacing: 2, textShadow: "0 0 20px rgba(200,150,30,0.4)",
           }}>
-            {story.title}
+            {tr(story, "title")}
           </div>
         </div>
 
@@ -66,7 +66,7 @@ export function StoryModal({ story, onDismiss }: StoryModalProps) {
           color: "#c8a878",
           fontStyle: "italic",
         }}>
-          {story.conclusion}
+          {tr(story, "conclusion")}
         </div>
 
         <div style={{ textAlign: "center", marginBottom: 22 }}>

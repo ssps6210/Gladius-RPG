@@ -39,7 +39,7 @@ function StatDiff({ label, newVal, oldVal }: { label: string; newVal: number; ol
 }
 
 function CompareTooltip({ newItem, equipped }: { newItem: any; equipped: any }) {
-  const { L } = useLanguage();
+  const { tr, L } = useLanguage();
   const eq = equipped || { attack: 0, defense: 0, hp: 0, speed: 0 };
   return (
     <div style={{
@@ -54,7 +54,7 @@ function CompareTooltip({ newItem, equipped }: { newItem: any; equipped: any }) 
       </div>
       {equipped && (
         <div style={{ fontSize: 9, color: "#6a5028", marginBottom: 4, fontStyle: "italic" }}>
-          {equipped.name || equipped.nameEn}
+          {tr(equipped, "name")}
         </div>
       )}
       <StatDiff label={L("攻", "ATK")} newVal={newItem.attack || 0} oldVal={eq.attack || 0} />
