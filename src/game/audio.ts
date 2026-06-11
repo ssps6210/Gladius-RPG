@@ -5,9 +5,17 @@ interface AudioSettings {
   seEnabled: boolean;
   bgmEnabled: boolean;
   masterVolume: number; // 0–1
+  bgmVolume: number;    // 0–1 independent BGM level
+  seVolume: number;     // 0–1 independent SE level
 }
 
-const _defaults: AudioSettings = { seEnabled: true, bgmEnabled: true, masterVolume: 1 };
+const _defaults: AudioSettings = {
+  seEnabled: true,
+  bgmEnabled: true,
+  masterVolume: 1,
+  bgmVolume: 0.8,
+  seVolume: 1.0,
+};
 let _settings: AudioSettings = { ..._defaults };
 
 if (typeof window !== "undefined") {
@@ -22,12 +30,25 @@ function _save() {
 }
 
 export function getAudioSettings(): Readonly<AudioSettings> { return _settings; }
-export function setSeEnabled(v: boolean)    { _settings = { ..._settings, seEnabled: v };                             _save(); }
-export function setBgmEnabled(v: boolean)   { _settings = { ..._settings, bgmEnabled: v };                            _save(); syncBgm(); }
+export function setSeEnabled(v: boolean)    { _settings = { ..._settings, seEnabled: v };    _save(); }
+export function setBgmEnabled(v: boolean)   { _settings = { ..._settings, bgmEnabled: v };   _save(); syncBgm(); }
 export function setMasterVolume(v: number)  {
   _settings = { ..._settings, masterVolume: Math.max(0, Math.min(1, v)) };
   _save();
-  if (_bgmGain) _bgmGain.gain.value = BGM_VOL * _settings.masterVolume;
+  if (_bgmGain) _bgmGain.gain.value = _bgmLevel();
+}
+export function setBgmVolume(v: number) {
+  _settings = { ..._settings, bgmVolume: Math.max(0, Math.min(1, v)) };
+  _save();
+  if (_bgmGain) _bgmGain.gain.value = _bgmLevel();
+}
+export function setSeVolume(v: number) {
+  _settings = { ..._settings, seVolume: Math.max(0, Math.min(1, v)) };
+  _save();
+}
+
+function _bgmLevel() {
+  return BGM_VOL * _settings.masterVolume * _settings.bgmVolume;
 }
 
 // ── AudioContext + buffer caches ─────────────────────────────────────────
@@ -96,7 +117,7 @@ function playBuf(buf: AudioBuffer, vol: number) {
 async function play(url: string, vol: number) {
   if (!_settings.seEnabled) return;
   const buf = await loadBuf(url);
-  if (buf) playBuf(buf, vol * _settings.masterVolume);
+  if (buf) playBuf(buf, vol * _settings.masterVolume * _settings.seVolume);
 }
 
 // ── BGM ───────────────────────────────────────────────────────────────────
@@ -110,24 +131,22 @@ async function _playBgmUrl(url: string) {
   const ac = getCtx();
   if (!ac) return;
   const buf = await loadBuf(url);
-  if (!buf || _currentBgmUrl !== url) return; // guard: url changed while loading
+  if (!buf || _currentBgmUrl !== url) return;
   _bgmGain = ac.createGain();
-  _bgmGain.gain.value = BGM_VOL * _settings.masterVolume;
+  _bgmGain.gain.value = _bgmLevel();
   _bgmGain.connect(ac.destination);
   const src = ac.createBufferSource();
   _bgmSource = src;
   src.buffer = buf;
   src.loop = true;
   src.connect(_bgmGain);
-  // Only clear if this specific source is still the active one.
-  // Without this guard, a stopped source's onended can null out a newer source.
   src.onended = () => { if (_bgmSource === src) { _bgmSource = null; _bgmGain = null; } };
   src.start();
 }
 
 export function stopBgm() {
   const src = _bgmSource;
-  _bgmSource = null; // clear first so onended guard fires false for this src
+  _bgmSource = null;
   _bgmGain = null;
   if (src) { try { src.stop(); } catch { /* ignore */ } }
 }

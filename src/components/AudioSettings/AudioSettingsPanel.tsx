@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { getAudioSettings, setBgmEnabled, setMasterVolume, setSeEnabled } from "../../game/audio";
+import {
+  getAudioSettings,
+  setBgmEnabled,
+  setBgmVolume,
+  setMasterVolume,
+  setSeEnabled,
+  setSeVolume,
+} from "../../game/audio";
 import { useLanguage } from "../../game/i18n/LanguageContext";
 
 export function AudioSettingsButton() {
@@ -8,7 +15,6 @@ export function AudioSettingsButton() {
   const [settings, setSettings] = useState(getAudioSettings);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Close on outside click
   useEffect(() => {
     if (!open) return;
     function handler(e: MouseEvent) {
@@ -32,12 +38,24 @@ export function AudioSettingsButton() {
     setSettings(s => ({ ...s, bgmEnabled: next }));
   }
 
-  function changeVolume(v: number) {
+  function changeMaster(v: number) {
     setMasterVolume(v);
     setSettings(s => ({ ...s, masterVolume: v }));
   }
 
-  const volPct = Math.round(settings.masterVolume * 100);
+  function changeBgmVol(v: number) {
+    setBgmVolume(v);
+    setSettings(s => ({ ...s, bgmVolume: v }));
+  }
+
+  function changeSeVol(v: number) {
+    setSeVolume(v);
+    setSettings(s => ({ ...s, seVolume: v }));
+  }
+
+  const masterPct = Math.round(settings.masterVolume * 100);
+  const bgmPct    = Math.round(settings.bgmVolume * 100);
+  const sePct     = Math.round(settings.seVolume * 100);
 
   return (
     <div ref={panelRef} style={{ position: "relative" }}>
@@ -47,7 +65,7 @@ export function AudioSettingsButton() {
         onClick={() => setOpen(o => !o)}
         title={L("音效設定", "Sound Settings", "音效设置")}
       >
-        {settings.seEnabled ? "🔊" : "🔇"}
+        {settings.seEnabled || settings.bgmEnabled ? "🔊" : "🔇"}
       </button>
 
       {open && (
@@ -59,7 +77,7 @@ export function AudioSettingsButton() {
           borderRadius: 6,
           padding: "14px 16px",
           boxShadow: "0 4px 24px rgba(0,0,0,0.7)",
-          minWidth: 200,
+          minWidth: 220,
           fontFamily: "'Cinzel', serif",
         }}>
           {/* Header */}
@@ -68,34 +86,80 @@ export function AudioSettingsButton() {
           </div>
 
           {/* Master Volume */}
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#c8a878", marginBottom: 6 }}>
-              <span>{L("總音量", "Master Vol", "总音量")}</span>
-              <span style={{ color: "#e8c050" }}>{volPct}%</span>
-            </div>
-            <input
-              type="range" min={0} max={1} step={0.05}
-              value={settings.masterVolume}
-              onChange={e => changeVolume(parseFloat(e.target.value))}
-              style={{ width: "100%", accentColor: "#c8961e", cursor: "pointer" }}
-            />
-          </div>
+          <VolumeRow
+            icon="🎚"
+            label={L("總音量", "Master", "总音量")}
+            pct={masterPct}
+            value={settings.masterVolume}
+            onChange={changeMaster}
+            enabled
+          />
 
-          {/* SE Toggle */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <span style={{ fontSize: 11, color: "#c8a878" }}>🔊 {L("音效 SE", "Sound FX")}</span>
-            <ToggleSwitch on={settings.seEnabled} onToggle={toggleSe} />
-          </div>
+          <div style={{ height: 1, background: "#2a1808", margin: "10px 0" }} />
 
-          {/* BGM Toggle */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 11, color: settings.bgmEnabled ? "#c8a878" : "#5a4828" }}>
-              🎵 {L("音樂 BGM", "Music BGM", "音乐 BGM")}
-            </span>
-            <ToggleSwitch on={settings.bgmEnabled} onToggle={toggleBgm} />
-          </div>
+          {/* BGM */}
+          <VolumeRow
+            icon="🎵"
+            label={L("音樂 BGM", "Music BGM", "音乐 BGM")}
+            pct={bgmPct}
+            value={settings.bgmVolume}
+            onChange={changeBgmVol}
+            enabled={settings.bgmEnabled}
+            toggle={<ToggleSwitch on={settings.bgmEnabled} onToggle={toggleBgm} />}
+          />
+
+          {/* SE */}
+          <VolumeRow
+            icon="🔊"
+            label={L("音效 SE", "Sound FX", "音效 SE")}
+            pct={sePct}
+            value={settings.seVolume}
+            onChange={changeSeVol}
+            enabled={settings.seEnabled}
+            toggle={<ToggleSwitch on={settings.seEnabled} onToggle={toggleSe} />}
+          />
         </div>
       )}
+    </div>
+  );
+}
+
+function VolumeRow({
+  icon, label, pct, value, onChange, enabled, toggle,
+}: {
+  icon: string;
+  label: string;
+  pct: number;
+  value: number;
+  onChange: (v: number) => void;
+  enabled: boolean;
+  toggle?: React.ReactNode;
+}) {
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+        <span style={{ fontSize: 11, color: enabled ? "#c8a878" : "#5a4828" }}>
+          {icon} {label}
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 11, color: enabled ? "#e8c050" : "#4a3820", minWidth: 32, textAlign: "right" }}>
+            {pct}%
+          </span>
+          {toggle}
+        </div>
+      </div>
+      <input
+        type="range" min={0} max={1} step={0.05}
+        value={value}
+        onChange={e => onChange(parseFloat(e.target.value))}
+        disabled={!enabled}
+        style={{
+          width: "100%",
+          accentColor: "#c8961e",
+          cursor: enabled ? "pointer" : "not-allowed",
+          opacity: enabled ? 1 : 0.35,
+        }}
+      />
     </div>
   );
 }
@@ -106,10 +170,10 @@ function ToggleSwitch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
       onClick={onToggle}
       style={{
         position: "relative",
-        width: 40, height: 20,
+        width: 36, height: 18,
         background: on ? "#c8961e" : "#2a1e0a",
         border: `1px solid ${on ? "#e8b030" : "#4a3010"}`,
-        borderRadius: 10,
+        borderRadius: 9,
         cursor: "pointer",
         padding: 0,
         transition: "background 0.2s",
@@ -118,8 +182,8 @@ function ToggleSwitch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
     >
       <span style={{
         position: "absolute",
-        top: 2, left: on ? 22 : 2,
-        width: 14, height: 14,
+        top: 2, left: on ? 18 : 2,
+        width: 12, height: 12,
         background: on ? "#fff8e0" : "#5a4028",
         borderRadius: "50%",
         transition: "left 0.2s",
