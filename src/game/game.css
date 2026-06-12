@@ -76,6 +76,8 @@
   box-shadow:0 0 10px rgba(139,90,20,.3), inset 0 1px 0 rgba(232,192,80,.1);
 }
 
+.gh-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
 .ml{display:grid;grid-template-columns:272px 1fr;min-height:calc(100vh - 58px)}
 
 .sb{
@@ -645,6 +647,7 @@
   .gt::before,.gt::after{font-size:14px;margin:0 6px}
   .gh{padding:0 12px;height:50px}
   .gd{font-size:12px;padding:4px 10px}
+  .gh-actions{gap:5px}
 
   .ml{grid-template-columns:1fr;grid-template-rows:auto 1fr}
 
@@ -685,4 +688,15 @@
 
   .eq-grid{grid-template-columns:1fr}
   .eq-slot:hover::after{display:none}
+}
+
+/* ── Narrow phone (≤430px) — keep header buttons on-screen ── */
+@media (max-width: 430px) {
+  .gt{font-size:13px;letter-spacing:1px}
+  .gt::before,.gt::after{display:none}
+  .gh{padding:0 8px}
+  .gh-actions{gap:3px}
+  .gh-actions .btn{font-size:9px;padding:3px 5px}
+  .gh-tutorial-btn{display:none}
+  .gd{font-size:11px;padding:3px 6px;gap:4px}
 }

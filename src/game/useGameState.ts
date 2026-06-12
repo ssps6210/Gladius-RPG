@@ -419,15 +419,19 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
     };
   }, [replay]);
 
+  const lootInitRef = useRef(false);
+  useEffect(() => { lootInitRef.current = false; }, [replay]);
   useEffect(() => {
     if (!replay || replay.cursor < replay.lines.length) return;
-    if (replay.drops && replay.drops.length > 0 && !lootDrop) {
+    if (lootInitRef.current) return;
+    lootInitRef.current = true;
+    if (replay.drops && replay.drops.length > 0) {
       setLootDrop({ ...replay.drops[0], _remaining: replay.drops.slice(1) } as LootDrop);
       playLootDrop();
-    } else if (!lootDrop) {
+    } else {
       if (replay.won) playVictory(); else playDefeat();
     }
-  }, [replay?.cursor, lootDrop]);
+  }, [replay?.cursor]);
 
   const takeLoot = () => {
     const remaining = (lootDrop && lootDrop._remaining) || [];
@@ -438,12 +442,18 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
       playLootDrop();
     } else {
       setLootDrop(null);
+      if (replay?.won) playVictory(); else if (replay) playDefeat();
     }
   };
 
   const discardLoot = () => {
     const remaining = (lootDrop && lootDrop._remaining) || [];
-    setLootDrop(remaining.length > 0 ? ({ ...remaining[0], _remaining: remaining.slice(1) } as LootDrop) : null);
+    if (remaining.length > 0) {
+      setLootDrop({ ...remaining[0], _remaining: remaining.slice(1) } as LootDrop);
+    } else {
+      setLootDrop(null);
+      if (replay?.won) playVictory(); else if (replay) playDefeat();
+    }
   };
 
   const equipLootNow = () => {
@@ -453,7 +463,12 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
     const old = player.equipment[item.slot];
     setPlayer((p) => ({ ...p, equipment: { ...p.equipment, [item.slot]: item } }));
     if (old) setInventory((inv) => [...inv, { ...old, uid: Date.now() }]);
-    setLootDrop(remaining.length > 0 ? ({ ...remaining[0], _remaining: remaining.slice(1) } as LootDrop) : null);
+    if (remaining.length > 0) {
+      setLootDrop({ ...remaining[0], _remaining: remaining.slice(1) } as LootDrop);
+    } else {
+      setLootDrop(null);
+      if (replay?.won) playVictory(); else if (replay) playDefeat();
+    }
   };
 
   const mercScrollsInInv = inventory.filter((i) => i.type === "merc_scroll");

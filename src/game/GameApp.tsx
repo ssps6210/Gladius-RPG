@@ -146,7 +146,7 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
       <div className="gw">
         <header className="gh">
           <div className="gt">⚔ GLADIUS</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div className="gh-actions">
             <AudioSettingsButton />
             {(() => {
               const cls = JOB_CLASSES[player.jobClass as keyof typeof JOB_CLASSES];
@@ -174,7 +174,7 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
               );
             })()}
             {tutorialStep === null && (
-              <button className="btn btm" style={{ fontSize: 10, padding: "3px 7px", opacity: 0.6 }} onClick={restartTutorial} title={L("重新播放新手教學", "Replay tutorial", "重新播放新手教学")}>❓</button>
+              <button className="btn btm gh-tutorial-btn" style={{ fontSize: 10, padding: "3px 7px", opacity: 0.6 }} onClick={restartTutorial} title={L("重新播放新手教學", "Replay tutorial", "重新播放新手教学")}>❓</button>
             )}
             <button className="btn btm" style={{ fontSize: 11, padding: "4px 10px" }} onClick={toggleLang}>🌐 {t("langBtn")}</button>
             <div className="gd">🪙 {player.gold}</div>
