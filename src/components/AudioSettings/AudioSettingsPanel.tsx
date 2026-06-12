@@ -69,7 +69,7 @@ export function AudioSettingsButton() {
       </button>
 
       {open && (
-        <div style={{
+        <div className="as-panel" style={{
           position: "absolute", top: "calc(100% + 6px)", right: 0,
           zIndex: 300,
           background: "linear-gradient(160deg, #2a1c08, #1e1408)",
