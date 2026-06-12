@@ -83,6 +83,7 @@ export function TutorialOverlay({
   const { L } = useLanguage();
   const [rect, setRect] = useState<DOMRect | null>(null);
   const advancedRef = useRef(false);
+  const stepStartTabRef = useRef<string>("");
 
   const currentStep = step !== null ? STEPS[step] ?? null : null;
 
@@ -102,13 +103,16 @@ export function TutorialOverlay({
     };
   }, [currentStep]);
 
-  // Reset advance guard each step
-  useEffect(() => { advancedRef.current = false; }, [step]);
+  // Reset advance guard each step, record which tab was active when step started
+  useEffect(() => {
+    advancedRef.current = false;
+    stepStartTabRef.current = activeTab;
+  }, [step]);
 
-  // Auto-advance when user navigates to the target tab
+  // Auto-advance only when user NAVIGATES to the target tab (not if already there)
   useEffect(() => {
     if (!currentStep || advancedRef.current) return;
-    if (activeTab === currentStep.tabId) {
+    if (activeTab === currentStep.tabId && stepStartTabRef.current !== currentStep.tabId) {
       advancedRef.current = true;
       const t = setTimeout(onAdvance, 700);
       return () => clearTimeout(t);
