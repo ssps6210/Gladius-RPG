@@ -427,7 +427,7 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
     } else if (!lootDrop) {
       if (replay.won) playVictory(); else playDefeat();
     }
-  }, [replay && replay.cursor]);
+  }, [replay?.cursor, lootDrop]);
 
   const takeLoot = () => {
     const remaining = (lootDrop && lootDrop._remaining) || [];

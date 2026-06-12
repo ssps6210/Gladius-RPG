@@ -7,6 +7,8 @@ interface TutorialStep {
   desc: string; descEn: string; descCn?: string;
 }
 
+export const TUTORIAL_TOTAL_STEPS = 6;
+
 const STEPS: TutorialStep[] = [
   {
     tabId: "dungeon",
