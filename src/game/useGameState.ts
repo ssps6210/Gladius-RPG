@@ -93,6 +93,7 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
   const [synthesisUids, setSynthesisUids] = useState<any[]>([]);
   const [synthesisResult, setSynthesisResult] = useState<any>(null);
   const [synthesisLog, setSynthesisLog] = useState<string[]>([]);
+  const [purchaseFlashUid, setPurchaseFlashUid] = useState<number | null>(null);
   const [shopItems, setShopItems] = useState<any[]>(() =>
     Array.from({ length: 8 }, (_, i) =>
       genShopItem(1, ["weapon", "offhand", "armor", "helmet", "gloves", "boots", "ring", "amulet"][i]),
@@ -599,6 +600,9 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
     setPlayer((p) => ({ ...p, gold: p.gold - item.cost }));
     const { cost: _c, auctionId: _a, currentBid: _b, myBid: _m, bidCount: _bc, endsIn: _e, sold: _s, ...clean } = item;
     setInventory((inv) => [...inv, { ...clean, uid: Date.now() + Math.random(), specials: clean.specials || [], affixes: clean.affixes || [] }]);
+    playGold();
+    setPurchaseFlashUid(item.uid);
+    setTimeout(() => setPurchaseFlashUid(null), 700);
   };
 
   const handleBuyPotion = (item: any) => {
@@ -1293,6 +1297,7 @@ export function useGameState(slot: import("./constants/storage").SaveSlot = 1) {
     item,
     onBuy: () => buyItem(item),
     rarity: getRarity(item.rarity),
+    flashing: purchaseFlashUid === item.uid,
   }));
   const inventoryItems = filteredInv.map((item) => {
     const rarity = getRarity(item.rarity);

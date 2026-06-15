@@ -465,6 +465,8 @@
   position:relative;
 }
 .si:hover{border-color:#6a4a18}
+@keyframes si-buy-flash{0%{filter:brightness(1)}40%{filter:brightness(1.9);box-shadow:0 0 18px rgba(200,160,30,.65)}100%{filter:brightness(1)}}
+.si-bought{animation:si-buy-flash .65s ease forwards}
 .sii{font-size:26px;margin-bottom:7px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
 .sin{font-family:'Cinzel',serif;font-size:11px;color:#c8a848;margin-bottom:4px;letter-spacing:.5px}
 .sis{font-size:11px;color:#5a4020;margin-bottom:5px;line-height:1.6}
@@ -703,6 +705,9 @@
   .gh-tutorial-btn{display:none}
   .gd{font-size:11px;padding:3px 6px;gap:4px}
   .lb{min-width:0;padding:20px 16px}
+  /* Loot popup: stack buttons so Discard is clearly separated from To Bag */
+  .la{flex-direction:column;gap:6px}
+  .la .btn{width:100%;padding:11px 0}
   /* Audio panel: flip to fixed full-width so it never clips off-screen */
   .as-panel{
     position:fixed!important;

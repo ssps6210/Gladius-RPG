@@ -94,9 +94,9 @@ export function ShopTab({
             ))}
           </div>
           <div className="sg">
-            {shopDisplayItems.map(({ cat, item, onBuy, rarity }, idx) => {
+            {shopDisplayItems.map(({ cat, item, onBuy, rarity, flashing }, idx) => {
               return (
-                <div key={idx} className="si" style={{ borderColor: rarity.color + "55", background: `linear-gradient(160deg,${rarity.color}08,#141008)`, boxShadow: rarity.glow || "none" }}>
+                <div key={idx} className={`si${flashing ? " si-bought" : ""}`} style={{ borderColor: rarity.color + "55", background: `linear-gradient(160deg,${rarity.color}08,#141008)`, boxShadow: rarity.glow || "none" }}>
                   <div className="sii" style={{ filter: `drop-shadow(0 2px 5px ${rarity.color}66)` }}>{item.icon}</div>
                   <div className="rb" style={{ color: rarity.color, borderColor: rarity.color + "55", background: `${rarity.color}15` }}>{tr(rarity, "label")}</div>
                   <div className="sin" style={{ color: rarity.color }}>{tr(item, "name")}</div>

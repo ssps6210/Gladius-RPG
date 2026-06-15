@@ -97,20 +97,19 @@ export function BattleReport({
           )}
 
           <div className="bact" style={{ marginTop: 12 }}>
-            {replay.cursor < replay.lines.length ? (
-              <button className="btn btm" onClick={onSkip}>
-                {t("btnSkip")}
-              </button>
-            ) : (
-              <>
-                <button className="btn btp" onClick={onRestart}>
-                  {replaySummary?.actionLabel}
-                </button>
-                <button className="btn btm" onClick={onClose}>
-                  {t("btnReturn")}
-                </button>
-              </>
-            )}
+            <button
+              className="btn btp"
+              onClick={onRestart}
+              style={{ visibility: replay.cursor < replay.lines.length ? "hidden" : undefined }}
+            >
+              {replaySummary?.actionLabel || "…"}
+            </button>
+            <button
+              className="btn btm"
+              onClick={replay.cursor < replay.lines.length ? onSkip : onClose}
+            >
+              {replay.cursor < replay.lines.length ? t("btnSkip") : t("btnReturn")}
+            </button>
           </div>
         </>
       ) : (
