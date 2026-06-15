@@ -42,7 +42,7 @@ function CompareTooltip({ newItem, equipped }: { newItem: any; equipped: any }) 
   const { tr, L } = useLanguage();
   const eq = equipped || { attack: 0, defense: 0, hp: 0, speed: 0 };
   return (
-    <div style={{
+    <div className="cmp-tip" style={{
       position: "absolute", left: "calc(100% + 6px)", top: 0,
       background: "linear-gradient(160deg,#1a1208,#0e0a06)",
       border: "1px solid #4a3010", borderRadius: 6, padding: "8px 10px",
@@ -235,6 +235,7 @@ export function InventoryTab({
               }}
               onMouseEnter={() => setHoveredUid(item.uid)}
               onMouseLeave={() => setHoveredUid(null)}
+              onClick={() => setHoveredUid(uid => uid === item.uid ? null : item.uid)}
             >
               {showCompare && <CompareTooltip newItem={item} equipped={currentEquipped} />}
               <div className="iii" style={{ filter: `drop-shadow(0 2px 4px ${rarityInfo.color}66)` }}>{item.icon}</div>

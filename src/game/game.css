@@ -151,11 +151,25 @@
   position:relative;
 }
 .eq-slot:hover{border-color:#8b5a14;background:rgba(139,90,20,.1)}
-.eq-slot:hover::after{content:'卸下';position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:9px;color:#8b5a14;font-family:'Cinzel',serif}
+.eq-slot:hover::after{content:'✕';position:absolute;right:5px;top:50%;transform:translateY(-50%);font-size:10px;color:#8b5a14}
 .eq-icon{font-size:12px;flex-shrink:0}
 .eq-label{color:#4a3020;font-size:9px;font-family:'Cinzel',serif;display:block}
 .eq-item{color:#c8a848;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;line-height:1.2}
 .eq-empty{color:#1e1208;font-size:10px;font-style:italic;flex:1}
+/* Compare tooltip — floats right on desktop, fixed-centered on touch */
+.cmp-tip{pointer-events:none}
+@media (hover:none) and (pointer:coarse){
+  .cmp-tip{
+    position:fixed!important;
+    left:50%!important;
+    top:auto!important;
+    bottom:90px!important;
+    transform:translateX(-50%)!important;
+    width:190px!important;
+    z-index:400!important;
+    pointer-events:auto;
+  }
+}
 .weapon-trait{
   font-size:10px;color:#d08030;
   padding:4px 8px;

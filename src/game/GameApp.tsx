@@ -294,49 +294,25 @@ export default function GameApp({ slot = 1, onExitToMenu }: { slot?: import("./c
 
             <div className="pn">
               <div className="ph">{t("equipTitle")}{t("clickUnequip")}</div>
-              <div className="pb" style={{ padding: "8px 10px" }}>
-                {equipmentSidebarItems.map(({ category, equippedItem, effectiveness, onUnequip, rarityColor, slot, style, textShadow, title }) => {
-                  return (
-                    <div key={slot.id}
-                      onClick={onUnequip}
-                      title={title}
-                      style={style}>
-                      <span style={{ fontSize: 13, flexShrink: 0, marginTop: 1 }}>{slot.icon}</span>
+              <div className="pb" style={{ padding: "6px 8px" }}>
+                <div className="eq-grid">
+                  {equipmentSidebarItems.map(({ equippedItem, effectiveness, onUnequip, rarityColor, textShadow, slot, title }) => (
+                    <div key={slot.id} className="eq-slot" onClick={onUnequip} title={title}
+                      style={equippedItem ? { borderColor: rarityColor + "66", background: rarityColor + "0d" } : undefined}>
+                      <span className="eq-icon">{slot.icon}</span>
                       <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontSize: 9, color: "#4a3020", fontFamily: "'Cinzel',serif", letterSpacing: 0.5, lineHeight: 1 }}>
+                        <span className="eq-label">
                           {tr(slot, "label")}
-                          {effectiveness && effectiveness < 1 && (
-                            <span style={{ color: "#7a5020", marginLeft: 3 }}>({Math.round(effectiveness * 100)}%)</span>
-                          )}
-                        </div>
-                        {equippedItem ? <>
-                          <div style={{
-                            fontSize: 11, color: rarityColor, lineHeight: 1.3, marginTop: 1,
-                            textShadow,
-                            fontFamily: "'Cinzel',serif", letterSpacing: 0.3,
-                          }}>{tr(equippedItem, "name")}</div>
-                          <div style={{ fontSize: 10, color: "#6a5030", marginTop: 2, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                            {equippedItem.attack > 0 && <span style={{ color: "#c8781e" }}>{L("攻", "ATK")}+{equippedItem.attack}</span>}
-                            {equippedItem.defense > 0 && <span style={{ color: "#4a9fd4" }}>{L("防", "DEF")}+{equippedItem.defense}</span>}
-                            {equippedItem.hp > 0 && <span style={{ color: "#c84040" }}>HP+{equippedItem.hp}</span>}
-                            {equippedItem.speed > 0 && <span style={{ color: "#4caf50" }}>{L("速", "SPD")}+{equippedItem.speed}</span>}
-                            {category && <span style={{ color: "#d08030" }}>{category.icon}{tr(category, "label")}</span>}
-                            {equippedItem.itemLevel && <span style={{ color: "#5a4020" }}>Lv{equippedItem.itemLevel}</span>}
-                          </div>
-                          {equippedItem.affixes && equippedItem.affixes.length > 0 && (
-                            <div style={{ marginTop: 2, display: "flex", gap: 3, flexWrap: "wrap" }}>
-                              {equippedItem.affixes.map((a: any, i: any) => (
-                                <span key={i} style={{ fontSize: 9, color: a.special ? "#c870d0" : "#6aaa6a", background: "rgba(0,0,0,0.3)", padding: "0 3px", borderRadius: 2 }}>
-                                  {tr(a, "tag")}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </> : <div style={{ fontSize: 10, color: "#2a1808", fontStyle: "italic" }}>{t("emptySlot2")}</div>}
+                          {effectiveness && effectiveness < 1 &&
+                            <span style={{ color: "#7a5020", marginLeft: 2 }}>({Math.round(effectiveness * 100)}%)</span>}
+                        </span>
+                        {equippedItem
+                          ? <div className="eq-item" style={{ color: rarityColor, textShadow }}>{tr(equippedItem, "name")}</div>
+                          : <div className="eq-empty">—</div>}
                       </div>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
             </div>
 
