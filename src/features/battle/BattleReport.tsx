@@ -65,7 +65,7 @@ export function BattleReport({
           <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
             <button
               className="btn btm"
-              style={{ fontSize: 10, padding: "3px 10px" }}
+              style={{ fontSize: 10, padding: "6px 12px" }}
               onClick={() => setQuickMode(q => !q)}
             >
               {quickMode

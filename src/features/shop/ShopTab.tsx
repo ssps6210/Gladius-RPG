@@ -88,7 +88,7 @@ export function ShopTab({
                 <span style={{ color: "#c8a848" }}>{tr(p, "name")}</span>
                 <span style={{ color: "#50a860" }}>+{p.heal}HP</span>
                 <span style={{ color: "#f0c040" }}>🪙{p.cost}</span>
-                <button className="btn btp" style={{ fontSize: 10, padding: "4px 10px" }} disabled={!p.canAfford}
+                <button className="btn btp" style={{ fontSize: 10, padding: "8px 10px" }} disabled={!p.canAfford}
                   onClick={p.onBuy}>{L("買", "Buy")}</button>
               </div>
             ))}

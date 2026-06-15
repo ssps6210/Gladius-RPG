@@ -672,6 +672,7 @@
   .nt{position:sticky;bottom:0;z-index:50;order:3;overflow-x:auto}
   .nb{font-size:9px;padding:12px 4px;letter-spacing:.5px;min-width:44px}
   .wcat-btn{padding:7px 10px}
+  .arena-refresh-bar{flex-wrap:wrap;gap:8px}
 
   .cm{grid-template-columns:1fr auto 1fr;gap:8px}
   .blog{height:140px;font-size:11.5px}

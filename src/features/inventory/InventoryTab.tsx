@@ -251,14 +251,14 @@ export function InventoryTab({
               <AffixLines affixes={item.affixes} />
               <div style={{ color: "#f0c040", fontSize: 11, margin: "5px 0" }}>{L("售", "Sell")} 🪙{price}</div>
               <div style={{ display: "flex", gap: 4 }}>
-                <button className="btn btp" style={{ flex: 1, fontSize: 9, padding: "5px" }} onClick={onEquip}>{L("裝備", "Equip", "装备")}</button>
-                <button className="btn btd" style={{ flex: 1, fontSize: 9, padding: "5px" }} onClick={onSell}>{L("出售", "Sell")}</button>
+                <button className="btn btp" style={{ flex: 1, fontSize: 10, padding: "8px 5px" }} onClick={onEquip}>{L("裝備", "Equip", "装备")}</button>
+                <button className="btn btd" style={{ flex: 1, fontSize: 10, padding: "8px 5px" }} onClick={onSell}>{L("出售", "Sell")}</button>
               </div>
               {onEquip2 && secondarySlotId && (
                 <div style={{ marginTop: 4 }}>
                   <button
                     className="btn btm"
-                    style={{ width: "100%", fontSize: 9, padding: "4px 5px", color: "#a08040" }}
+                    style={{ width: "100%", fontSize: 10, padding: "7px 5px", color: "#a08040" }}
                     onClick={onEquip2}
                     title={currentEquipped2 ? (currentEquipped2 as any).name || "" : ""}
                   >
